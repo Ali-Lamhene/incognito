@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, SafeAreaView, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { Dimensions, StyleSheet, useColorScheme, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
   withRepeat,
   withTiming
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentSplashScreen } from '../components/AgentSplashScreen';
 import { IncognitoLogo } from '../components/IncognitoLogo';
 import { MainButton } from '../components/MainButton';
@@ -17,6 +18,7 @@ import { Colors } from '../constants/Colors';
 const { width, height } = Dimensions.get('window');
 
 export default function AgentHomeScreen() {
+  const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   const [showSplash, setShowSplash] = useState(true);
@@ -52,9 +54,7 @@ export default function AgentHomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-
-      {/* BACKGROUND: Blurred Secret Agent Desk */}
+      {/* BACKGROUND: Blurred Secret Agent Desk - Edge to Edge */}
       <View style={styles.backgroundContainer}>
         <Image
           source={require('../assets/images/surveillance_target_v4.png')}
@@ -64,131 +64,136 @@ export default function AgentHomeScreen() {
         <View style={styles.backgroundOverlay} />
       </View>
 
-      <SafeAreaView style={styles.safeArea}>
-        <Animated.View style={[styles.mainContent, animatedContentStyle]}>
-
-          {/* HEADER: Technical Telemetry */}
-          <View style={styles.header}>
-            <View style={styles.logoGroup}>
-              <Image
-                source={require('../assets/images/incognito_logo.png')}
-                style={styles.headerLogo}
-                contentFit="contain"
-              />
-              <View style={styles.agentInfo}>
-                <ThemedText type="code" style={styles.headerLabel}>AGENT_STATUS</ThemedText>
-                <ThemedText type="futuristic" style={styles.agentName}>#RX_CORTEX</ThemedText>
-              </View>
-            </View>
-            <View style={styles.telemetryGroup}>
-              <ThemedText type="code" style={styles.telemetryValue}>SIG: 100%</ThemedText>
-              <View style={styles.signalBadge}>
-                <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
-                <ThemedText type="code" style={{ color: colors.primary, fontSize: 8 }}>EN_LIGNE</ThemedText>
-              </View>
+      <Animated.View style={[
+        styles.mainContent,
+        animatedContentStyle,
+        {
+          paddingTop: insets.top + 10,
+          paddingBottom: Math.max(insets.bottom, 20),
+          paddingLeft:  15,
+          paddingRight:15,
+        }
+      ]}>
+        {/* HEADER: Technical Telemetry */}
+        <View style={styles.header}>
+          <View style={styles.logoGroup}>
+            <Image
+              source={require('../assets/images/incognito_logo.png')}
+              style={styles.headerLogo}
+              contentFit="contain"
+            />
+            <View style={styles.agentInfo}>
+              <ThemedText type="code" style={styles.headerLabel}>AGENT_STATUS</ThemedText>
+              <ThemedText type="futuristic" style={styles.agentName}>#RX_CORTEX</ThemedText>
             </View>
           </View>
+          <View style={styles.telemetryGroup}>
+            <ThemedText type="code" style={styles.telemetryValue}>SIG: 100%</ThemedText>
+            <View style={styles.signalBadge}>
+              <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
+              <ThemedText type="code" style={{ color: colors.primary, fontSize: 8 }}>EN_LIGNE</ThemedText>
+            </View>
+          </View>
+        </View>
 
-          {/* CENTRAL: Augmented Reality Dossier */}
-          <View style={styles.centerSection}>
-            <View style={styles.augmentedFrame}>
-              {/* Pro Corner Brackets */}
-              <View style={styles.cornerTL} />
-              <View style={styles.cornerTR} />
-              <View style={styles.cornerBL} />
-              <View style={styles.cornerBR} />
+        {/* CENTRAL: Augmented Reality Dossier */}
+        <View style={styles.centerSection}>
+          <View style={styles.augmentedFrame}>
+            {/* Pro Corner Brackets */}
+            <View style={styles.cornerTL} />
+            <View style={styles.cornerTR} />
+            <View style={styles.cornerBL} />
+            <View style={styles.cornerBR} />
 
-              {/* Tactical Borders */}
-              <View style={styles.tacticalBorderT} />
-              <View style={styles.tacticalBorderB} />
+            {/* Tactical Borders */}
+            <View style={styles.tacticalBorderT} />
+            <View style={styles.tacticalBorderB} />
 
-              <View style={styles.scannerLineContainer}>
-                <Animated.View style={[styles.scannerLine, {
-                  transform: [{ translateY: scannerTranslateY.value }]
-                }]} />
-              </View>
+            <View style={styles.scannerLineContainer}>
+              <Animated.View style={[styles.scannerLine, {
+                transform: [{ translateY: scannerTranslateY.value }]
+              }]} />
+            </View>
 
-              <View style={styles.brandingGroup}>
-                <IncognitoLogo size={55} color="#FFFFFF" style={styles.mainLogo} />
+            <View style={styles.brandingGroup}>
+              <IncognitoLogo size={55} color="#FFFFFF" style={styles.mainLogo} />
 
-                <View style={styles.tacticalTitleStrip}>
-                  {"INCOGNITO".split("").map((char, i) => (
-                    <View
-                      key={i}
+              <View style={styles.tacticalTitleStrip}>
+                {"INCOGNITO".split("").map((char, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.letterBlock,
+                      {
+                        backgroundColor: i % 2 === 0 ? '#000' : '#FFF',
+                        transform: [
+                          { rotate: `${(i % 3 - 1) * 4}deg` },
+                          { translateY: (i % 2 === 0 ? -2 : 2) }
+                        ],
+                        borderWidth: 1,
+                        borderColor: i % 2 === 0 ? '#333' : '#000',
+                      }
+                    ]}
+                  >
+                    <ThemedText
                       style={[
-                        styles.letterBlock,
+                        styles.stripLetter,
                         {
-                          backgroundColor: i % 2 === 0 ? '#000' : '#FFF',
-                          transform: [
-                            { rotate: `${(i % 3 - 1) * 4}deg` },
-                            { translateY: (i % 2 === 0 ? -2 : 2) }
-                          ],
-                          borderWidth: 1,
-                          borderColor: i % 2 === 0 ? '#333' : '#000',
+                          color: i % 2 === 0 ? '#FFF' : '#000',
+                          fontFamily: i % 3 === 0 ? 'serif' : 'monospace',
                         }
                       ]}
                     >
-                      <ThemedText
-                        style={[
-                          styles.stripLetter,
-                          {
-                            color: i % 2 === 0 ? '#FFF' : '#000',
-                            fontFamily: i % 3 === 0 ? 'serif' : 'monospace',
-                          }
-                        ]}
-                      >
-                        {char}
-                      </ThemedText>
-                    </View>
-                  ))}
-                </View>
-
-                <View style={styles.brandingFooter}>
-                  <ThemedText type="code" style={styles.classTag}>MISSION_ID: #INFIL-9 // CLASSIFIED_ACCESS</ThemedText>
-                </View>
-
-                <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
+                      {char}
+                    </ThemedText>
+                  </View>
+                ))}
               </View>
 
-              <View style={styles.frameMetadata}>
-                <ThemedText type="code" style={styles.frameMetaText}>LOC_48.8566_2.3522</ThemedText>
-                <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
+              <View style={styles.brandingFooter}>
+                <ThemedText type="code" style={styles.classTag}>MISSION_ID: #INFIL-9 // CLASSIFIED_ACCESS</ThemedText>
               </View>
-            </View>
-          </View>
 
-          {/* BOTTOM: Mission Deployment */}
-          <View style={styles.actionSection}>
-            <View style={styles.deployBadge}>
-              <ThemedText type="code" style={styles.deployLabel}>DEPLOYMENT_PROTOCOL</ThemedText>
+              <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
             </View>
 
-            <MainButton
-              title="CRÉER UNE MISSION"
-              onPress={() => console.log('Create')}
-              style={styles.primaryAction}
-            />
-            <MainButton
-              title="REJOINDRE L'INFILTRATION"
-              variant="outline"
-              onPress={() => console.log('Join')}
-              style={styles.secondaryAction}
-            />
+            <View style={styles.frameMetadata}>
+              <ThemedText type="code" style={styles.frameMetaText}>LOC_48.8566_2.3522</ThemedText>
+              <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
+            </View>
+          </View>
+        </View>
+
+        {/* BOTTOM: Mission Deployment */}
+        <View style={styles.actionSection}>
+          <View style={styles.deployBadge}>
+            <ThemedText type="code" style={styles.deployLabel}>DEPLOYMENT_PROTOCOL</ThemedText>
           </View>
 
-          {/* DATA OVERLAY: Side Stream */}
-          <View style={styles.sideDataOverlay}>
-            <Animated.View style={animatedDataStyle}>
-              {Array.from({ length: 25 }).map((_, i) => (
-                <ThemedText key={i} type="code" style={styles.driftText}>
-                  {`>> ${Math.random().toString(16).slice(2, 8).toUpperCase()} // OK`}
-                </ThemedText>
-              ))}
-            </Animated.View>
-          </View>
+          <MainButton
+            title="CRÉER UNE MISSION"
+            onPress={() => console.log('Create')}
+            style={styles.primaryAction}
+          />
+          <MainButton
+            title="REJOINDRE L'INFILTRATION"
+            variant="outline"
+            onPress={() => console.log('Join')}
+            style={styles.secondaryAction}
+          />
+        </View>
 
-        </Animated.View>
-      </SafeAreaView>
+        {/* DATA OVERLAY: Side Stream */}
+        <View style={styles.sideDataOverlay}>
+          <Animated.View style={animatedDataStyle}>
+            {Array.from({ length: 25 }).map((_, i) => (
+              <ThemedText key={i} type="code" style={styles.driftText}>
+                {`>> ${Math.random().toString(16).slice(2, 8).toUpperCase()} // OK`}
+              </ThemedText>
+            ))}
+          </Animated.View>
+        </View>
+      </Animated.View>
     </View>
   );
 }
@@ -215,7 +220,7 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    paddingHorizontal: 30,
+    paddingHorizontal: 35, // Increased padding to avoid edges
     justifyContent: 'space-between',
     paddingVertical: 20,
   },
