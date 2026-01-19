@@ -7,6 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainButton } from '../../components/MainButton';
 import { ThemedText } from '../../components/ThemedText';
 
+import { useSession } from '../../context/SessionContext';
+import { generateMissionCode } from '../../utils/missionCode';
+
 const THREAT_LEVELS = ['RECRUE', 'AGENT', 'DOUBLE ZÉRO'];
 const DURATIONS = ['15 MIN', '45 MIN', '2 HEURES', '∞'];
 const PROTOCOLS = ['SOCIAL', 'ABSURDE', 'RISQUÉ'];
@@ -14,16 +17,19 @@ const PROTOCOLS = ['SOCIAL', 'ABSURDE', 'RISQUÉ'];
 export default function CreateMissionScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { createSession } = useSession();
 
     // Mission Parameters State
     const [threatLevel, setThreatLevel] = useState('AGENT');
     const [duration, setDuration] = useState('45 MIN');
     const [protocol, setProtocol] = useState('SOCIAL');
 
-    const handleCreate = () => {
-        // Logic to create lobby would go here
-        console.log("Mission Initialized:", { threatLevel, duration, protocol });
-        // router.push('/lobby/waiting'); // Future step
+    const handleCreate = async () => {
+        const missionCode = generateMissionCode();
+        await createSession(missionCode, threatLevel);
+
+        console.log("Mission Initialized:", { threatLevel, duration, protocol, missionCode });
+        router.push(`/lobby/${missionCode}`);
     };
 
     const renderSelector = (label: string, options: string[], selected: string, onSelect: (val: string) => void) => (

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Platform, useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Colors } from "../constants/Colors";
+import { SessionProvider } from "../context/SessionContext";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -21,15 +22,17 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" backgroundColor="#000000" translucent={false} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: {
-            backgroundColor: Colors[colorScheme].background,
-          },
-        }}
-      />
+      <SessionProvider>
+        <StatusBar style="light" backgroundColor="#000000" translucent={false} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: {
+              backgroundColor: Colors[colorScheme].background,
+            },
+          }}
+        />
+      </SessionProvider>
     </SafeAreaProvider>
   );
 }

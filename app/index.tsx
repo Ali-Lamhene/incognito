@@ -15,17 +15,29 @@ import { IncognitoLogo } from '../components/IncognitoLogo';
 import { MainButton } from '../components/MainButton';
 import { ThemedText } from '../components/ThemedText';
 import { Colors } from '../constants/Colors';
+import { useAppState } from '../store/appState';
 
-const { width, height } = Dimensions.get('window');
+import { useSession } from '../context/SessionContext';
+
+// ... inside AgentHomeScreen ...
 
 export default function AgentHomeScreen() {
   const router = useRouter();
+  const { height } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
+  const { session } = useSession();
+  const { hasLaunched, setHasLaunched } = useAppState();
+
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
-  const [showSplash, setShowSplash] = useState(true);
 
-  // Animation shared values
+  // Show splash only if app hasn't launched yet
+  const [showSplash, setShowSplash] = useState(!hasLaunched);
+
+  const missionIdDisplay = session ? session.code : "NO_ACTIVE_MISSION";
+  const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
+
+  // ... shared values ...
   const contentOpacity = useSharedValue(0);
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
@@ -33,8 +45,10 @@ export default function AgentHomeScreen() {
 
   useEffect(() => {
     if (!showSplash) {
+      if (!hasLaunched) setHasLaunched(); // Mark as launched once splash is gone or skipped
+
       contentOpacity.value = withTiming(1, { duration: 1000 });
-      // Infinite data drift animation
+      // ... rest of animations
       dataScrollY.value = withRepeat(
         withTiming(-200, { duration: 10000, easing: Easing.linear }),
         -1,
@@ -50,6 +64,11 @@ export default function AgentHomeScreen() {
     }
   }, [showSplash]);
 
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    setHasLaunched();
+  };
+
   const scanlineStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: scanlineY.value }],
   }));
@@ -62,8 +81,11 @@ export default function AgentHomeScreen() {
     transform: [{ translateY: dataScrollY.value }],
   }));
 
+
+  // ... (inside AgentHomeScreen)
+
   if (showSplash) {
-    return <AgentSplashScreen onComplete={() => setShowSplash(false)} />;
+    return <AgentSplashScreen onComplete={handleSplashFinish} />;
   }
 
   return (
@@ -184,7 +206,9 @@ export default function AgentHomeScreen() {
               </View>
 
               <View style={styles.brandingFooter}>
-                <ThemedText type="code" style={styles.classTag}>MISSION_ID: #INFIL-9 // CLASSIFIED_ACCESS</ThemedText>
+                <ThemedText type="code" style={styles.classTag}>
+                  MISSION_ID: #{session ? session.code : "INFIL-9"} // {session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS"}
+                </ThemedText>
               </View>
 
               <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
@@ -199,21 +223,34 @@ export default function AgentHomeScreen() {
 
         {/* BOTTOM: Mission Deployment */}
         <View style={styles.actionSection}>
-          <View style={styles.deployBadge}>
-            <ThemedText type="code" style={styles.deployLabel}>DEPLOYMENT_PROTOCOL</ThemedText>
+          <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
+            <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
+              {session ? `ACTIVE_PROTOCOL: ${session.code}` : 'DEPLOYMENT_PROTOCOL'}
+            </ThemedText>
           </View>
 
-          <MainButton
-            title="CRÉER UNE MISSION"
-            onPress={() => router.push('/mission/create')}
-            style={styles.primaryAction}
-          />
-          <MainButton
-            title="REJOINDRE L'INFILTRATION"
-            variant="outline"
-            onPress={() => console.log('Join')}
-            style={styles.secondaryAction}
-          />
+          {session ? (
+            <MainButton
+              title="RETOURNER AU SALON"
+              onPress={() => router.push(`/lobby/${session.code}`)}
+              style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
+            />
+          ) : (
+            <MainButton
+              title="CRÉER UNE MISSION"
+              onPress={() => router.push('/mission/create')}
+              style={styles.primaryAction}
+            />
+          )}
+
+          {!session && (
+            <MainButton
+              title="REJOINDRE L'INFILTRATION"
+              variant="outline"
+              onPress={() => console.log('Join')}
+              style={styles.secondaryAction}
+            />
+          )}
         </View>
 
         {/* DATA OVERLAY: Side Stream */}

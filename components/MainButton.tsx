@@ -1,13 +1,13 @@
 import * as Haptics from 'expo-haptics';
-import { StyleSheet, Text, TextStyle, TouchableOpacity, useColorScheme, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, useColorScheme, View, ViewStyle } from 'react-native';
 import { Colors } from '../constants/Colors';
 
 interface MainButtonProps {
     onPress: () => void;
     title: string;
     variant?: 'primary' | 'outline' | 'ghost';
-    style?: ViewStyle;
-    textStyle?: TextStyle;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
 }
 
 export function MainButton({ onPress, title, variant = 'primary', style, textStyle }: MainButtonProps) {
