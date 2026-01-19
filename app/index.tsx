@@ -21,6 +21,7 @@ import { useAppState } from '../store/appState';
 import { useProfileStore } from '../store/profileStore';
 
 import { useSession } from '../context/SessionContext';
+import { useTranslation } from '../hooks/useTranslation';
 
 // ... inside AgentHomeScreen ...
 
@@ -31,6 +32,7 @@ export default function AgentHomeScreen() {
   const { session } = useSession();
   const { hasLaunched, setHasLaunched } = useAppState();
   const { profile, isFirstSetupDone, createProfile, updateProfile } = useProfileStore();
+  const { t } = useTranslation();
 
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -177,9 +179,9 @@ export default function AgentHomeScreen() {
               )}
             </View>
             <View style={styles.agentInfo}>
-              <ThemedText type="code" style={styles.headerLabel}>AGENT_ACTIVE</ThemedText>
+              <ThemedText type="code" style={styles.headerLabel}>{t('home.agent_active')}</ThemedText>
               <ThemedText type="futuristic" style={[styles.agentName, { color: '#FFF' }]}>
-                {profile?.codename ? `#${profile.codename}` : "UNKNOWN"}
+                {profile?.codename ? `#${profile.codename}` : t('common.unknown')}
               </ThemedText>
             </View>
           </TouchableOpacity>
@@ -190,7 +192,7 @@ export default function AgentHomeScreen() {
             <View style={styles.separatorV} />
             <View style={styles.signalBadge}>
               <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
-              <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>EN_LIGNE</ThemedText>
+              <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.status_online')}</ThemedText>
             </View>
           </View>
         </View>
@@ -281,7 +283,7 @@ export default function AgentHomeScreen() {
             />
           ) : (
             <MainButton
-              title="CRÉER UNE MISSION"
+              title={t('home.create_mission_title')}
               onPress={() => router.push('/mission/create')}
               style={styles.primaryAction}
             />
@@ -289,7 +291,7 @@ export default function AgentHomeScreen() {
 
           {!session && (
             <MainButton
-              title="REJOINDRE L'INFILTRATION"
+              title={t('home.join_mission_subtitle')}
               variant="outline"
               onPress={() => console.log('Join')}
               style={styles.secondaryAction}

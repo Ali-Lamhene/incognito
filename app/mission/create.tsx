@@ -10,6 +10,8 @@ import { ThemedText } from '../../components/ThemedText';
 import { useSession } from '../../context/SessionContext';
 import { generateMissionCode } from '../../utils/missionCode';
 
+import { useTranslation } from '../../hooks/useTranslation';
+
 const THREAT_LEVELS = ['RECRUE', 'AGENT', 'DOUBLE ZÉRO'];
 const DURATIONS = ['15 MIN', '45 MIN', '2 HEURES', '∞'];
 const PROTOCOLS = ['SOCIAL', 'ABSURDE', 'RISQUÉ'];
@@ -18,6 +20,7 @@ export default function CreateMissionScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { createSession } = useSession();
+    const { t } = useTranslation();
 
     // Mission Parameters State
     const [threatLevel, setThreatLevel] = useState('AGENT');
@@ -89,29 +92,29 @@ export default function CreateMissionScreen() {
                 {/* Header */}
                 <Animated.View entering={FadeInDown.delay(100).duration(600)}>
                     <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <ThemedText type="code" style={styles.backText}>{'<< ABORT_MISSION'}</ThemedText>
+                        <ThemedText type="code" style={styles.backText}>{'<< ' + t('mission.abort_mission')}</ThemedText>
                     </TouchableOpacity>
-                    <ThemedText type="subtitle" style={styles.screenTitle}>CONFIGURATION_MISSION</ThemedText>
+                    <ThemedText type="subtitle" style={styles.screenTitle}>{t('mission.create_title')}</ThemedText>
                     <View style={styles.headerLine} />
                 </Animated.View>
 
                 {/* Parameters Form */}
                 <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                    {renderSelector('NIVEAU_DE_MENACE // DIFFICULTY', THREAT_LEVELS, threatLevel, setThreatLevel)}
-                    {renderSelector('FENÊTRE_OPÉRATIONNELLE // DURATION', DURATIONS, duration, setDuration)}
-                    {renderSelector('PROTOCOLE_D_ENGAGEMENT // TYPE', PROTOCOLS, protocol, setProtocol)}
+                    {renderSelector(t('mission.threat_level'), THREAT_LEVELS, threatLevel, setThreatLevel)}
+                    {renderSelector(t('mission.duration'), DURATIONS, duration, setDuration)}
+                    {renderSelector(t('mission.protocol'), PROTOCOLS, protocol, setProtocol)}
                 </Animated.View>
 
                 {/* Footer Action */}
                 <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
                     <View style={styles.summaryBox}>
                         <ThemedText type="code" style={styles.summaryText}>
-                            CONFIG: {threatLevel} / {duration} / {protocol}
+                            {t('mission.config_summary')}: {threatLevel} / {duration} / {protocol}
                         </ThemedText>
                     </View>
 
                     <MainButton
-                        title="INITIALISER LE SALON"
+                        title={t('mission.btn_init')}
                         onPress={handleCreate}
                         style={styles.createButton}
                     />

@@ -8,11 +8,14 @@ import { ThemedText } from '../../components/ThemedText';
 import { useProfileStore } from '../../store/profileStore';
 import { useSettingsStore } from '../../store/settingsStore';
 
+import { useTranslation } from '../../hooks/useTranslation';
+
 export default function SettingsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { soundEnabled, hapticsEnabled, notificationsEnabled, language, toggleSound, toggleHaptics, toggleNotifications, setLanguage } = useSettingsStore();
+    const { soundEnabled, notificationsEnabled, language, toggleSound, toggleNotifications, setLanguage } = useSettingsStore();
     const { profile } = useProfileStore();
+    const { t } = useTranslation();
 
     const handleBack = () => {
         router.back();
@@ -24,9 +27,9 @@ export default function SettingsScreen() {
             <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                     <Ionicons name="chevron-back" size={24} color="#FFF" />
-                    <ThemedText type="code" style={styles.backText}>RETURN</ThemedText>
+                    <ThemedText type="code" style={styles.backText}>{t('common.return')}</ThemedText>
                 </TouchableOpacity>
-                <ThemedText type="subtitle">SYSTEM CONFIG</ThemedText>
+                <ThemedText type="subtitle">{t('settings.title')}</ThemedText>
                 <View style={{ width: 40 }} />
             </Animated.View>
 
@@ -39,14 +42,14 @@ export default function SettingsScreen() {
 
                 {/* Profile Summary */}
                 <View style={styles.section}>
-                    <ThemedText type="code" style={styles.sectionTitle}>AGENT PROFILE</ThemedText>
+                    <ThemedText type="code" style={styles.sectionTitle}>{t('settings.section_profile')}</ThemedText>
                     <View style={styles.profileCard}>
                         <View style={styles.profileInfo}>
                             <View style={styles.avatarContainer}>
                                 <Ionicons name={(profile?.avatar as any) || "person"} size={24} color="#FFF" />
                             </View>
                             <View>
-                                <ThemedText type="default" style={styles.profileName}>{profile?.codename || "UNKNOWN"}</ThemedText>
+                                <ThemedText type="default" style={styles.profileName}>{profile?.codename || t('common.unknown')}</ThemedText>
                                 <ThemedText type="code" style={styles.profileId}>ID: {profile?.id.slice(0, 8).toUpperCase()}</ThemedText>
                             </View>
                         </View>
@@ -55,13 +58,13 @@ export default function SettingsScreen() {
 
                 {/* System Settings */}
                 <View style={styles.section}>
-                    <ThemedText type="code" style={styles.sectionTitle}>DEVICE PARAMETERS</ThemedText>
+                    <ThemedText type="code" style={styles.sectionTitle}>{t('settings.section_device')}</ThemedText>
 
                     {/* Audio */}
                     <View style={styles.settingRow}>
                         <View style={styles.settingLabel}>
                             <Ionicons name="volume-high-outline" size={20} color="#FFF" />
-                            <ThemedText type="default">AUDIO_FX</ThemedText>
+                            <ThemedText type="default">{t('settings.audio_fx')}</ThemedText>
                         </View>
                         <Switch
                             value={soundEnabled}
@@ -76,7 +79,7 @@ export default function SettingsScreen() {
                     <View style={styles.settingRow}>
                         <View style={styles.settingLabel}>
                             <Ionicons name="notifications-outline" size={20} color="#FFF" />
-                            <ThemedText type="default">NOTIFICATIONS</ThemedText>
+                            <ThemedText type="default">{t('settings.notifications')}</ThemedText>
                         </View>
                         <Switch
                             value={notificationsEnabled}
@@ -90,7 +93,7 @@ export default function SettingsScreen() {
                     <View style={styles.settingRow}>
                         <View style={styles.settingLabel}>
                             <Ionicons name="language-outline" size={20} color="#FFF" />
-                            <ThemedText type="default">LANGUAGE</ThemedText>
+                            <ThemedText type="default">{t('settings.language')}</ThemedText>
                         </View>
                         <View style={styles.langToggle}>
                             <TouchableOpacity
@@ -111,13 +114,13 @@ export default function SettingsScreen() {
 
                 {/* System Info */}
                 <View style={styles.section}>
-                    <ThemedText type="code" style={styles.sectionTitle}>SYSTEM INFO</ThemedText>
+                    <ThemedText type="code" style={styles.sectionTitle}>{t('settings.section_info')}</ThemedText>
                     <View style={styles.infoRow}>
-                        <ThemedText type="code" style={styles.infoLabel}>VERSION</ThemedText>
+                        <ThemedText type="code" style={styles.infoLabel}>{t('settings.version')}</ThemedText>
                         <ThemedText type="code" style={styles.infoValue}>v1.0.0 (BETA)</ThemedText>
                     </View>
                     <View style={styles.infoRow}>
-                        <ThemedText type="code" style={styles.infoLabel}>CONTACT</ThemedText>
+                        <ThemedText type="code" style={styles.infoLabel}>{t('settings.contact')}</ThemedText>
                         <ThemedText type="code" style={styles.infoValue}>otakumi.factory@gmail.com</ThemedText>
                     </View>
                 </View>

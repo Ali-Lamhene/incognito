@@ -33,6 +33,7 @@ export function ConfirmationModal({
             visible={visible}
             animationType="none"
             onRequestClose={onCancel}
+            statusBarTranslucent
         >
             <TouchableWithoutFeedback onPress={onCancel}>
                 <View style={styles.overlay}>
@@ -73,14 +74,14 @@ export function ConfirmationModal({
                                     style={[
                                         styles.button,
                                         variant === 'danger' ? {
-                                            borderColor: '#D13639',
-                                            backgroundColor: 'rgba(80, 20, 20, 0.2)', // Darker, subtle background
-                                            shadowColor: '#000',
+                                            borderColor: '#FFF',
+                                            backgroundColor: '#FFF', // White background
+                                            shadowColor: '#FFF',
                                             shadowOpacity: 0.2,
                                             shadowRadius: 4
                                         } : undefined
                                     ]}
-                                    textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 2 } : { fontSize: 12 }}
+                                    textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 2, fontWeight: 'bold' } : { fontSize: 12 }}
                                 />
                             </View>
 
@@ -103,10 +104,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)', // Ensure dark overlay
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(5, 5, 10, 0.9)',
+        backgroundColor: 'rgba(0, 0, 0, 0.95)', // Darker backdrop
     },
     container: {
         width: '85%',
@@ -117,8 +119,8 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     dangerBorder: {
-        borderColor: 'rgba(210, 50, 50, 0.4)', // Muted Stamp Red
-        shadowColor: '#8B0000',
+        borderColor: '#FFF', // White border for danger
+        shadowColor: '#FFF',
         shadowOpacity: 0.1,
         shadowRadius: 5,
     },
@@ -131,8 +133,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     dangerText: {
-        color: '#D13639', // Faded Stamp Red
-        textShadowColor: 'rgba(100, 0, 0, 0.2)',
+        color: '#FFF', // White text for danger
+        textShadowColor: 'rgba(255, 255, 255, 0.2)',
         textShadowRadius: 2,
     },
     line: {
@@ -142,7 +144,7 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     dangerLine: {
-        backgroundColor: 'rgba(200, 50, 50, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Brighter white line
     },
     message: {
         textAlign: 'center',
@@ -151,12 +153,13 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     actions: {
-        flexDirection: 'row',
-        gap: 15,
+        flexDirection: 'column', // Stack vertically for long texts
+        gap: 5,
         marginTop: 10,
+        width: '100%',
     },
     button: {
-        flex: 1,
+        width: '100%', // Full width
     },
     cornerTL: { position: 'absolute', top: -1, left: -1, width: 8, height: 8, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
     cornerTR: { position: 'absolute', top: -1, right: -1, width: 8, height: 8, borderTopWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },

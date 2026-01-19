@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Modal, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import { useTranslation } from '../hooks/useTranslation';
 import { MainButton } from './MainButton';
 import { ThemedText } from './ThemedText';
 
@@ -22,6 +23,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
     const [codename, setCodename] = useState(initialData?.codename || '');
     const [selectedEmblem, setSelectedEmblem] = useState(initialData?.avatar || AGENT_EMBLEMS[0]);
     const [selectedColor, setSelectedColor] = useState(initialData?.color || AGENT_COLORS[0]);
+    const { t } = useTranslation();
 
     // Reset state when visible or initialData changes
     React.useEffect(() => {
@@ -62,17 +64,17 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                     >
                         <View style={styles.header}>
                             <ThemedText type="subtitle" style={styles.title}>
-                                {initialData ? 'UPDATE IDENTITY' : 'NEW IDENTITY'}
+                                {initialData ? t('profile.title_edit') : t('profile.title_new')}
                             </ThemedText>
                             <View style={[styles.line, { backgroundColor: '#FFF' }]} />
                         </View>
 
                         <View style={styles.formContainer}>
                             <View style={styles.inputGroup}>
-                                <ThemedText type="code" style={styles.label}>CODENAME</ThemedText>
+                                <ThemedText type="code" style={styles.label}>{t('profile.label_codename')}</ThemedText>
                                 <TextInput
                                     style={[styles.input, { borderColor: '#FFF' }]}
-                                    placeholder="ENTER ALIAS..."
+                                    placeholder={t('profile.placeholder_codename')}
                                     placeholderTextColor="rgba(255,255,255,0.3)"
                                     value={codename}
                                     onChangeText={setCodename}
@@ -83,7 +85,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                             </View>
 
                             <View style={styles.inputGroup}>
-                                <ThemedText type="code" style={styles.label}>SELECT EMBLEM</ThemedText>
+                                <ThemedText type="code" style={styles.label}>{t('profile.label_emblem')}</ThemedText>
                                 <View style={styles.emblemGrid}>
                                     {AGENT_EMBLEMS.map((icon) => (
                                         <TouchableOpacity
@@ -106,7 +108,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                         </View>
 
                         <MainButton
-                            title={initialData ? "UPDATE PROFILE" : "INITIALIZE PROFILE"}
+                            title={initialData ? t('common.confirm') : t('profile.btn_create')}
                             onPress={handleConfirm}
                             style={[styles.button, { backgroundColor: '#FFF' }]}
                             textStyle={{ color: '#000' }}

@@ -1,0 +1,72 @@
+{
+    "common": {
+        "return": "RETURN",
+        "confirm": "CONFIRM",
+        "cancel": "CANCEL",
+        "loading": "LOADING...",
+        "unknown": "UNKNOWN",
+        "ok": "OK"
+    },
+    "home": {
+        "status_online": "ONLINE",
+        "agent_active": "AGENT ACTIVE",
+        "create_mission_title": "CREATE MISSION",
+        "create_mission_subtitle": "NEW OPERATION",
+        "join_mission_title": "SCAN QR CODE",
+        "join_mission_subtitle": "JOIN INFILTRATION"
+    },
+    "settings": {
+        "title": "SYSTEM CONFIG",
+        "section_profile": "AGENT PROFILE",
+        "section_device": "DEVICE PARAMETERS",
+        "audio_fx": "AUDIO FX",
+        "notifications": "NOTIFICATIONS",
+        "language": "LANGUAGE",
+        "section_info": "SYSTEM INFO",
+        "version": "VERSION",
+        "contact": "CONTACT"
+    },
+    "profile": {
+        "title_new": "IDENTIFICATION REQUIRED",
+        "subtitle_new": "Please configure your identity",
+        "title_edit": "UPDATE REQUIRED",
+        "subtitle_edit": "Modify your accreditation parameters",
+        "label_codename": "CODENAME",
+        "placeholder_codename": "Enter your alias",
+        "label_emblem": "EMBLEM",
+        "btn_create": "CONFIRM IDENTITY",
+        "btn_update": "UPDATE PROFILE"
+    },
+    "lobby": {
+        "title": "TACTICAL LOBBY",
+        "mission_id": "MISSION ID",
+        "waiting": "WAITING...",
+        "linked_msg": "LINKED TO COMMAND",
+        "scan_instruction": "SCAN TO JOIN",
+        "copy_hint": "TAP TO COPY FREQ",
+        "agents_connected": "AGENTS CONNECTED",
+        "btn_deploy": "DEPLOY MISSION",
+        "btn_abort": "ABORT MISSION",
+        "btn_leave": "LEAVE",
+        "abort_title": "Abort mission?",
+        "abort_msg": "This will end the session for all agents.",
+        "leave_title": "Leave mission?",
+        "leave_msg": "You will be disconnected from the lobby."
+    },
+    "mission": {
+        "create_title": "MISSION CONFIG",
+        "abort_mission": "ABORT MISSION",
+        "threat_level": "THREAT LEVEL",
+        "duration": "OPERATIONAL WINDOW",
+        "protocol": "ENGAGEMENT PROTOCOL",
+        "btn_init": "INITIALIZE LOBBY",
+        "config_summary": "CONFIG"
+    },
+    "splash": {
+        "init": "SYSTEM INITIALIZATION...",
+        "loading_assets": "LOADING ASSETS...",
+        "secure_connection": "SECURE CONNECTION...",
+        "analyzing": "ANALYZING...",
+        "detection": "DETECTING SUSPECT #82B"
+    }
+}

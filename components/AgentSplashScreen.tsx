@@ -10,6 +10,7 @@ import Animated, {
     withRepeat,
     withTiming
 } from 'react-native-reanimated';
+import { useTranslation } from '../hooks/useTranslation';
 import { ThemedText } from './ThemedText';
 
 const { width, height } = Dimensions.get('window');
@@ -19,6 +20,7 @@ interface AgentSplashScreenProps {
 }
 
 export function AgentSplashScreen({ onComplete }: AgentSplashScreenProps) {
+    const { t } = useTranslation();
     const opacity = useSharedValue(0);
     const imageScale = useSharedValue(1.1);
     const scanLineY = useSharedValue(-height * 0.5);
@@ -87,8 +89,8 @@ export function AgentSplashScreen({ onComplete }: AgentSplashScreenProps) {
             {/* Loading UI Elements */}
             <View style={styles.content}>
                 <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
-                    <ThemedText type="code" style={styles.loadingLabel}>ANALYSE_DU_VISAGE_EN_COURS...</ThemedText>
-                    <ThemedText type="futuristic" style={styles.statusTitle}>DÉTECTION SUSPECT #82B</ThemedText>
+                    <ThemedText type="code" style={styles.loadingLabel}>{t('splash.analyzing')}</ThemedText>
+                    <ThemedText type="futuristic" style={styles.statusTitle}>{t('splash.detection')}</ThemedText>
 
                     {/* Visual Progress Bar */}
                     <View style={styles.progressBarBg}>

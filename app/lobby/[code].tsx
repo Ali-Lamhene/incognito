@@ -11,12 +11,14 @@ import { MainButton } from '../../components/MainButton';
 import { ThemedText } from '../../components/ThemedText';
 
 import { useSession } from '../../context/SessionContext';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function LobbyScreen() {
     const { code } = useLocalSearchParams();
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { session, clearSession } = useSession();
+    const { t } = useTranslation();
 
     const isHost = session?.role === 'HOST';
 
@@ -87,7 +89,7 @@ export default function LobbyScreen() {
         return (
             <View style={styles.emptySlot}>
                 <Animated.View style={animatedStyle}>
-                    <ThemedText type="code" style={styles.emptyText}>SEARCHING...</ThemedText>
+                    <ThemedText type="code" style={styles.emptyText}>{t('lobby.waiting')}</ThemedText>
                 </Animated.View>
             </View>
         );
@@ -125,19 +127,19 @@ export default function LobbyScreen() {
                 <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
                     <View style={styles.headerTop}>
                         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                            <ThemedText type="code" style={styles.backText}>{'<< HIDE_FREQ'}</ThemedText>
+                            <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
                         </TouchableOpacity>
 
                         {isHost && (
                             <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
-                                <Ionicons name="close-circle-outline" size={24} color="rgba(209, 54, 57, 0.8)" />
+                                <Ionicons name="trash-outline" size={20} color="#FFF" />
                             </TouchableOpacity>
                         )}
                     </View>
                     <View style={{ marginTop: 10 }}>
-                        <ThemedText type="subtitle" style={styles.screenTitle}>SALON TACTIQUE</ThemedText>
+                        <ThemedText type="subtitle" style={styles.screenTitle}>{t('lobby.title')}</ThemedText>
                         <ThemedText type="code" style={styles.subTitle}>
-                            {isHost ? 'WAITING FOR AGENTS...' : 'LINKED TO COMMAND'}
+                            {isHost ? t('lobby.waiting') : t('lobby.linked_msg')}
                         </ThemedText>
                     </View>
                 </Animated.View>
@@ -161,14 +163,14 @@ export default function LobbyScreen() {
 
                     <TouchableOpacity onPress={copyToClipboard} style={styles.codeDisplay}>
                         <ThemedText type="futuristic" style={styles.missionCodeText}>{code}</ThemedText>
-                        <ThemedText type="code" style={styles.copyHint}>TAP_TO_COPY_FREQ</ThemedText>
+                        <ThemedText type="code" style={styles.copyHint}>{t('lobby.copy_hint')}</ThemedText>
                     </TouchableOpacity>
                 </Animated.View>
 
                 {/* Footer Action */}
                 <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
                     <MainButton
-                        title="DÉPLOYER LA MISSION"
+                        title={t('lobby.btn_deploy')}
                         onPress={() => console.log('Start Game')}
                         style={styles.startButton}
                     />
@@ -176,7 +178,7 @@ export default function LobbyScreen() {
 
                 {/* Agents List */}
                 <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.agentsSection}>
-                    <ThemedText type="code" style={styles.sectionLabel}>AGENTS_DETECTED [{agents.length}]</ThemedText>
+                    <ThemedText type="code" style={styles.sectionLabel}>{t('lobby.agents_connected')} [{agents.length}]</ThemedText>
                     <View style={styles.agentsGrid}>
                         {agents.map((agent) => (
                             <View key={agent.id} style={styles.agentBadge}>
@@ -196,10 +198,10 @@ export default function LobbyScreen() {
 
             <ConfirmationModal
                 visible={showDestroyModal}
-                title="TERMINATE MISSION?"
-                message="WARNING: This will destroy the active lobby for all agents. This action cannot be undone."
-                confirmLabel="DESTROY"
-                cancelLabel="CANCEL"
+                title={t('lobby.abort_title')}
+                message={t('lobby.abort_msg')}
+                confirmLabel={t('lobby.btn_abort')}
+                cancelLabel={t('common.cancel')}
                 onConfirm={confirmDestroy}
                 onCancel={() => setShowDestroyModal(false)}
                 variant="danger"

@@ -1,0 +1,72 @@
+{
+    "common": {
+        "return": "RETOUR",
+        "confirm": "CONFIRMER",
+        "cancel": "ANNULER",
+        "loading": "CHARGEMENT...",
+        "unknown": "INCONNU",
+        "ok": "OK"
+    },
+    "home": {
+        "status_online": "EN LIGNE",
+        "agent_active": "AGENT ACTIF",
+        "create_mission_title": "CRÉER UNE MISSION",
+        "create_mission_subtitle": "NOUVELLE OPÉRATION",
+        "join_mission_title": "SCANNER UN QR CODE",
+        "join_mission_subtitle": "REJOINDRE L'INFILTRATION"
+    },
+    "settings": {
+        "title": "CONFIG SYSTÈME",
+        "section_profile": "PROFIL AGENT",
+        "section_device": "PARAMÈTRES APPAREIL",
+        "audio_fx": "EFFETS AUDIO",
+        "notifications": "NOTIFICATIONS",
+        "language": "LANGUE",
+        "section_info": "INFOS SYSTÈME",
+        "version": "VERSION",
+        "contact": "CONTACT"
+    },
+    "profile": {
+        "title_new": "IDENTIFICATION REQUISE",
+        "subtitle_new": "Veuillez configurer votre identité",
+        "title_edit": "MISE À JOUR REQUISE",
+        "subtitle_edit": "Modifier vos paramètres d'accréditation",
+        "label_codename": "NOM DE CODE",
+        "placeholder_codename": "Entrez votre alias",
+        "label_emblem": "EMBLÈME",
+        "btn_create": "CONFIRMER L'IDENTITÉ",
+        "btn_update": "METTRE À JOUR"
+    },
+    "lobby": {
+        "title": "SALON TACTIQUE",
+        "mission_id": "ID MISSION",
+        "waiting": "EN ATTENTE...",
+        "linked_msg": "LIAISON COM. ÉTABLIE",
+        "scan_instruction": "SCANNEZ POUR REJOINDRE",
+        "copy_hint": "COPIER FRÉQUENCE",
+        "agents_connected": "AGENTS CONNECTÉS",
+        "btn_deploy": "DÉPLOYER LA MISSION",
+        "btn_abort": "SUPPRIMER",
+        "btn_leave": "QUITTER",
+        "abort_title": "Abandonner la mission ?",
+        "abort_msg": "Cela mettra fin à la session pour tous les agents.",
+        "leave_title": "Quitter la mission ?",
+        "leave_msg": "Vous serez déconnecté du lobby."
+    },
+    "mission": {
+        "create_title": "CONFIGURATION MISSION",
+        "abort_mission": "ABANDONNER MISSION",
+        "threat_level": "NIVEAU DE MENACE",
+        "duration": "FENÊTRE OPÉRATIONNELLE",
+        "protocol": "PROTOCOLE D'ENGAGEMENT",
+        "btn_init": "INITIALISER LE SALON",
+        "config_summary": "CONFIG"
+    },
+    "splash": {
+        "init": "INITIALISATION SYSTÈME...",
+        "loading_assets": "CHARGEMENT RESSOURCES...",
+        "secure_connection": "CONNEXION SÉCURISÉE...",
+        "analyzing": "ANALYSE...",
+        "detection": "DÉTECTION SUSPECT #82B"
+    }
+}
