@@ -186,8 +186,8 @@ export default function AgentHomeScreen() {
           <View style={styles.telemetryGroup}>
             <ThemedText type="code" style={styles.telemetryValue}>SIG: 100%</ThemedText>
             <View style={styles.signalBadge}>
-              <View style={[styles.pulseDot, { backgroundColor: colors.primary }]} />
-              <ThemedText type="code" style={{ color: colors.primary, fontSize: 8 }}>EN_LIGNE</ThemedText>
+              <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
+              <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>EN_LIGNE</ThemedText>
             </View>
           </View>
         </View>
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5, 5, 8, 0.65)', // Slightly lighter to see the background better
+    backgroundColor: 'rgba(5, 5, 8, 0.75)',
   },
   tacticalOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     opacity: 0.2,
   },
   actionSection: {
-    gap: 12,
+    gap: 2,
     marginBottom: 20,
   },
   deployBadge: {
