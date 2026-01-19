@@ -60,7 +60,19 @@
         "duration": "FENÊTRE OPÉRATIONNELLE",
         "protocol": "PROTOCOLE D'ENGAGEMENT",
         "btn_init": "INITIALISER LE SALON",
-        "config_summary": "CONFIG"
+        "config_summary": "CONFIG",
+        "options": {
+            "RECRUIT": "RECRUE",
+            "AGENT": "AGENT",
+            "DOUBLE_ZERO": "DOUBLE ZÉRO",
+            "15_MIN": "15 MIN",
+            "45_MIN": "45 MIN",
+            "2_HOURS": "2 HEURES",
+            "INFINITE": "∞",
+            "SOCIAL": "SOCIAL",
+            "ABSURD": "ABSURDE",
+            "RISKY": "RISQUÉ"
+        }
     },
     "splash": {
         "init": "INITIALISATION SYSTÈME...",
@@ -68,5 +80,9 @@
         "secure_connection": "CONNEXION SÉCURISÉE...",
         "analyzing": "ANALYSE...",
         "detection": "DÉTECTION SUSPECT #82B"
+    },
+    "permissions": {
+        "camera_msg": "Accès caméra requis pour scanner les fréquences.",
+        "camera_btn": "AUTORISER L'ACCÈS"
     }
 }

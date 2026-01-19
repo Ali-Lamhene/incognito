@@ -293,7 +293,7 @@ export default function AgentHomeScreen() {
             <MainButton
               title={t('home.join_mission_subtitle')}
               variant="outline"
-              onPress={() => console.log('Join')}
+              onPress={() => router.push('/mission/join')}
               style={styles.secondaryAction}
             />
           )}

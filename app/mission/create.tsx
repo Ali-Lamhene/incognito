@@ -12,9 +12,9 @@ import { generateMissionCode } from '../../utils/missionCode';
 
 import { useTranslation } from '../../hooks/useTranslation';
 
-const THREAT_LEVELS = ['RECRUE', 'AGENT', 'DOUBLE ZÉRO'];
-const DURATIONS = ['15 MIN', '45 MIN', '2 HEURES', '∞'];
-const PROTOCOLS = ['SOCIAL', 'ABSURDE', 'RISQUÉ'];
+const THREAT_LEVELS = ['RECRUIT', 'AGENT', 'DOUBLE_ZERO'];
+const DURATIONS = ['15_MIN', '45_MIN', '2_HOURS', 'INFINITE'];
+const PROTOCOLS = ['SOCIAL', 'ABSURD', 'RISKY'];
 
 export default function CreateMissionScreen() {
     const router = useRouter();
@@ -24,7 +24,7 @@ export default function CreateMissionScreen() {
 
     // Mission Parameters State
     const [threatLevel, setThreatLevel] = useState('AGENT');
-    const [duration, setDuration] = useState('45 MIN');
+    const [duration, setDuration] = useState('45_MIN');
     const [protocol, setProtocol] = useState('SOCIAL');
 
     const handleCreate = async () => {
@@ -57,7 +57,7 @@ export default function CreateMissionScreen() {
                                     isSelected && styles.optionTextSelected
                                 ]}
                             >
-                                {opt}
+                                {t(`mission.options.${opt}`)}
                             </ThemedText>
                             {isSelected && <View style={styles.selectedCorner} />}
                         </TouchableOpacity>
@@ -109,7 +109,7 @@ export default function CreateMissionScreen() {
                 <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
                     <View style={styles.summaryBox}>
                         <ThemedText type="code" style={styles.summaryText}>
-                            {t('mission.config_summary')}: {threatLevel} / {duration} / {protocol}
+                            {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
                         </ThemedText>
                     </View>
 

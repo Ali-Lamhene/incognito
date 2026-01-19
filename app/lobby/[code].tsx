@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Clipboard, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import Animated, { FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConfirmationModal } from '../../components/ConfirmationModal';
 import { MainButton } from '../../components/MainButton';
@@ -13,24 +13,34 @@ import { ThemedText } from '../../components/ThemedText';
 import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
 
+import { useProfileStore } from '../../store/profileStore';
+
 export default function LobbyScreen() {
     const { code } = useLocalSearchParams();
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { session, clearSession } = useSession();
+    const { session, clearSession, joinSession } = useSession();
     const { t } = useTranslation();
+    const { profile } = useProfileStore();
+
+    useEffect(() => {
+        if (code && typeof code === 'string') {
+            // If no active session or session code differs, join as agent
+            if (!session || session.code !== code) {
+                joinSession(code);
+            }
+        }
+    }, [code, session]);
 
     const isHost = session?.role === 'HOST';
 
-    // Mock connected agents
-    const [agents, setAgents] = useState([
-        { id: '1', name: 'Commander', status: 'READY' },
-        { id: '2', name: 'Ghost', status: 'PENDING' },
-        { id: '3', name: 'Viper', status: 'READY' },
-        { id: '4', name: 'Spectre', status: 'PENDING' },
-        { id: '5', name: 'Cipher', status: 'READY' },
-        { id: '6', name: 'Neon', status: 'PENDING' },
-    ]);
+    // Real connected agents (starting with self)
+    // Real connected agents (starting with self)
+    const [agents, setAgents] = useState(profile ? [{
+        id: profile.id,
+        name: profile.codename,
+        status: 'READY' // Self is always ready initially
+    }] : []);
 
     const scannerOpacity = useSharedValue(0.3);
 
@@ -95,6 +105,39 @@ export default function LobbyScreen() {
         );
     };
 
+    const AnimatedWaitingText = ({ text }: { text: string }) => {
+        const step = useSharedValue(0);
+
+        useEffect(() => {
+            step.value = withRepeat(
+                withTiming(4, { duration: 2000, easing: Easing.linear }),
+                -1,
+                false
+            );
+        }, []);
+
+        const d1Style = useAnimatedStyle(() => ({
+            opacity: step.value >= 1 ? 1 : 0
+        }));
+        const d2Style = useAnimatedStyle(() => ({
+            opacity: step.value >= 2 ? 1 : 0
+        }));
+        const d3Style = useAnimatedStyle(() => ({
+            opacity: step.value >= 3 ? 1 : 0
+        }));
+
+        const baseText = text.replace(/\.+$/, '');
+
+        return (
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <ThemedText type="code" style={styles.subTitle}>{baseText}</ThemedText>
+                <Animated.View style={d1Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
+                <Animated.View style={d2Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
+                <Animated.View style={d3Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
+            </View>
+        );
+    };
+
     return (
         <View style={styles.container}>
             {/* BACKGROUND: Surveillance Desk for Planning Phase */}
@@ -113,11 +156,12 @@ export default function LobbyScreen() {
             </View>
 
             <ScrollView
+                style={{ flex: 1, marginBottom: insets.bottom }}
                 contentContainerStyle={[
                     styles.scrollContent,
                     {
                         paddingTop: insets.top + 20,
-                        paddingBottom: Math.max(insets.bottom, 20) + 40 // +40 extra padding to clear nav bar safely
+                        paddingBottom: 20
                     }
                 ]}
                 showsVerticalScrollIndicator={false}
@@ -138,9 +182,11 @@ export default function LobbyScreen() {
                     </View>
                     <View style={{ marginTop: 10 }}>
                         <ThemedText type="subtitle" style={styles.screenTitle}>{t('lobby.title')}</ThemedText>
-                        <ThemedText type="code" style={styles.subTitle}>
-                            {isHost ? t('lobby.waiting') : t('lobby.linked_msg')}
-                        </ThemedText>
+                        {isHost ? (
+                            <AnimatedWaitingText text={t('lobby.waiting')} />
+                        ) : (
+                            <ThemedText type="code" style={styles.subTitle}>{t('lobby.linked_msg')}</ThemedText>
+                        )}
                     </View>
                 </Animated.View>
 
@@ -187,7 +233,7 @@ export default function LobbyScreen() {
                             </View>
                         ))}
                         {/* Placeholder for empty slots */}
-                        {[...Array(2)].map((_, i) => (
+                        {[...Array(1)].map((_, i) => (
                             <SearchingSlot key={`empty-${i}`} />
                         ))}
                     </View>
