@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, useColorScheme, View } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -13,9 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentSplashScreen } from '../components/AgentSplashScreen';
 import { IncognitoLogo } from '../components/IncognitoLogo';
 import { MainButton } from '../components/MainButton';
+import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { ThemedText } from '../components/ThemedText';
 import { Colors } from '../constants/Colors';
 import { useAppState } from '../store/appState';
+import { useProfileStore } from '../store/profileStore';
 
 import { useSession } from '../context/SessionContext';
 
@@ -27,12 +30,15 @@ export default function AgentHomeScreen() {
   const insets = useSafeAreaInsets();
   const { session } = useSession();
   const { hasLaunched, setHasLaunched } = useAppState();
+  const { profile, isFirstSetupDone, createProfile, updateProfile } = useProfileStore();
 
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   // Show splash only if app hasn't launched yet
   const [showSplash, setShowSplash] = useState(!hasLaunched);
+  // Show setup only if splash is done AND profile not set
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
 
   const missionIdDisplay = session ? session.code : "NO_ACTIVE_MISSION";
   const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
@@ -42,6 +48,13 @@ export default function AgentHomeScreen() {
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
   const scanlineY = useSharedValue(-height);
+
+  useEffect(() => {
+    // If not showing splash and profile not setup, show modal
+    if (!showSplash && !isFirstSetupDone) {
+      setShowProfileSetup(true);
+    }
+  }, [showSplash, isFirstSetupDone]);
 
   useEffect(() => {
     if (!showSplash) {
@@ -67,6 +80,18 @@ export default function AgentHomeScreen() {
   const handleSplashFinish = () => {
     setShowSplash(false);
     setHasLaunched();
+    if (!isFirstSetupDone) {
+      setShowProfileSetup(true);
+    }
+  };
+
+  const handleProfileComplete = (codename: string, avatar: string, color: string) => {
+    if (profile) {
+      updateProfile({ codename, avatar, themeColor: color });
+    } else {
+      createProfile(codename, avatar, color);
+    }
+    setShowProfileSetup(false);
   };
 
   const scanlineStyle = useAnimatedStyle(() => ({
@@ -90,6 +115,11 @@ export default function AgentHomeScreen() {
 
   return (
     <View style={styles.container}>
+      <ProfileSetupModal
+        visible={showProfileSetup}
+        onComplete={handleProfileComplete}
+        initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
+      />
       {/* BACKGROUND: Blurred Secret Agent Desk - Edge to Edge */}
       <View style={styles.backgroundContainer}>
         <Image
@@ -131,17 +161,28 @@ export default function AgentHomeScreen() {
       ]}>
         {/* HEADER: Technical Telemetry */}
         <View style={styles.header}>
-          <View style={styles.logoGroup}>
-            <Image
-              source={require('../assets/images/incognito_logo.png')}
-              style={styles.headerLogo}
-              contentFit="contain"
-            />
-            <View style={styles.agentInfo}>
-              <ThemedText type="code" style={styles.headerLabel}>AGENT_STATUS</ThemedText>
-              <ThemedText type="futuristic" style={styles.agentName}>#RX_CORTEX</ThemedText>
+          <TouchableOpacity
+            onPress={() => setShowProfileSetup(true)}
+            style={styles.logoGroup}
+          >
+            <View style={[styles.headerLogoRing, { borderColor: '#FFF' }]}>
+              {profile?.avatar ? (
+                <Ionicons name={profile.avatar as any} size={20} color="#FFF" />
+              ) : (
+                <Image
+                  source={require('../assets/images/incognito_logo.png')}
+                  style={styles.headerLogo}
+                  contentFit="contain"
+                />
+              )}
             </View>
-          </View>
+            <View style={styles.agentInfo}>
+              <ThemedText type="code" style={styles.headerLabel}>AGENT_ACTIVE</ThemedText>
+              <ThemedText type="futuristic" style={[styles.agentName, { color: '#FFF' }]}>
+                {profile?.codename ? `#${profile.codename}` : "UNKNOWN"}
+              </ThemedText>
+            </View>
+          </TouchableOpacity>
           <View style={styles.telemetryGroup}>
             <ThemedText type="code" style={styles.telemetryValue}>SIG: 100%</ThemedText>
             <View style={styles.signalBadge}>
@@ -334,11 +375,20 @@ const styles = StyleSheet.create({
   logoGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 6,
+  },
+  headerLogoRing: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   headerLogo: {
-    width: 32,
-    height: 32,
+    width: 24,
+    height: 24,
   },
   agentInfo: {
     gap: 0,
