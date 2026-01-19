@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, useColorScheme, View } from 'react-native';
 import Animated, {
@@ -18,6 +19,7 @@ import { Colors } from '../constants/Colors';
 const { width, height } = Dimensions.get('window');
 
 export default function AgentHomeScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
@@ -203,7 +205,7 @@ export default function AgentHomeScreen() {
 
           <MainButton
             title="CRÉER UNE MISSION"
-            onPress={() => console.log('Create')}
+            onPress={() => router.push('/mission/create')}
             style={styles.primaryAction}
           />
           <MainButton
