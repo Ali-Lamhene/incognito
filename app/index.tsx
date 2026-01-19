@@ -27,6 +27,7 @@ export default function AgentHomeScreen() {
   const contentOpacity = useSharedValue(0);
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
+  const scanlineY = useSharedValue(-height);
 
   useEffect(() => {
     if (!showSplash) {
@@ -37,8 +38,19 @@ export default function AgentHomeScreen() {
         -1,
         false
       );
+
+      // Global scanline animation
+      scanlineY.value = withRepeat(
+        withTiming(height, { duration: 4000, easing: Easing.linear }),
+        -1,
+        false
+      );
     }
   }, [showSplash]);
+
+  const scanlineStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: scanlineY.value }],
+  }));
 
   const animatedContentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
@@ -57,21 +69,40 @@ export default function AgentHomeScreen() {
       {/* BACKGROUND: Blurred Secret Agent Desk - Edge to Edge */}
       <View style={styles.backgroundContainer}>
         <Image
-          source={require('../assets/images/surveillance_target_v4.png')}
+          source={require('../assets/images/agent_silhouette_rain.png')}
           style={styles.backgroundImage}
           contentFit="cover"
         />
         <View style={styles.backgroundOverlay} />
+
+        {/* Manual HUD Grid */}
+        <View style={styles.hudGrid}>
+          {[...Array(6)].map((_, i) => (
+            <View key={`h-${i}`} style={[styles.gridLineH, { top: `${(i + 1) * 15}%` }]} />
+          ))}
+          {[...Array(6)].map((_, i) => (
+            <View key={`v-${i}`} style={[styles.gridLineV, { left: `${(i + 1) * 15}%` }]} />
+          ))}
+        </View>
+
+        {/* Moving Scanline */}
+        <Animated.View style={[styles.atmosphereScanline, scanlineStyle]} />
+
+        <Image
+          source={require('../assets/images/tactical_texture.png')}
+          style={styles.tacticalOverlay}
+          contentFit="cover"
+        />
       </View>
 
       <Animated.View style={[
         styles.mainContent,
         animatedContentStyle,
         {
-          paddingTop: insets.top + 10,
-          paddingBottom: Math.max(insets.bottom, 20),
-          paddingLeft:  15,
-          paddingRight:15,
+          paddingTop: insets.top,
+          paddingBottom: Math.max(insets.bottom, 10),
+          paddingLeft: 15,
+          paddingRight: 15,
         }
       ]}>
         {/* HEADER: Technical Telemetry */}
@@ -213,7 +244,38 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(2, 6, 23, 0.7)',
+    backgroundColor: 'rgba(5, 5, 8, 0.65)', // Slightly lighter to see the background better
+  },
+  tacticalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.15,
+  },
+  hudGrid: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.015,
+  },
+  gridLineH: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: '#FFF',
+  },
+  gridLineV: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 1,
+    backgroundColor: '#FFF',
+  },
+  atmosphereScanline: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   safeArea: {
     flex: 1,
