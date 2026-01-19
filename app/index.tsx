@@ -184,7 +184,10 @@ export default function AgentHomeScreen() {
             </View>
           </TouchableOpacity>
           <View style={styles.telemetryGroup}>
-            <ThemedText type="code" style={styles.telemetryValue}>SIG: 100%</ThemedText>
+            <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
+              <Ionicons name="options" size={20} color="#FFF" style={{ opacity: 0.8 }} />
+            </TouchableOpacity>
+            <View style={styles.separatorV} />
             <View style={styles.signalBadge}>
               <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
               <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>EN_LIGNE</ThemedText>
@@ -403,8 +406,18 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   telemetryGroup: {
-    alignItems: 'flex-end',
-    gap: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  settingsButton: {
+    padding: 5,
+  },
+  separatorV: {
+    width: 1,
+    height: 12,
+    backgroundColor: '#FFF',
+    opacity: 0.2,
   },
   telemetryValue: {
     fontSize: 8,
