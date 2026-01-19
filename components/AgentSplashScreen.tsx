@@ -45,7 +45,9 @@ export function AgentSplashScreen({ onComplete }: AgentSplashScreenProps) {
 
         // Completion trigger
         const timer = setTimeout(() => {
-            opacity.value = withTiming(0, { duration: 1200 }, () => {
+            const duration = 1200;
+            opacity.value = withTiming(0, { duration });
+            textOpacity.value = withTiming(0, { duration }, () => {
                 if (onComplete) {
                     runOnJS(onComplete)();
                 }

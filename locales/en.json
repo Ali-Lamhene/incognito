@@ -3,6 +3,7 @@
         "return": "RETURN",
         "confirm": "CONFIRM",
         "cancel": "CANCEL",
+        "or": "OR",
         "loading": "LOADING...",
         "unknown": "UNKNOWN",
         "ok": "OK"
@@ -61,6 +62,10 @@
         "protocol": "ENGAGEMENT PROTOCOL",
         "btn_init": "INITIALIZE LOBBY",
         "config_summary": "CONFIG",
+        "mission_not_found": "MISSION NOT FOUND: ACCESS DENIED",
+        "join_code_label": "MISSION ACCREDITATION",
+        "join_code_placeholder": "STEALTH-TIGER-23",
+        "btn_join_code": "CONNECT",
         "options": {
             "RECRUIT": "RECRUIT",
             "AGENT": "AGENT",

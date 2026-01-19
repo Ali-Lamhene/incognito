@@ -16,21 +16,25 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useProfileStore } from '../../store/profileStore';
 
 export default function LobbyScreen() {
-    const { code } = useLocalSearchParams();
+    const { code: rawCode } = useLocalSearchParams();
+    const code = typeof rawCode === 'string' ? rawCode.trim().toUpperCase() : '';
+
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { session, clearSession, joinSession } = useSession();
+    const { session, clearSession, joinSession, isInitialized } = useSession();
     const { t } = useTranslation();
     const { profile } = useProfileStore();
+    const [isExiting, setIsExiting] = useState(false);
 
     useEffect(() => {
-        if (code && typeof code === 'string') {
+        if (isExiting) return;
+        if (isInitialized && code && typeof code === 'string' && code.length > 0) {
             // If no active session or session code differs, join as agent
             if (!session || session.code !== code) {
                 joinSession(code);
             }
         }
-    }, [code, session]);
+    }, [code, session, isInitialized, isExiting]);
 
     const isHost = session?.role === 'HOST';
 
@@ -69,6 +73,7 @@ export default function LobbyScreen() {
     };
 
     const confirmDestroy = async () => {
+        setIsExiting(true);
         setShowDestroyModal(false);
         await clearSession();
         router.replace('/');
@@ -176,7 +181,7 @@ export default function LobbyScreen() {
 
                         {isHost && (
                             <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
-                                <Ionicons name="trash-outline" size={20} color="#FFF" />
+                                <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
                             </TouchableOpacity>
                         )}
                     </View>
@@ -397,8 +402,10 @@ const styles = StyleSheet.create({
         gap: 15,
     },
     destroyButton: {
-        padding: 4,
-        // Removed border/bg for a cleaner icon-only look as requested ("plus beau button")
-        opacity: 0.8,
+        padding: 8,
+        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 107, 107, 0.2)',
     }
 });

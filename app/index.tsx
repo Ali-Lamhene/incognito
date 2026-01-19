@@ -5,6 +5,9 @@ import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
 import Animated, {
   Easing,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -29,7 +32,7 @@ export default function AgentHomeScreen() {
   const router = useRouter();
   const { height } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
-  const { session } = useSession();
+  const { session, clearSession } = useSession();
   const { hasLaunched, setHasLaunched } = useAppState();
   const { profile, isFirstSetupDone, createProfile, updateProfile } = useProfileStore();
   const { t } = useTranslation();
@@ -46,7 +49,6 @@ export default function AgentHomeScreen() {
   const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
 
   // ... shared values ...
-  const contentOpacity = useSharedValue(0);
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
   const scanlineY = useSharedValue(-height);
@@ -62,7 +64,6 @@ export default function AgentHomeScreen() {
     if (!showSplash) {
       if (!hasLaunched) setHasLaunched(); // Mark as launched once splash is gone or skipped
 
-      contentOpacity.value = withTiming(1, { duration: 1000 });
       // ... rest of animations
       dataScrollY.value = withRepeat(
         withTiming(-200, { duration: 10000, easing: Easing.linear }),
@@ -101,7 +102,7 @@ export default function AgentHomeScreen() {
   }));
 
   const animatedContentStyle = useAnimatedStyle(() => ({
-    opacity: contentOpacity.value,
+    flex: 1, // Layout animations handle the entrance
   }));
 
   const animatedDataStyle = useAnimatedStyle(() => ({
@@ -123,7 +124,7 @@ export default function AgentHomeScreen() {
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
       />
       {/* BACKGROUND: Blurred Secret Agent Desk - Edge to Edge */}
-      <View style={styles.backgroundContainer}>
+      <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
         <Image
           source={require('../assets/images/agent_silhouette_rain.png')}
           style={styles.backgroundImage}
@@ -149,7 +150,7 @@ export default function AgentHomeScreen() {
           style={styles.tacticalOverlay}
           contentFit="cover"
         />
-      </View>
+      </Animated.View>
 
       <Animated.View style={[
         styles.mainContent,
@@ -162,7 +163,7 @@ export default function AgentHomeScreen() {
         }
       ]}>
         {/* HEADER: Technical Telemetry */}
-        <View style={styles.header}>
+        <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.header}>
           <TouchableOpacity
             onPress={() => setShowProfileSetup(true)}
             style={styles.logoGroup}
@@ -195,10 +196,10 @@ export default function AgentHomeScreen() {
               <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.status_online')}</ThemedText>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* CENTRAL: Augmented Reality Dossier */}
-        <View style={styles.centerSection}>
+        <Animated.View entering={FadeIn.delay(1200).duration(1000)} style={styles.centerSection}>
           <View style={styles.augmentedFrame}>
             {/* Pro Corner Brackets */}
             <View style={styles.cornerTL} />
@@ -265,10 +266,10 @@ export default function AgentHomeScreen() {
               <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* BOTTOM: Mission Deployment */}
-        <View style={styles.actionSection}>
+        <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
           <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
             <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
               {session ? `ACTIVE_PROTOCOL: ${session.code}` : 'DEPLOYMENT_PROTOCOL'}
@@ -276,28 +277,37 @@ export default function AgentHomeScreen() {
           </View>
 
           {session ? (
-            <MainButton
-              title="RETOURNER AU SALON"
-              onPress={() => router.push(`/lobby/${session.code}`)}
-              style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
-            />
+            <>
+              <MainButton
+                title="RETOURNER AU SALON"
+                onPress={() => router.push(`/lobby/${session.code}`)}
+                style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
+              />
+              <MainButton
+                title="ABANDONNER LA MISSION"
+                variant="outline"
+                onPress={async () => {
+                  await clearSession();
+                }}
+                style={[styles.secondaryAction, { marginTop: 10, borderColor: 'rgba(255, 107, 107, 0.3)' }]}
+              />
+            </>
           ) : (
-            <MainButton
-              title={t('home.create_mission_title')}
-              onPress={() => router.push('/mission/create')}
-              style={styles.primaryAction}
-            />
+            <>
+              <MainButton
+                title={t('home.create_mission_title')}
+                onPress={() => router.push('/mission/create')}
+                style={styles.primaryAction}
+              />
+              <MainButton
+                title={t('home.join_mission_subtitle')}
+                variant="outline"
+                onPress={() => router.push('/mission/join')}
+                style={[styles.secondaryAction, { marginTop: 10 }]}
+              />
+            </>
           )}
-
-          {!session && (
-            <MainButton
-              title={t('home.join_mission_subtitle')}
-              variant="outline"
-              onPress={() => router.push('/mission/join')}
-              style={styles.secondaryAction}
-            />
-          )}
-        </View>
+        </Animated.View>
 
         {/* DATA OVERLAY: Side Stream */}
         <View style={styles.sideDataOverlay}>
