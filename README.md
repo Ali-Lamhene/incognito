@@ -1,50 +1,46 @@
-# Welcome to your Expo app 👋
+# Incognito 🕵️‍♂️
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Incognito** est un jeu mobile de "Social Deduction" développé avec React Native et Expo.
 
-## Get started
+## 🌟 Concept
 
-1. Install dependencies
+Le but est simple : accomplir des défis secrets sans se faire repérer par les autres joueurs. 
 
-   ```bash
-   npm install
-   ```
+Imaginez une soirée entre amis : chacun reçoit une mission secrète sur son téléphone (ex: "Changer de place avec quelqu'un", "Utiliser le mot 'Escarpin'"). Si vous réussissez votre mission sans que personne ne s'en rende compte, vous marquez des points. Si quelqu'un vous observe et appuie sur "Démasquer", c'est lui qui gagne les points !
 
-2. Start the app
+## 🎮 Comment jouer ?
 
-   ```bash
-   npx expo start
-   ```
+1. **Création du Salon** : Un joueur crée une partie et partage le code.
+2. **Rejoindre** : Les autres joueurs rejoignent via le code.
+3. **Missions** : Dès que la partie commence, chacun reçoit son défi secret.
+4. **Action** : Réalisez votre défi avec subtilité.
+5. **Démasquage** : Observez les autres. S'ils font quelque chose d'inhabituel, tentez de les démasquer !
 
-In the output, you'll find options to open the app in a
+## 📁 Documentation
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Pour plus de détails sur la conception, consultez le dossier [`/doc`](./doc) :
+- [Concept Général](./doc/concept.md)
+- [Mécaniques de Jeu](./doc/mechanics.md)
+- [Écrans et Navigation](./doc/screens.md)
+- [Architecture Technique](./doc/technical.md)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🛠 Tech Stack
 
-## Get a fresh project
+- **Framework** : React Native (Expo)
+- **Navigation** : Expo Router
+- **Temps Réel** : Firebase (projeté)
+- **Langage** : TypeScript
 
-When you're ready, run:
+---
 
+## 🚀 Installation & Lancement
+
+1. Installez les dépendances :
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+2. Lancez le projet :
+```bash
+npx expo start
+```
