@@ -5,7 +5,8 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
-    FadeIn, FadeInDown, FadeInUp, FadeOut,
+    FadeIn, FadeInDown, FadeInLeft,
+    FadeInUp, FadeOut,
     useAnimatedStyle, useSharedValue, withRepeat, withTiming
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,8 +21,8 @@ export default function ActiveMissionScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const {
-        session, agents, status, clearSession, completeChallenge,
-        reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge
+        session, agents, events, status, clearSession, completeChallenge, triggerBluff, finalizeChallengePoints,
+        reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent
     } = useSession();
     const { profile } = useProfileStore();
     const { t } = useTranslation();
@@ -29,6 +30,8 @@ export default function ActiveMissionScreen() {
     const [isRevealed, setIsRevealed] = useState(false);
     const [showAbortModal, setShowAbortModal] = useState(false);
     const [showImpossibleModal, setShowImpossibleModal] = useState(false);
+    const [now, setNow] = useState(Date.now());
+    const [visibleEvents, setVisibleEvents] = useState<string[]>([]);
 
     const scanPos = useSharedValue(0);
 
@@ -62,12 +65,59 @@ export default function ActiveMissionScreen() {
         transform: [{ translateY: scanPos.value * 250 }] // 250 est une approx de la hauteur max
     }));
 
+    // Auto-finalize points when timer expires + UI Tick
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const currentTime = Date.now();
+            setNow(currentTime); // Force UI update
+
+            agents.forEach(agent => {
+                if (agent.pendingValidation) {
+                    const elapsed = currentTime - agent.pendingValidation.startedAt;
+                    if (elapsed >= 60000) {
+                        finalizeChallengePoints(agent.id);
+                    }
+                }
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [agents]);
+
+    // Toast management: appear for 5s then disappear
+    useEffect(() => {
+        const currentTime = Date.now();
+        const newEvents = events.filter(e => {
+            const isRecent = (currentTime - e.timestamp) < 5000;
+            const notShowing = !visibleEvents.includes(e.id);
+            return isRecent && notShowing;
+        });
+
+        if (newEvents.length > 0) {
+            const newIds = newEvents.map(e => e.id);
+            setVisibleEvents(prev => [...prev, ...newIds]);
+
+            newIds.forEach(id => {
+                setTimeout(() => {
+                    setVisibleEvents(prev => prev.filter(vid => vid !== id));
+                }, 5000);
+            });
+        }
+    }, [events]);
+
     const handleComplete = async () => {
         if (profile?.id) {
             await completeChallenge(profile.id);
+            setIsRevealed(false); // Re-hide after completion
         }
     };
 
+    const handleBluff = async () => {
+        if (profile?.id) {
+            await triggerBluff(profile.id);
+            setIsRevealed(false);
+        }
+    };
     const handleAbort = async () => {
         setShowAbortModal(false);
         await clearSession(profile?.id);
@@ -84,6 +134,12 @@ export default function ActiveMissionScreen() {
     const handleVote = async (vote: 'FEASIBLE' | 'IMPOSSIBLE') => {
         if (agentInIncident && profile?.id) {
             await voteIncident(agentInIncident.id, profile.id, vote);
+        }
+    };
+
+    const handleUnmask = async (targetId: string) => {
+        if (profile?.id) {
+            const success = await unmaskAgent(targetId, profile.id);
         }
     };
 
@@ -271,7 +327,7 @@ export default function ActiveMissionScreen() {
                                 color={isCompleted ? "#4CAF50" : (me?.incident ? "#FF6B6B" : "#FFF")}
                             />
                             <ThemedText type="code" style={[styles.cardTitle, isCompleted && { color: '#4CAF50' }, me?.incident && { color: '#FF6B6B' }]}>
-                                {isCompleted ? "VÉRIFICATION RÉUSSIE" : (me?.incident ? "IDENTITÉ SUSPENDUE" : "IDENTIFICATION REQUIS")}
+                                {isCompleted ? "VÉRIFICATION RÉUSSIE" : (me?.incident ? "IDENTITÉ SUSPENDUE" : "IDENTIFICATION REQUISE")}
                             </ThemedText>
                         </View>
 
@@ -346,27 +402,65 @@ export default function ActiveMissionScreen() {
                             )}
                         </Pressable>
 
-                        {!isCompleted && !me?.incident && (
-                            <View style={{ gap: 10 }}>
+                        {!me?.pendingValidation && !me?.completed && !me?.incident && (
+                            <View style={{ gap: 15 }}>
                                 <MainButton
                                     title="CONFIRMER OBJECTIF"
                                     onPress={handleComplete}
                                     style={styles.completeBtn}
                                 />
-                                <TouchableOpacity
-                                    onPress={() => setShowImpossibleModal(true)}
-                                    style={styles.impossibleBtn}
-                                >
-                                    <Ionicons name="flash-off" size={14} color="rgba(255,107,107,0.6)" />
-                                    <ThemedText type="code" style={styles.impossibleBtnText}>MISSION IMPOSSIBLE</ThemedText>
-                                </TouchableOpacity>
+                                <View style={{ flexDirection: 'row', gap: 10 }}>
+                                    <TouchableOpacity
+                                        onPress={handleBluff}
+                                        style={[styles.bluffBtn, { flex: 1 }]}
+                                    >
+                                        <Ionicons name="eye-off" size={12} color="rgba(162, 155, 254, 0.6)" />
+                                        <ThemedText
+                                            type="code"
+                                            style={styles.bluffBtnText}
+                                            numberOfLines={1}
+                                            adjustsFontSizeToFit
+                                        >
+                                            BLUFF
+                                        </ThemedText>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        onPress={() => setShowImpossibleModal(true)}
+                                        style={[styles.impossibleBtn, { flex: 1.4 }]}
+                                    >
+                                        <Ionicons name="flash-off" size={11} color="rgba(255,107,107,0.6)" />
+                                        <ThemedText
+                                            type="code"
+                                            style={styles.impossibleBtnText}
+                                            numberOfLines={1}
+                                            adjustsFontSizeToFit
+                                        >
+                                            MISSION IMPOSSIBLE
+                                        </ThemedText>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         )}
 
-                        {isCompleted && (
-                            <View style={styles.completedBadge}>
-                                <Ionicons name="checkmark-done-circle" size={16} color="#4CAF50" style={{ marginRight: 8 }} />
-                                <ThemedText type="code" style={styles.completedBadgeText}>MISSION ACCOMPLIE</ThemedText>
+                        {me?.pendingValidation && (
+                            <View style={[styles.pendingBadge, me.pendingValidation.isBluff && styles.pendingBadgeBluff]}>
+                                <Ionicons
+                                    name={me.pendingValidation.isBluff ? "eye-outline" : "timer-outline"}
+                                    size={16}
+                                    color={me.pendingValidation.isBluff ? "#A29BFE" : "#FFD93D"}
+                                    style={{ marginRight: 8 }}
+                                />
+                                <View>
+                                    <ThemedText type="code" style={[styles.pendingBadgeText, me.pendingValidation.isBluff && { color: '#A29BFE' }]}>
+                                        {me.pendingValidation.isBluff ? "MODE BLUFF ACTIVÉ" : "VÉRIFICATION"} : {Math.max(0, Math.floor((60000 - (now - me.pendingValidation.startedAt)) / 1000))}s
+                                    </ThemedText>
+                                    <ThemedText style={[styles.pendingBadgeSub, me.pendingValidation.isBluff && { color: 'rgba(162, 155, 254, 0.7)' }]}>
+                                        {me.pendingValidation.isBluff
+                                            ? "Les autres croient que vous travaillez... Appâtez-les !"
+                                            : "Restez discret, l'Agence vérifie vos traces..."}
+                                    </ThemedText>
+                                </View>
                             </View>
                         )}
 
@@ -432,10 +526,11 @@ export default function ActiveMissionScreen() {
                                             <ThemedText type="code" style={styles.agentScoreText}>{agent.score || 0}</ThemedText>
                                         </View>
                                     </View>
-                                    {agent.completed ? (
-                                        <ThemedText style={styles.agentStatusText}>OBJECTIF REMPLI</ThemedText>
-                                    ) : agent.incident ? (
-                                        <ThemedText style={[styles.agentStatusText, { color: '#FF6B6B' }]}>INCIDENT SIGNALÉ</ThemedText>
+                                    {agent.pendingValidation ? (
+                                        <View style={styles.criticalStatus}>
+                                            <ThemedText style={[styles.agentStatusText, { color: '#FFD93D' }]}>ÉMISSION SUSPECTE ({Math.max(0, Math.floor((60000 - (now - agent.pendingValidation.startedAt)) / 1000))}s)</ThemedText>
+                                            <View style={styles.alertPulse} />
+                                        </View>
                                     ) : (
                                         <ThemedText style={styles.agentStatusText}>OPÉRATIONNEL</ThemedText>
                                     )}
@@ -444,17 +539,20 @@ export default function ActiveMissionScreen() {
 
                             {!agent.incident && (
                                 <TouchableOpacity
+                                    onPress={() => handleUnmask(agent.id)}
                                     disabled={!!agentInIncident}
                                     style={[
                                         styles.unmaskBtn,
-                                        (agent.completed || !!agentInIncident) && styles.unmaskBtnDisabled
+                                        (!!agentInIncident) && styles.unmaskBtnDisabled,
+                                        agent.pendingValidation && styles.unmaskBtnActive
                                     ]}
                                 >
                                     <ThemedText type="code" style={[
                                         styles.unmaskText,
-                                        (agent.completed || !!agentInIncident) && styles.unmaskTextDisabled
+                                        (!!agentInIncident) && styles.unmaskTextDisabled,
+                                        agent.pendingValidation && styles.unmaskTextActive
                                     ]}>
-                                        {!!agentInIncident ? "VOTE..." : "DÉMASQUER"}
+                                        {!!agentInIncident ? "VOTE..." : (agent.pendingValidation ? "DÉMASQUER !" : "DÉMASQUER")}
                                     </ThemedText>
                                 </TouchableOpacity>
                             )}
@@ -478,6 +576,45 @@ export default function ActiveMissionScreen() {
                     </ThemedText>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* Flux Tactique des Événements (Bottom Left Toast) */}
+            <View style={[styles.eventFeed, { bottom: insets.bottom + 20 }]} pointerEvents="none">
+                {events.filter(e => visibleEvents.includes(e.id)).map((event, idx) => (
+                    <Animated.View
+                        key={event.id}
+                        entering={FadeInLeft.duration(400)}
+                        exiting={FadeOut.duration(300)}
+                        style={[styles.eventToast, styles[`eventToast_${event.type}`]]}
+                    >
+                        <View style={styles.eventIconBox}>
+                            <Ionicons
+                                name={
+                                    event.type === 'SUSPECT' ? 'eye' :
+                                        event.type === 'SUCCESS' ? 'checkmark-circle' :
+                                            event.type === 'UNMASKED' ? 'shield-outline' : 'alert-circle'
+                                }
+                                size={14}
+                                color="#FFF"
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <ThemedText type="code" style={styles.eventLabel}>
+                                {event.type === 'SUSPECT' ? 'ACTIVITÉ SUSPECTE' :
+                                    event.type === 'SUCCESS' ? 'MISSION RÉUSSIE' :
+                                        event.type === 'UNMASKED' ? 'DÉMASQUAGE' :
+                                            event.type === 'BLUFF_SUCCESS' ? 'BLUFF RÉUSSI' : 'ERREUR TACTIQUE'}
+                            </ThemedText>
+                            <ThemedText style={styles.eventText} numberOfLines={1}>
+                                {event.type === 'SUSPECT' ? `${event.agentName} sous surveillance...` :
+                                    event.type === 'SUCCESS' ? `${event.agentName} s'est infiltré (+${event.points})` :
+                                        event.type === 'UNMASKED' ? `${event.agentName} intercepté par ${event.targetName}` :
+                                            event.type === 'BLUFF_SUCCESS' ? `${event.agentName} a piégé ${event.targetName}` :
+                                                `${event.agentName} a fait une fausse accusation`}
+                            </ThemedText>
+                        </View>
+                    </Animated.View>
+                ))}
+            </View>
 
             <ConfirmationModal
                 visible={showAbortModal}
@@ -1234,9 +1371,9 @@ const styles = StyleSheet.create({
         borderStyle: 'dashed',
     },
     impossibleBtnText: {
-        fontSize: 9,
+        fontSize: 8.5,
         color: 'rgba(255,107,107,0.6)',
-        letterSpacing: 1,
+        letterSpacing: 0.3,
         fontWeight: 'bold',
     },
     challengeBoxIncident: {
@@ -1288,5 +1425,123 @@ const styles = StyleSheet.create({
         color: 'rgba(255,255,255,0.3)',
         letterSpacing: 1,
         fontWeight: 'bold',
+    },
+    pendingBadge: {
+        marginTop: 20,
+        backgroundColor: 'rgba(255, 217, 61, 0.1)',
+        padding: 15,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 217, 61, 0.3)',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    pendingBadgeBluff: {
+        backgroundColor: 'rgba(162, 155, 254, 0.1)',
+        borderColor: 'rgba(162, 155, 254, 0.3)',
+    },
+    pendingBadgeText: {
+        fontSize: 11,
+        color: '#FFD93D',
+        letterSpacing: 1,
+        fontWeight: 'bold',
+    },
+    pendingBadgeSub: {
+        fontSize: 8,
+        color: 'rgba(255, 217, 61, 0.7)',
+        marginTop: 2,
+    },
+    unmaskBtnActive: {
+        backgroundColor: 'rgba(255, 217, 61, 0.15)',
+        borderColor: '#FFD93D',
+        borderWidth: 2,
+    },
+    unmaskTextActive: {
+        color: '#FFD93D',
+        textShadowColor: 'rgba(255, 217, 61, 0.5)',
+        textShadowRadius: 10,
+    },
+    criticalStatus: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    alertPulse: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#FFD93D',
+    },
+    bluffBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 12,
+        backgroundColor: 'rgba(123, 104, 238, 0.05)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(123, 104, 238, 0.2)',
+        borderStyle: 'dashed',
+    },
+    bluffBtnText: {
+        fontSize: 9,
+        color: 'rgba(123, 104, 238, 0.8)',
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
+    },
+    eventFeed: {
+        position: 'absolute',
+        left: 20,
+        width: '75%',
+        gap: 8,
+        zIndex: 100,
+    },
+    eventToast: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 6,
+        borderWidth: 1,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        gap: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+    },
+    eventToast_SUSPECT: {
+        borderColor: 'rgba(255, 217, 61, 0.3)',
+    },
+    eventToast_SUCCESS: {
+        borderColor: 'rgba(76, 175, 80, 0.3)',
+    },
+    eventToast_UNMASKED: {
+        borderColor: 'rgba(255, 107, 107, 0.3)',
+    },
+    eventToast_BLUFF_SUCCESS: {
+        borderColor: 'rgba(162, 155, 254, 0.3)',
+    },
+    eventToast_FAILED_UNMASK: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    eventIconBox: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    eventLabel: {
+        fontSize: 8,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+        color: 'rgba(255,255,255,0.5)',
+    },
+    eventText: {
+        fontSize: 10,
+        color: '#FFF',
+        fontWeight: '500',
     }
 });
