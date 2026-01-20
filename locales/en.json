@@ -77,7 +77,12 @@
             "SOCIAL": "SOCIAL",
             "ABSURD": "ABSURD",
             "RISKY": "RISKY"
-        }
+        },
+        "unmask_confess": "CONFESS",
+        "unmask_deny": "DENY",
+        "unmask_popup_title": "UNMASKING ATTEMPT",
+        "unmask_popup_msg": "Verbalize the secret you think you discovered to everyone before the final judgement.",
+        "unmask_popup_btn": "SIGNAL ATTEMPT"
     },
     "splash": {
         "init": "SYSTEM INITIALIZATION...",

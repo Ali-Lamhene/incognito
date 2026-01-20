@@ -17,12 +17,72 @@ import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useProfileStore } from '../../store/profileStore';
 
+const RouletteStrip = ({ names, winnerName }: { names: string[], winnerName: string | null }) => {
+    const scrollY = useSharedValue(0);
+    const stripHeight = names.length * 80;
+
+    useEffect(() => {
+        if (!winnerName) {
+            scrollY.value = withRepeat(
+                withTiming(-stripHeight, { duration: 400 }),
+                -1,
+                false
+            );
+        } else {
+            const winnerIdx = names.indexOf(winnerName);
+            scrollY.value = withTiming(-winnerIdx * 80, { duration: 800 });
+        }
+    }, [winnerName]);
+
+    const animStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: scrollY.value }]
+    }));
+
+    return (
+        <View style={{ height: 80, overflow: 'hidden' }}>
+            <Animated.View style={animStyle}>
+                {names.map((name, i) => (
+                    <View key={i} style={{ height: 80, justifyContent: 'center', alignItems: 'center', width: '100%', paddingHorizontal: 20 }}>
+                        <View style={{ padding: 10, borderRadius: 8, backgroundColor: 'rgba(255, 107, 107, 0.1)', borderWidth: 1, borderColor: 'rgba(255, 107, 107, 0.2)', width: '100%', alignItems: 'center' }}>
+                            <ThemedText
+                                type="futuristic"
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                style={{ fontSize: 20, color: '#FFF', letterSpacing: 2, textAlign: 'center' }}
+                            >
+                                {name.toUpperCase()}
+                            </ThemedText>
+                        </View>
+                    </View>
+                ))}
+                {!winnerName && names.map((name, i) => (
+                    <View key={`loop-${i}`} style={{ height: 80, justifyContent: 'center', alignItems: 'center', width: '100%', paddingHorizontal: 20 }}>
+                        <View style={{ padding: 10, borderRadius: 8, backgroundColor: 'rgba(255, 107, 107, 0.1)', borderWidth: 1, borderColor: 'rgba(255, 107, 107, 0.2)', width: '100%', alignItems: 'center' }}>
+                            <ThemedText
+                                type="futuristic"
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                style={{ fontSize: 20, color: '#FFF', letterSpacing: 2, textAlign: 'center' }}
+                            >
+                                {name.toUpperCase()}
+                            </ThemedText>
+                        </View>
+                    </View>
+                ))}
+            </Animated.View>
+        </View>
+    );
+};
+
+
+
 export default function ActiveMissionScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const {
         session, agents, events, status, clearSession, completeChallenge, triggerBluff, finalizeChallengePoints,
-        reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent
+        reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent,
+        respondToUnmask, resolveUnmaskVote, triggerRouletteTirage
     } = useSession();
     const { profile } = useProfileStore();
     const { t } = useTranslation();
@@ -30,8 +90,13 @@ export default function ActiveMissionScreen() {
     const [isRevealed, setIsRevealed] = useState(false);
     const [showAbortModal, setShowAbortModal] = useState(false);
     const [showImpossibleModal, setShowImpossibleModal] = useState(false);
-    const [now, setNow] = useState(Date.now());
     const [visibleEvents, setVisibleEvents] = useState<string[]>([]);
+    const [isRouletteActive, setIsRouletteActive] = useState(false);
+    const [rouletteWinner, setRouletteWinner] = useState<string | null>(null);
+    const [showUnmaskModal, setShowUnmaskModal] = useState(false);
+    const [targetIdToUnmask, setTargetIdToUnmask] = useState<string | null>(null);
+    const [processedRouletteIncident, setProcessedRouletteIncident] = useState<string | null>(null);
+    const [now, setNow] = useState(Date.now());
 
     const scanPos = useSharedValue(0);
 
@@ -40,13 +105,23 @@ export default function ActiveMissionScreen() {
     const isCompleted = me?.completed;
     const isHost = session?.role === 'HOST';
 
-    // Agent qui a déclaré sa mission impossible
-    const agentInIncident = agents.find(a => a.incident?.type === 'IMPOSSIBLE');
+    // Agent impliqué dans un incident
+    const agentInIncident = agents.find(a => !!a.incident);
+    const incidentType = agentInIncident?.incident?.type;
     const incidentVotes = agentInIncident?.incident?.votes || {};
     const myVote = incidentVotes[profile?.id || ''];
 
+    // Stats pour mission impossible
     const countPossible = Object.values(incidentVotes).filter(v => v === 'IMPOSSIBLE').length;
     const countFeasible = Object.values(incidentVotes).filter(v => v === 'FEASIBLE').length;
+
+    // Stats pour démasquage
+    const countYes = Object.values(incidentVotes).filter(v => v === 'YES').length;
+    const countNo = Object.values(incidentVotes).filter(v => v === 'NO').length;
+
+    const maxVoters = agents.length - 2;
+    const currentVoters = Object.keys(incidentVotes).length;
+    const isUnmaskTie = incidentType === 'UNMASK_VOTE' && countYes === countNo && currentVoters >= maxVoters;
 
     useEffect(() => {
         if (status === 'LOBBY') {
@@ -131,17 +206,82 @@ export default function ActiveMissionScreen() {
         }
     };
 
-    const handleVote = async (vote: 'FEASIBLE' | 'IMPOSSIBLE') => {
+    const handleVote = async (vote: 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO') => {
         if (agentInIncident && profile?.id) {
             await voteIncident(agentInIncident.id, profile.id, vote);
         }
     };
 
-    const handleUnmask = async (targetId: string) => {
-        if (profile?.id) {
-            const success = await unmaskAgent(targetId, profile.id);
+    const handleUnmask = (targetId: string) => {
+        setTargetIdToUnmask(targetId);
+        setShowUnmaskModal(true);
+    };
+
+    const handleConfirmUnmask = async () => {
+        if (profile?.id && targetIdToUnmask) {
+            await unmaskAgent(targetIdToUnmask, profile.id);
+            setShowUnmaskModal(false);
+            setTargetIdToUnmask(null);
         }
     };
+
+    const handleRespondToUnmask = async (isCorrect: boolean) => {
+        if (agentInIncident && profile?.id) {
+            await respondToUnmask(agentInIncident.id, isCorrect);
+        }
+    };
+
+    const handleResolveUnmaskVote = async (wasActuallyCorrect: boolean) => {
+        if (agentInIncident && profile?.id) {
+            await resolveUnmaskVote(agentInIncident.id, wasActuallyCorrect);
+        }
+    };
+
+    const startRoulette = (sharedWinnerId: string) => {
+        if (!agentInIncident || isRouletteActive) return;
+        setIsRouletteActive(true);
+        const unmaskerId = agentInIncident.incident?.unmaskerId;
+
+        // On laisse l'animation tourner 4 secondes
+        setTimeout(() => {
+            setRouletteWinner(sharedWinnerId);
+            // On attend 2s sur le vainqueur avant de valider
+            setTimeout(() => {
+                // SEUL LE GAGNANT ou L'ACCUSATEUR (si gagnant) résout pour éviter les doublons
+                // Ici on décide que c'est celui qui a initié (l'unmasker) qui finit le job si c'est lui qui a déclenché
+                // Ou plus simplement: celui qui est localement l'unmasker s'occupe de la résolution Firebase
+                const isUnmasker = profile?.id === unmaskerId;
+                if (isUnmasker) {
+                    handleResolveUnmaskVote(sharedWinnerId === unmaskerId);
+                }
+                setIsRouletteActive(false);
+                setRouletteWinner(null);
+            }, 2000);
+        }, 4000);
+    };
+
+    // Auto-trigger roulette logic
+    useEffect(() => {
+        if (incidentType === 'UNMASK_VOTE' && (isUnmaskTie || maxVoters <= 0) && agentInIncident) {
+            const sharedWinner = agentInIncident.incident?.rouletteWinnerId;
+            const isUnmasker = profile?.id === agentInIncident.incident?.unmaskerId;
+            const incidentId = `${agentInIncident.id}-${agentInIncident.incident?.reportedAt}`;
+
+            if (sharedWinner) {
+                // Si on n'a pas encore traité cet incident précis
+                if (processedRouletteIncident !== incidentId && !isRouletteActive && !rouletteWinner) {
+                    setProcessedRouletteIncident(incidentId);
+                    startRoulette(sharedWinner);
+                }
+            } else if (isUnmasker) {
+                // Personne n'a encore choisi, l'accusateur s'en occupe
+                triggerRouletteTirage(agentInIncident.id, agentInIncident.incident!.unmaskerId!);
+            }
+        } else if (!agentInIncident) {
+            // Reset quand il n'y a plus d'incident
+            setProcessedRouletteIncident(null);
+        }
+    }, [incidentType, isUnmaskTie, maxVoters, isRouletteActive, rouletteWinner, agentInIncident?.incident?.rouletteWinnerId, processedRouletteIncident]);
 
     return (
         <View style={styles.container}>
@@ -205,106 +345,209 @@ export default function ActiveMissionScreen() {
                     >
                         <View style={{ flex: 1 }}>
                             <View style={styles.incidentHeader}>
-                                <Ionicons name="warning" size={16} color="#FF6B6B" />
-                                <ThemedText type="code" style={styles.incidentTitle}>ANOMALIE SIGNALÉE</ThemedText>
-
-                                <View style={styles.voterTally}>
-                                    <ThemedText type="code" style={styles.voterTallyText}>
-                                        {Object.keys(incidentVotes).length}/{agents.length - 1} VOTES
-                                    </ThemedText>
-                                </View>
-                            </View>
-
-                            <ThemedText style={styles.incidentText}>
-                                {agentInIncident.id === profile?.id
-                                    ? "Majorité requise pour valider votre demande :"
-                                    : `${agentInIncident.name} (${agentInIncident.score || 0} pts) prétend que cet objectif est irréalisable :`}
-                            </ThemedText>
-
-                            <View style={styles.reportedChallengeBox}>
-                                <ThemedText style={styles.reportedChallengeText}>
-                                    "{agentInIncident.challenge?.text}"
+                                <Ionicons
+                                    name={incidentType === 'IMPOSSIBLE' ? "warning" : "finger-print"}
+                                    size={16}
+                                    color="#FF6B6B"
+                                />
+                                <ThemedText type="code" style={styles.incidentTitle}>
+                                    {incidentType === 'IMPOSSIBLE' ? 'ANOMALIE SIGNALÉE' : 'DÉMASQUAGE EN COURS'}
                                 </ThemedText>
-                            </View>
 
-                            {/* Section de Vote Commune (Visible par tous les membres de la session) */}
-                            <View style={styles.universalVoteSection}>
-                                <View style={styles.voteBreakdown}>
-                                    <View style={[styles.voteColumn, countPossible > countFeasible && styles.voteColumnWinning]}>
-                                        <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>INFAISABLE ({countPossible})</ThemedText>
-                                        {agents.filter(a => incidentVotes[a.id] === 'IMPOSSIBLE').map(a => (
-                                            <ThemedText key={a.id} style={styles.voterName}>
-                                                • {a.name} <ThemedText style={styles.voterScore}>({a.score || 0})</ThemedText>
-                                            </ThemedText>
-                                        ))}
-                                        {countPossible === 0 && <ThemedText style={styles.voterNameEmpty}>Aucun vote</ThemedText>}
-                                    </View>
-                                    <View style={styles.breakdownDivider} />
-                                    <View style={[styles.voteColumn, countFeasible > countPossible && styles.voteColumnWinning]}>
-                                        <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>RÉALISABLE ({countFeasible})</ThemedText>
-                                        {agents.filter(a => incidentVotes[a.id] === 'FEASIBLE').map(a => (
-                                            <ThemedText key={a.id} style={styles.voterName}>
-                                                • {a.name} <ThemedText style={styles.voterScore}>({a.score || 0})</ThemedText>
-                                            </ThemedText>
-                                        ))}
-                                        {countFeasible === 0 && <ThemedText style={styles.voterNameEmpty}>Aucun vote</ThemedText>}
-                                    </View>
-                                </View>
-
-                                {agentInIncident.id !== profile?.id ? (
-                                    <View style={styles.voteActions}>
-                                        <TouchableOpacity
-                                            onPress={() => handleVote('IMPOSSIBLE')}
-                                            style={[styles.voteBtn, myVote === 'IMPOSSIBLE' && styles.voteBtnSelectedImpossible]}
-                                        >
-                                            <Ionicons name="thumbs-up" size={14} color={myVote === 'IMPOSSIBLE' ? "#FFF" : "#FF6B6B"} />
-                                            <ThemedText type="code" style={[styles.voteBtnText, myVote === 'IMPOSSIBLE' && { color: '#FFF' }]}>
-                                                INFAISABLE
-                                            </ThemedText>
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            onPress={() => handleVote('FEASIBLE')}
-                                            style={[styles.voteBtn, myVote === 'FEASIBLE' && styles.voteBtnSelectedFeasible]}
-                                        >
-                                            <Ionicons name="thumbs-down" size={14} color={myVote === 'FEASIBLE' ? "#FFF" : "#4CAF50"} />
-                                            <ThemedText type="code" style={[styles.voteBtnText, myVote === 'FEASIBLE' && { color: '#FFF' }]}>
-                                                RÉALISABLE
-                                            </ThemedText>
-                                        </TouchableOpacity>
-                                    </View>
-                                ) : (
-                                    <View style={styles.subjectActionsSection}>
-                                        {countPossible !== countFeasible && (countPossible > 0 || countFeasible > 0) ? (
-                                            <TouchableOpacity
-                                                onPress={() => resolveImpossibleChallenge(agentInIncident.id, countPossible > countFeasible)}
-                                                style={[
-                                                    styles.applyMajorityBtn,
-                                                    { backgroundColor: countPossible > countFeasible ? '#4CAF50' : '#FF6B6B' },
-                                                    { shadowColor: countPossible > countFeasible ? '#4CAF50' : '#FF6B6B' }
-                                                ]}
-                                            >
-                                                <Ionicons name={countPossible > countFeasible ? "shield-checkmark" : "warning"} size={18} color="#FFF" />
-                                                <View>
-                                                    <ThemedText type="code" style={styles.applyMajorityText}>
-                                                        {countPossible > countFeasible ? "VALIDER L'IMPOSSIBILITÉ" : "ACCEPTER L'ÉCHEC"}
-                                                    </ThemedText>
-                                                    <ThemedText style={styles.applyMajoritySub}>
-                                                        Verdict : {countPossible > countFeasible ? "Accordé (0 pts perdu)" : "Refusé (-10 pts)"}
-                                                    </ThemedText>
-                                                </View>
-                                            </TouchableOpacity>
-                                        ) : (
-                                            <View style={styles.subjectWaitBoxCompact}>
-                                                <ThemedText style={styles.voterName}>Attente d'une majorité de votes...</ThemedText>
-                                            </View>
-                                        )}
+                                {incidentType !== 'UNMASK_PROMPT' && (
+                                    <View style={styles.voterTally}>
+                                        <ThemedText type="code" style={styles.voterTallyText}>
+                                            {Object.keys(incidentVotes).length}/{agents.length - (incidentType === 'UNMASK_VOTE' ? 2 : 1)} VOTES
+                                        </ThemedText>
                                     </View>
                                 )}
                             </View>
+
+                            {/* Cas MISSION IMPOSSIBLE */}
+                            {incidentType === 'IMPOSSIBLE' && (
+                                <>
+                                    <ThemedText style={styles.incidentText}>
+                                        {agentInIncident.id === profile?.id
+                                            ? "Majorité requise pour valider votre demande :"
+                                            : `${agentInIncident.name} (${agentInIncident.score || 0} pts) prétend que cet objectif est irréalisable :`}
+                                    </ThemedText>
+
+                                    <View style={styles.reportedChallengeBox}>
+                                        <ThemedText style={styles.reportedChallengeText}>
+                                            "{agentInIncident.challenge?.text}"
+                                        </ThemedText>
+                                    </View>
+
+                                    <View style={styles.universalVoteSection}>
+                                        <View style={styles.voteBreakdown}>
+                                            <View style={[styles.voteColumn, countPossible > countFeasible && styles.voteColumnWinning]}>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>INFAISABLE ({countPossible})</ThemedText>
+                                                {agents.filter(a => incidentVotes[a.id] === 'IMPOSSIBLE').map(a => (
+                                                    <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
+                                                ))}
+                                            </View>
+                                            <View style={styles.breakdownDivider} />
+                                            <View style={[styles.voteColumn, countFeasible > countPossible && styles.voteColumnWinning]}>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>RÉALISABLE ({countFeasible})</ThemedText>
+                                                {agents.filter(a => incidentVotes[a.id] === 'FEASIBLE').map(a => (
+                                                    <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
+                                                ))}
+                                            </View>
+                                        </View>
+
+                                        {agentInIncident.id !== profile?.id ? (
+                                            <View style={styles.voteActions}>
+                                                <TouchableOpacity
+                                                    onPress={() => handleVote('IMPOSSIBLE')}
+                                                    style={[styles.voteBtn, myVote === 'IMPOSSIBLE' && styles.voteBtnSelectedImpossible]}
+                                                >
+                                                    <Ionicons name="thumbs-up" size={14} color={myVote === 'IMPOSSIBLE' ? "#FFF" : "#FF6B6B"} />
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'IMPOSSIBLE' && { color: '#FFF' }]}>INFAISABLE</ThemedText>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={() => handleVote('FEASIBLE')}
+                                                    style={[styles.voteBtn, myVote === 'FEASIBLE' && styles.voteBtnSelectedFeasible]}
+                                                >
+                                                    <Ionicons name="thumbs-down" size={14} color={myVote === 'FEASIBLE' ? "#FFF" : "#4CAF50"} />
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'FEASIBLE' && { color: '#FFF' }]}>RÉALISABLE</ThemedText>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ) : (
+                                            <View style={styles.subjectActionsSection}>
+                                                {countPossible !== countFeasible && (countPossible > 0 || countFeasible > 0) ? (
+                                                    <TouchableOpacity
+                                                        onPress={() => resolveImpossibleChallenge(agentInIncident.id, countPossible > countFeasible)}
+                                                        style={[styles.applyMajorityBtn, { backgroundColor: countPossible > countFeasible ? '#4CAF50' : '#FF6B6B' }]}
+                                                    >
+                                                        <ThemedText type="code" style={styles.applyMajorityText}>
+                                                            {countPossible > countFeasible ? "VALIDER" : "ACCEPTER L'ÉCHEC"}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <ThemedText style={styles.voterName}>Attente d'une majorité...</ThemedText>
+                                                )}
+                                            </View>
+                                        )}
+                                    </View>
+                                </>
+                            )}
+
+                            {/* Cas UNMASK_PROMPT (Le suspect doit répondre) */}
+                            {incidentType === 'UNMASK_PROMPT' && (
+                                <>
+                                    <ThemedText style={styles.incidentText}>
+                                        {agentInIncident.id === profile?.id
+                                            ? `L'Agent ${agentInIncident.incident?.unmaskerName} prétend vous avoir démasqué !`
+                                            : `L'Agent ${agentInIncident.incident?.unmaskerName} tente de démasquer ${agentInIncident.name}...`}
+                                    </ThemedText>
+
+                                    {agentInIncident.id === profile?.id ? (
+                                        <View style={styles.voteActions}>
+                                            <TouchableOpacity
+                                                onPress={() => handleRespondToUnmask(true)}
+                                                style={[styles.voteBtn, styles.voteBtnSelectedFeasible, { paddingVertical: 14 }]}
+                                            >
+                                                <ThemedText type="code" style={{ color: '#FFF' }}>{t('mission.unmask_confess')}</ThemedText>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={() => handleRespondToUnmask(false)}
+                                                style={[styles.voteBtn, styles.voteBtnSelectedImpossible, { paddingVertical: 14 }]}
+                                            >
+                                                <ThemedText type="code" style={{ color: '#FFF' }}>{t('mission.unmask_deny')}</ThemedText>
+                                            </TouchableOpacity>
+                                        </View>
+                                    ) : (
+                                        <View style={styles.subjectWaitBoxCompact}>
+                                            <ThemedText style={styles.voterName}>En attente de la réponse de {agentInIncident.name}...</ThemedText>
+                                        </View>
+                                    )}
+                                </>
+                            )}
+
+                            {/* Cas UNMASK_VOTE (L'assemblée juge car le suspect a nié) */}
+                            {incidentType === 'UNMASK_VOTE' && (
+                                <>
+                                    <ThemedText style={styles.incidentText}>
+                                        {agentInIncident.name} nie avoir été démasqué. L'assemblée doit juger.
+                                        Voici la mission que {agentInIncident.name} devait accomplir :
+                                    </ThemedText>
+
+                                    <View style={[styles.reportedChallengeBox, { borderColor: '#A29BFE' }]}>
+                                        <ThemedText style={[styles.reportedChallengeText, { color: '#A29BFE' }]}>
+                                            "{agentInIncident.challenge?.text}"
+                                        </ThemedText>
+                                    </View>
+
+                                    <ThemedText style={styles.incidentText}>
+                                        {agentInIncident.incident?.unmaskerName} avait-il raison ?
+                                    </ThemedText>
+
+                                    <View style={styles.universalVoteSection}>
+                                        <View style={styles.voteBreakdown}>
+                                            <View style={[styles.voteColumn, countYes > countNo && styles.voteColumnWinning]}>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>OUI ({countYes})</ThemedText>
+                                                {agents.filter(a => incidentVotes[a.id] === 'YES').map(a => (
+                                                    <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
+                                                ))}
+                                            </View>
+                                            <View style={[styles.voteColumn, countNo > countYes && styles.voteColumnWinning]}>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>NON ({countNo})</ThemedText>
+                                                {agents.filter(a => incidentVotes[a.id] === 'NO').map(a => (
+                                                    <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
+                                                ))}
+                                            </View>
+                                        </View>
+
+                                        {profile?.id !== agentInIncident.id && profile?.id !== agentInIncident.incident?.unmaskerId ? (
+                                            <View style={styles.voteActions}>
+                                                <TouchableOpacity
+                                                    onPress={() => handleVote('YES')}
+                                                    style={[styles.voteBtn, myVote === 'YES' && styles.voteBtnSelectedFeasible]}
+                                                >
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'YES' && { color: '#FFF' }]}>IL A RAISON</ThemedText>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={() => handleVote('NO')}
+                                                    style={[styles.voteBtn, myVote === 'NO' && styles.voteBtnSelectedImpossible]}
+                                                >
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'NO' && { color: '#FFF' }]}>IL SE TROMPE</ThemedText>
+                                                </TouchableOpacity>
+                                            </View>
+                                        ) : (
+                                            <View style={styles.subjectActionsSection}>
+                                                {isRouletteActive ? (
+                                                    <View style={[styles.applyMajorityBtn, { backgroundColor: 'rgba(255, 107, 107, 0.2)', borderColor: '#FF6B6B', borderWidth: 1 }]}>
+                                                        <Ionicons name="sync" size={18} color="#FF6B6B" />
+                                                        <View>
+                                                            <ThemedText type="code" style={[styles.applyMajorityText, { color: '#FF6B6B' }]}>ARBITRAGE EN COURS...</ThemedText>
+                                                            <ThemedText style={styles.applyMajoritySub}>Le système choisit un vainqueur de manière aléatoire.</ThemedText>
+                                                        </View>
+                                                    </View>
+                                                ) : (countYes !== countNo && (countYes > 0 || countNo > 0)) ? (
+                                                    <TouchableOpacity
+                                                        onPress={() => handleResolveUnmaskVote(countYes > countNo)}
+                                                        style={[styles.applyMajorityBtn, { backgroundColor: countYes > countNo ? '#4CAF50' : '#FF6B6B' }]}
+                                                    >
+                                                        <ThemedText type="code" style={styles.applyMajorityText}>
+                                                            {countYes > countNo ? "VALIDER LE DÉMASQUAGE" : "ACCUSER À TORT"}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+                                                ) : (
+                                                    <View style={styles.subjectWaitBoxCompact}>
+                                                        <ThemedText style={styles.voterName}>
+                                                            {maxVoters <= 0 ? "Initialisation de l'arbitrage..." : "Attente d'une majorité de votes..."}
+                                                        </ThemedText>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        )}
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </Animated.View>
                 )}
+
 
                 {/* Tactical Challenge Card */}
                 <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.cardContainer}>
@@ -509,7 +752,7 @@ export default function ActiveMissionScreen() {
                                     ) : agent.incident ? (
                                         <Ionicons name="hammer" size={16} color="#FF6B6B" />
                                     ) : (
-                                        <ThemedText type="code" style={{ fontSize: 10 }}>{agent.name.substring(0, 2)}</ThemedText>
+                                        <ThemedText type="code" style={{ fontSize: 10 }}>{agent.name?.substring(0, 2) || '??'}</ThemedText>
                                     )}
                                 </View>
                                 <View style={{ flex: 1 }}>
@@ -577,6 +820,42 @@ export default function ActiveMissionScreen() {
                 </TouchableOpacity>
             </ScrollView>
 
+            {/* Roulette de Tirage au Sort (Modal UI) - FIXED OVERLAY */}
+            {isRouletteActive && (
+                <Animated.View entering={FadeIn} style={[styles.rouletteOverlay, { backgroundColor: 'rgba(0,0,0,0.95)' }]}>
+                    <View style={styles.rouletteContainer}>
+                        <View style={styles.rouletteHeader}>
+                            <Ionicons name="flash" size={30} color="#FF6B6B" />
+                            <ThemedText type="futuristic" style={styles.rouletteTitle}>ARBITRAGE ALÉATOIRE</ThemedText>
+                            <ThemedText style={styles.rouletteSub}>Égalité parfaite... Le QG tranche !</ThemedText>
+                        </View>
+
+                        <View style={styles.rouletteBox}>
+                            <View style={styles.rouletteMarker} />
+                            <View style={{ width: '100%', alignItems: 'center' }}>
+                                <View style={{ width: '100%' }}>
+                                    <RouletteStrip
+                                        names={[
+                                            agentInIncident?.incident?.unmaskerName || 'ACCCUSATEUR',
+                                            agentInIncident?.name || 'SUSPECT'
+                                        ]}
+                                        winnerName={rouletteWinner ? (rouletteWinner === agentInIncident?.id ? agentInIncident.name : agentInIncident?.incident?.unmaskerName || '') : null}
+                                    />
+                                </View>
+                            </View>
+                        </View>
+
+                        {rouletteWinner && (
+                            <Animated.View entering={FadeInUp} style={styles.winnerTag}>
+                                <ThemedText type="futuristic" style={styles.winnerName}>
+                                    VERDICT : {agents.find(a => a.id === rouletteWinner)?.name} 
+                                </ThemedText>
+                            </Animated.View>
+                        )}
+                    </View>
+                </Animated.View>
+            )}
+
             {/* Flux Tactique des Événements (Bottom Left Toast) */}
             <View style={[styles.eventFeed, { bottom: insets.bottom + 20 }]} pointerEvents="none">
                 {events.filter(e => visibleEvents.includes(e.id)).map((event, idx) => (
@@ -604,12 +883,12 @@ export default function ActiveMissionScreen() {
                                         event.type === 'UNMASKED' ? 'DÉMASQUAGE' :
                                             event.type === 'BLUFF_SUCCESS' ? 'BLUFF RÉUSSI' : 'ERREUR TACTIQUE'}
                             </ThemedText>
-                            <ThemedText style={styles.eventText} numberOfLines={1}>
+                            <ThemedText style={styles.eventText} numberOfLines={2}>
                                 {event.type === 'SUSPECT' ? `${event.agentName} sous surveillance...` :
                                     event.type === 'SUCCESS' ? `${event.agentName} s'est infiltré (+${event.points})` :
-                                        event.type === 'UNMASKED' ? `${event.agentName} intercepté par ${event.targetName}` :
-                                            event.type === 'BLUFF_SUCCESS' ? `${event.agentName} a piégé ${event.targetName}` :
-                                                `${event.agentName} a fait une fausse accusation`}
+                                        event.type === 'UNMASKED' ? `${event.targetName} a démasqué ${event.agentName} ! Mission : ${event.missionText}` :
+                                            event.type === 'BLUFF_SUCCESS' ? `${event.agentName} a piégé ${event.targetName} (+${event.points})` :
+                                                `${event.agentName} : accusation erronée sur ${event.targetName} (${event.points})`}
                             </ThemedText>
                         </View>
                     </Animated.View>
@@ -635,6 +914,16 @@ export default function ActiveMissionScreen() {
                 cancelLabel="ANNULER"
                 onConfirm={handleImpossible}
                 onCancel={() => setShowImpossibleModal(false)}
+            />
+
+            <ConfirmationModal
+                visible={showUnmaskModal}
+                title={t('mission.unmask_popup_title')}
+                message={t('mission.unmask_popup_msg')}
+                confirmLabel={t('mission.unmask_popup_btn')}
+                cancelLabel={t('common.cancel')}
+                onConfirm={handleConfirmUnmask}
+                onCancel={() => setShowUnmaskModal(false)}
             />
         </View>
     );
@@ -1439,6 +1728,96 @@ const styles = StyleSheet.create({
     pendingBadgeBluff: {
         backgroundColor: 'rgba(162, 155, 254, 0.1)',
         borderColor: 'rgba(162, 155, 254, 0.3)',
+    },
+    rouletteOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: 99999,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 100,
+    },
+    rouletteContainer: {
+        width: '100%',
+        alignItems: 'center',
+        padding: 30,
+        marginTop: -50,
+    },
+    rouletteHeader: {
+        alignItems: 'center',
+        marginBottom: 40,
+    },
+    rouletteTitle: {
+        fontSize: 18,
+        color: '#FF6B6B',
+        marginTop: 15,
+        letterSpacing: 4,
+        textAlign: 'center',
+        textShadowColor: 'rgba(255, 107, 107, 0.5)',
+        textShadowRadius: 10,
+    },
+    rouletteSub: {
+        fontSize: 10,
+        color: 'rgba(255,255,255,0.6)',
+        marginTop: 8,
+        letterSpacing: 2,
+        textTransform: 'uppercase',
+        textAlign: 'center',
+    },
+    rouletteBox: {
+        width: '95%',
+        height: 140,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderWidth: 2,
+        borderColor: 'rgba(255, 107, 107, 0.3)',
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        shadowColor: '#FF6B6B',
+        shadowOpacity: 0.2,
+        shadowRadius: 20,
+    },
+    rouletteMarker: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 35,
+        height: 70,
+        borderTopWidth: 2,
+        borderBottomWidth: 2,
+        borderColor: '#FF6B6B',
+        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+        zIndex: 1,
+    },
+    rouletteNames: {
+        width: '100%',
+        zIndex: 2,
+    },
+    winnerTag: {
+        marginTop: 50,
+        paddingHorizontal: 30,
+        paddingVertical: 15,
+        backgroundColor: 'rgba(255, 107, 107, 0.2)',
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#FF6B6B',
+        shadowColor: '#FF6B6B',
+        shadowOpacity: 0.5,
+        shadowRadius: 15,
+    },
+    winnerName: {
+        fontSize: 14,
+        color: '#FFF',
+        letterSpacing: 2,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     pendingBadgeText: {
         fontSize: 11,

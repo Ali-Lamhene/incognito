@@ -77,7 +77,12 @@
             "SOCIAL": "SOCIAL",
             "ABSURD": "ABSURDE",
             "RISKY": "RISQUÉ"
-        }
+        },
+        "unmask_confess": "AVOUER",
+        "unmask_deny": "NIER",
+        "unmask_popup_title": "TENTATIVE DE DÉMASQUAGE",
+        "unmask_popup_msg": "Énoncez le secret que vous pensez avoir découvert à haute voix avant le jugement final.",
+        "unmask_popup_btn": "SIGNALER LA TENTATIVE"
     },
     "splash": {
         "init": "INITIALISATION SYSTÈME...",

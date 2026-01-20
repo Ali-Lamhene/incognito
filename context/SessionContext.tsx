@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { child, get, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
+import { child, get, increment, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
@@ -20,6 +20,7 @@ type MissionEvent = {
     timestamp: number;
     targetName?: string;
     points?: number;
+    missionText?: string;
 };
 
 type Agent = {
@@ -36,9 +37,12 @@ type Agent = {
     completedAt?: number;
     score?: number;
     incident?: {
-        type: 'IMPOSSIBLE';
+        type: 'IMPOSSIBLE' | 'UNMASK_PROMPT' | 'UNMASK_VOTE';
         reportedAt: number;
-        votes?: Record<string, 'FEASIBLE' | 'IMPOSSIBLE'>;
+        unmaskerId?: string;
+        unmaskerName?: string;
+        votes?: Record<string, 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO'>;
+        rouletteWinnerId?: string;
     };
     pendingValidation?: {
         challengeId?: string;
@@ -63,10 +67,13 @@ type SessionContextType = {
     triggerBluff: (agentId: string) => Promise<void>;
     finalizeChallengePoints: (agentId: string) => Promise<void>;
     reportImpossibleChallenge: (agentId: string) => Promise<void>;
-    voteIncident: (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE') => Promise<void>;
+    voteIncident: (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO') => Promise<void>;
     resolveImpossibleChallenge: (agentId: string, wasActuallyImpossible: boolean) => Promise<void>;
     unmaskAgent: (targetId: string, validatorId: string) => Promise<boolean>;
+    respondToUnmask: (targetId: string, isCorrect: boolean) => Promise<void>;
+    resolveUnmaskVote: (targetId: string, wasActuallyCorrect: boolean) => Promise<void>;
     pushEvent: (event: Omit<MissionEvent, 'id' | 'timestamp'>) => Promise<void>;
+    triggerRouletteTirage: (targetId: string, unmaskerId: string) => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -316,7 +323,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             const updates: any = {};
 
             if (!agentData.pendingValidation.isBluff) {
-                updates['score'] = currentScore + 10;
+                updates['score'] = increment(10);
                 await pushEvent({
                     type: 'SUCCESS',
                     agentId,
@@ -341,7 +348,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
-    const voteIncident = async (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE') => {
+    const voteIncident = async (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO') => {
         if (!session?.code) return;
         await update(ref(db, `missions/${session.code}/agents/${agentId}/incident/votes`), {
             [voterId]: vote
@@ -366,8 +373,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         updates[`missions/${session.code}/agents/${agentId}/incident`] = null;
 
         if (!wasActuallyImpossible) {
-            const currentScore = missionData.agents?.[agentId]?.score || 0;
-            updates[`missions/${session.code}/agents/${agentId}/score`] = currentScore - 10;
+            updates[`missions/${session.code}/agents/${agentId}/score`] = increment(-10);
         }
 
         await update(ref(db), updates);
@@ -384,47 +390,115 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         if (!target || !validator) return false;
 
+        // On place la cible en état de PROMPT
+        await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
+            type: 'UNMASK_PROMPT',
+            unmaskerId: validatorId,
+            unmaskerName: validator.name,
+            reportedAt: Date.now()
+        });
+
+        // Event initial
+        await pushEvent({
+            type: 'SUSPECT',
+            agentId: validatorId,
+            agentName: `${validator.name} tente de démasquer ${target.name} !`
+        });
+
+        return true;
+    };
+
+    const respondToUnmask = async (targetId: string, isCorrect: boolean) => {
+        if (!session?.code) return;
+
+        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
+        const missionData = missionSnapshot.val();
+        const target = missionData.agents?.[targetId];
+        const unmaskerId = target.incident?.unmaskerId;
+        const unmasker = missionData.agents?.[unmaskerId];
+
+        if (isCorrect) {
+            // L'agent avoue
+            const updates: any = {};
+            const targetScore = target.score || 0;
+            const unmaskerScore = unmasker?.score || 0;
+
+            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
+            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
+            updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
+
+            await update(ref(db), updates);
+
+            await pushEvent({
+                type: 'UNMASKED',
+                agentId: targetId,
+                agentName: target.name,
+                targetName: unmasker?.name || 'Unmasker',
+                missionText: target.challenge?.text,
+                points: 10
+            });
+        } else {
+            // L'agent nie - on passe au vote mais on GARDE les infos de l'unmasker
+            await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
+                type: 'UNMASK_VOTE',
+                votes: {}
+            });
+        }
+    };
+
+    const triggerRouletteTirage = async (targetId: string, unmaskerId: string) => {
+        if (!session?.code) return;
+        const winnerId = Math.random() > 0.5 ? unmaskerId : targetId;
+        await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
+            rouletteWinnerId: winnerId
+        });
+    };
+
+    const resolveUnmaskVote = async (targetId: string, wasActuallyCorrect: boolean) => {
+        if (!session?.code) return;
+
+        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
+        const missionData = missionSnapshot.val();
+        const target = missionData.agents?.[targetId];
+        const unmaskerId = target?.incident?.unmaskerId;
+
+        if (!unmaskerId) return; // Sécurité : l'incident a déjà été nettoyé ou n'existe pas
+
+        const unmasker = missionData.agents?.[unmaskerId];
+
         const updates: any = {};
         const targetScore = target.score || 0;
-        const validatorScore = validator.score || 0;
+        const unmaskerScore = unmasker?.score || 0;
 
-        if (target.pendingValidation) {
-            if (!target.pendingValidation.isBluff) {
-                updates[`missions/${session.code}/agents/${targetId}/score`] = targetScore - 10;
-                updates[`missions/${session.code}/agents/${validatorId}/score`] = validatorScore + 10;
-                await pushEvent({
-                    type: 'UNMASKED',
-                    agentId: targetId,
-                    agentName: target.name,
-                    targetName: validator.name,
-                    points: 10
-                });
-            } else {
-                updates[`missions/${session.code}/agents/${validatorId}/score`] = validatorScore - 5;
-                updates[`missions/${session.code}/agents/${targetId}/score`] = targetScore + 5;
-                await pushEvent({
-                    type: 'BLUFF_SUCCESS',
-                    agentId: targetId,
-                    agentName: target.name,
-                    targetName: validator.name,
-                    points: 5
-                });
-            }
-            updates[`missions/${session.code}/agents/${targetId}/pendingValidation`] = null;
-            await update(ref(db), updates);
-            return true;
+        if (wasActuallyCorrect) {
+            // Le vote a donné raison à l'accusateur
+            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
+            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
+
+            await pushEvent({
+                type: 'UNMASKED',
+                agentId: targetId,
+                agentName: target.name,
+                targetName: unmasker?.name || 'Unmasker',
+                missionText: target.challenge?.text,
+                points: 10
+            });
+        } else {
+            // Le vote a donné raison à l'accusé
+            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(10); // Bonus pour avoir été faussement accusé
+            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(-10); // Malus pour fausse accusation
+
+            await pushEvent({
+                type: 'FAILED_UNMASK',
+                agentId: unmaskerId,
+                agentName: unmasker?.name || 'Unmasker',
+                targetName: target.name,
+                points: -10
+            });
         }
 
-        updates[`missions/${session.code}/agents/${validatorId}/score`] = validatorScore - 5;
+        updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
         await update(ref(db), updates);
-        await pushEvent({
-            type: 'FAILED_UNMASK',
-            agentId: validatorId,
-            agentName: validator.name,
-            targetName: target.name,
-            points: -5
-        });
-        return false;
     };
 
     return (
@@ -432,7 +506,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             session, isInitialized, agents, events, status,
             createSession, joinSession, clearSession,
             startMission, checkSessionExists, completeChallenge, triggerBluff, finalizeChallengePoints,
-            reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent, pushEvent
+            reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent,
+            respondToUnmask, resolveUnmaskVote, pushEvent, triggerRouletteTirage
         }}>
             {children}
         </SessionContext.Provider>
