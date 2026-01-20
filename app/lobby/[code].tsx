@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Clipboard, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Animated, { Easing, FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,10 +24,18 @@ export default function LobbyScreen() {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { session, clearSession, joinSession, isInitialized, agents: syncedAgents } = useSession();
+    const { session, clearSession, joinSession, isInitialized, agents: syncedAgents, status, startMission } = useSession();
     const { t } = useTranslation();
     const { profile } = useProfileStore();
     const [isExiting, setIsExiting] = useState(false);
+    const [showStartModal, setShowStartModal] = useState(false);
+
+    // Redirection quand la mission commence
+    useEffect(() => {
+        if (status === 'ACTIVE') {
+            router.replace('/mission/active');
+        }
+    }, [status]);
 
     // Enregistrement de l'agent sur Firebase
     useEffect(() => {
@@ -46,9 +55,12 @@ export default function LobbyScreen() {
         onDisconnect(agentRef).remove();
 
         return () => {
-            // Optionnel: ne pas supprimer manuellement ici si on veut que l'agent reste 
-            // affiché un peu après un refresh, mais pour l'instant on nettoie.
-            remove(agentRef);
+            // On ne supprime l'agent que s'il a explicitement quitté (bouton abandonner)
+            // ou si on est encore dans le lobby et qu'il change d'écran.
+            // Si la mission est ACTIVE, on garde l'agent pour qu'il puisse voir son objectif.
+            if (isExiting) {
+                remove(agentRef);
+            }
         };
     }, [code, profile?.id, isInitialized, isExiting]);
 
@@ -115,9 +127,18 @@ export default function LobbyScreen() {
         router.replace('/');
     };
 
-    const copyToClipboard = () => {
+    const handleDeploy = () => {
+        setShowStartModal(true);
+    };
+
+    const confirmStart = async () => {
+        setShowStartModal(false);
+        await startMission();
+    };
+
+    const copyToClipboard = async () => {
         if (typeof code === 'string') {
-            Clipboard.setString(code);
+            await Clipboard.setStringAsync(code);
             // Could add a toast here
         }
     };
@@ -255,13 +276,21 @@ export default function LobbyScreen() {
                 </Animated.View>
 
                 {/* Footer Action */}
-                <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
-                    <MainButton
-                        title={t('lobby.btn_deploy')}
-                        onPress={() => console.log('Start Game')}
-                        style={styles.startButton}
-                    />
-                </Animated.View>
+                {isHost && (
+                    <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
+                        <MainButton
+                            title={agents.length < 2 ? "ATTENTE D'AGENTS" : t('lobby.btn_deploy')}
+                            onPress={handleDeploy}
+                            disabled={agents.length < 2}
+                            style={styles.startButton}
+                        />
+                        {agents.length < 2 && (
+                            <ThemedText type="code" style={styles.aloneHint}>
+                                RECRUTEMENT REQUIS : AU MOINS UN AUTRE AGENT DOIT REJOINDRE LE SALON.
+                            </ThemedText>
+                        )}
+                    </Animated.View>
+                )}
 
                 {/* Agents List */}
                 <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.agentsSection}>
@@ -302,6 +331,16 @@ export default function LobbyScreen() {
                 cancelLabel={t('common.cancel')}
                 onConfirm={confirmLeave}
                 onCancel={() => setShowLeaveModal(false)}
+            />
+
+            <ConfirmationModal
+                visible={showStartModal}
+                title="Lancer l'opération ?"
+                message="Tous les agents sont-ils prêts pour l'infiltration ?"
+                confirmLabel="DÉPLOYER"
+                cancelLabel={t('common.cancel')}
+                onConfirm={confirmStart}
+                onCancel={() => setShowStartModal(false)}
             />
         </View>
     );
@@ -453,5 +492,12 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: 'rgba(255, 107, 107, 0.2)',
+    },
+    aloneHint: {
+        fontSize: 8,
+        color: '#FF6B6B',
+        textAlign: 'center',
+        opacity: 0.8,
+        letterSpacing: 1,
     }
 });

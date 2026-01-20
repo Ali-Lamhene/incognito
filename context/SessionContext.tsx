@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { child, get, onValue, ref, remove, serverTimestamp, set } from 'firebase/database';
+import { child, get, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
 
 type MissionSession = {
@@ -16,16 +17,34 @@ type Agent = {
     avatar: string;
     status: 'READY' | 'WAITING';
     lastSeen: any;
+    challenge?: {
+        text: string;
+        id: string;
+    };
+    completed?: boolean;
+    completedAt?: number;
+    score?: number;
+    incident?: {
+        type: 'IMPOSSIBLE';
+        reportedAt: number;
+        votes?: Record<string, 'FEASIBLE' | 'IMPOSSIBLE'>;
+    };
 };
 
 type SessionContextType = {
     session: MissionSession | null;
     isInitialized: boolean;
     agents: Agent[];
+    status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
     createSession: (code: string, threatLevel: string) => Promise<void>;
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
+    startMission: () => Promise<void>;
     checkSessionExists: (code: string) => Promise<boolean>;
+    completeChallenge: (agentId: string) => Promise<void>;
+    reportImpossibleChallenge: (agentId: string) => Promise<void>;
+    voteIncident: (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE') => Promise<void>;
+    resolveImpossibleChallenge: (agentId: string, wasActuallyImpossible: boolean) => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -34,29 +53,42 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const [session, setSession] = useState<MissionSession | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
     const [agents, setAgents] = useState<Agent[]>([]);
+    const [status, setStatus] = useState<'LOBBY' | 'ACTIVE' | 'FINISHED'>('LOBBY');
 
     useEffect(() => {
         loadSession();
     }, []);
 
-    // Synchronisation des agents quand une session est active
+    // Synchronisation des agents et du statut quand une session est active
     useEffect(() => {
         if (!session?.code) {
             setAgents([]);
+            setStatus('LOBBY');
             return;
         }
 
-        const agentsRef = ref(db, `missions/${session.code}/agents`);
-        const unsubscribe = onValue(agentsRef, (snapshot) => {
+        const missionRef = ref(db, `missions/${session.code}`);
+        const unsubscribe = onValue(missionRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                const agentsList: Agent[] = Object.entries(data).map(([id, val]: [string, any]) => ({
-                    id,
-                    ...val
-                }));
-                setAgents(agentsList);
+                // Sync agents
+                if (data.agents) {
+                    const agentsList: Agent[] = Object.entries(data.agents).map(([id, val]: [string, any]) => ({
+                        id,
+                        ...val
+                    }));
+                    setAgents(agentsList);
+                } else {
+                    setAgents([]);
+                }
+
+                // Sync status
+                if (data.status) {
+                    setStatus(data.status);
+                }
             } else {
                 setAgents([]);
+                setStatus('LOBBY');
             }
         });
 
@@ -128,6 +160,42 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         return true;
     };
 
+    const startMission = async () => {
+        if (!session || session.role !== 'HOST') return;
+
+        // 1. Récupérer la liste la plus à jour des agents directement sur Firebase
+        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
+        const missionData = missionSnapshot.val();
+
+        if (!missionData || !missionData.agents) {
+            console.warn("No agents found to start mission");
+            return;
+        }
+
+        const currentAgents = Object.entries(missionData.agents).map(([id, val]: [string, any]) => ({
+            id,
+            ...val
+        }));
+
+        // 2. Distribuer des défis aléatoires
+        const updates: any = {};
+        const availableChallenges = [...CHALLENGES];
+
+        currentAgents.forEach(agent => {
+            if (availableChallenges.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * availableChallenges.length);
+            const challenge = availableChallenges.splice(randomIndex, 1)[0];
+
+            updates[`missions/${session.code}/agents/${agent.id}/challenge`] = challenge;
+        });
+
+        // 3. Changer le statut
+        updates[`missions/${session.code}/status`] = 'ACTIVE';
+        updates[`missions/${session.code}/startedAt`] = serverTimestamp();
+
+        await update(ref(db), updates);
+    };
+
     const clearSession = async (agentId?: string) => {
         if (!session?.code) return;
 
@@ -157,8 +225,68 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await AsyncStorage.removeItem('incognito_session');
     };
 
+    const completeChallenge = async (agentId: string) => {
+        if (!session?.code) return;
+        await update(ref(db, `missions/${session.code}/agents/${agentId}`), {
+            completed: true,
+            completedAt: serverTimestamp()
+        });
+    };
+
+    const reportImpossibleChallenge = async (agentId: string) => {
+        if (!session?.code) return;
+        await update(ref(db, `missions/${session.code}/agents/${agentId}`), {
+            incident: {
+                type: 'IMPOSSIBLE',
+                reportedAt: Date.now(),
+                votes: {}
+            }
+        });
+    };
+
+    const voteIncident = async (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE') => {
+        if (!session?.code) return;
+        await update(ref(db, `missions/${session.code}/agents/${agentId}/incident/votes`), {
+            [voterId]: vote
+        });
+    };
+
+    const resolveImpossibleChallenge = async (agentId: string, wasActuallyImpossible: boolean) => {
+        if (!session?.code) return;
+
+        // 1. Calculer le nouveau challenge
+        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
+        const missionData = missionSnapshot.val();
+
+        // Trouver les challenges déjà utilisés
+        const usedChallengeIds = Object.values(missionData.agents || {})
+            .map((a: any) => a.challenge?.id)
+            .filter(id => !!id);
+
+        const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
+        const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
+
+        // 2. Mettre à jour Firebase (nouveau challenge, reset incident, points si besoin)
+        const updates: any = {};
+        updates[`missions/${session.code}/agents/${agentId}/challenge`] = nextChallenge;
+        updates[`missions/${session.code}/agents/${agentId}/incident`] = null;
+
+        if (!wasActuallyImpossible) {
+            // L'agent perd des points (on les stocke dans la session pour l'instant)
+            const currentScore = missionData.agents?.[agentId]?.score || 0;
+            updates[`missions/${session.code}/agents/${agentId}/score`] = currentScore - 10;
+        }
+
+        await update(ref(db), updates);
+    };
+
     return (
-        <SessionContext.Provider value={{ session, isInitialized, agents, createSession, joinSession, clearSession, checkSessionExists }}>
+        <SessionContext.Provider value={{
+            session, isInitialized, agents, status,
+            createSession, joinSession, clearSession,
+            startMission, checkSessionExists, completeChallenge,
+            reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge
+        }}>
             {children}
         </SessionContext.Provider>
     );

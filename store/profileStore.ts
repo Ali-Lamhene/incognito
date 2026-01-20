@@ -31,9 +31,10 @@ export const useProfileStore = create<ProfileState>()(
             isFirstSetupDone: false,
 
             createProfile: (codename, avatar, color) => {
+                const uniqueId = `AGENT-${Math.random().toString(36).toUpperCase().substr(2, 6)}`;
                 const newProfile: AgentProfile = {
-                    id: Math.random().toString(36).substr(2, 9),
-                    codename: codename || `AGENT-${Math.floor(Math.random() * 1000)}`,
+                    id: uniqueId,
+                    codename: codename || `RECRUE-${Math.floor(1000 + Math.random() * 9000)}`,
                     avatar: avatar || 'finger-print-outline',
                     role: 'OPERATIVE',
                     themeColor: color || DEFAULT_COLORS[Math.floor(Math.random() * DEFAULT_COLORS.length)],

@@ -50,7 +50,7 @@ export default function SettingsScreen() {
                             </View>
                             <View>
                                 <ThemedText type="default" style={styles.profileName}>{profile?.codename || t('common.unknown')}</ThemedText>
-                                <ThemedText type="code" style={styles.profileId}>ID: {profile?.id.slice(0, 8).toUpperCase()}</ThemedText>
+                                <ThemedText type="code" style={styles.profileId}>CODE AGENT : {profile?.id || '---'}</ThemedText>
                             </View>
                         </View>
                     </View>

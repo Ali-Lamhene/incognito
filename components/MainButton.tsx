@@ -8,18 +8,23 @@ interface MainButtonProps {
     variant?: 'primary' | 'outline' | 'ghost';
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
+    disabled?: boolean;
 }
 
-export function MainButton({ onPress, title, variant = 'primary', style, textStyle }: MainButtonProps) {
+export function MainButton({ onPress, title, variant = 'primary', style, textStyle, disabled }: MainButtonProps) {
     const colorScheme = 'dark';
     const colors = Colors[colorScheme];
 
     const handlePress = () => {
+        if (disabled) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         onPress();
     };
 
     const getButtonStyle = () => {
+        if (disabled) {
+            return { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' };
+        }
         switch (variant) {
             case 'outline':
                 return { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.primary };
@@ -31,6 +36,9 @@ export function MainButton({ onPress, title, variant = 'primary', style, textSty
     };
 
     const getTextStyle = () => {
+        if (disabled) {
+            return { color: 'rgba(255,255,255,0.2)' };
+        }
         switch (variant) {
             case 'outline':
                 return { color: colors.primary };
@@ -43,15 +51,16 @@ export function MainButton({ onPress, title, variant = 'primary', style, textSty
 
     return (
         <TouchableOpacity
-            activeOpacity={0.8}
+            activeOpacity={disabled ? 1 : 0.8}
             onPress={handlePress}
-            style={[styles.container, style]}
+            disabled={disabled}
+            style={[styles.container, style, disabled && { opacity: 0.7 }]}
         >
             <View style={[styles.button, getButtonStyle()]}>
                 <Text style={[styles.text, getTextStyle(), textStyle]}>{title}</Text>
             </View>
             {/* Functional Corner Detail */}
-            {variant === 'primary' && (
+            {variant === 'primary' && !disabled && (
                 <View style={[styles.corner, { borderTopColor: '#FFF', borderLeftColor: '#FFF' }]} />
             )}
         </TouchableOpacity>

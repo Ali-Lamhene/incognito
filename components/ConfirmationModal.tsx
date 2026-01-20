@@ -81,7 +81,7 @@ export function ConfirmationModal({
                                             shadowRadius: 4
                                         } : undefined
                                     ]}
-                                    textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 2, fontWeight: 'bold' } : { fontSize: 12 }}
+                                    textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 1, fontWeight: 'bold' } : { fontSize: 12 }}
                                 />
                             </View>
 
