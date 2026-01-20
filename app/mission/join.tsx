@@ -52,101 +52,103 @@ export default function JoinMissionScreen() {
                 />
             </View>
 
-            <View style={[
-                styles.content,
-                { paddingTop: insets.top + 20, marginBottom: insets.bottom, paddingBottom: 20 }
-            ]}>
+            <View style={styles.tabletCenteredContainer}>
+                <View style={[
+                    styles.content,
+                    { paddingTop: insets.top + 20, paddingBottom: 20 + insets.bottom }
+                ]}>
 
-                {/* Header */}
-                <Animated.View entering={FadeInDown.delay(100).duration(600)}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
-                    </TouchableOpacity>
-                    <ThemedText type="subtitle" style={styles.screenTitle}>{t('home.join_mission_subtitle')}</ThemedText>
-                    <View style={styles.headerLine} />
-                </Animated.View>
+                    {/* Header */}
+                    <Animated.View entering={FadeInDown.delay(100).duration(600)}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                            <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
+                        </TouchableOpacity>
+                        <ThemedText type="subtitle" style={styles.screenTitle}>{t('home.join_mission_subtitle')}</ThemedText>
+                        <View style={styles.headerLine} />
+                    </Animated.View>
 
-                {/* Manual Entry Section */}
-                <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                    <View style={styles.inputWrapper}>
-                        <View style={styles.labelRow}>
-                            <Ionicons name="keypad-outline" size={12} color="rgba(255,255,255,0.4)" />
-                            <ThemedText type="code" style={styles.inputLabel}>
-                                {t('mission.join_code_label')}
-                            </ThemedText>
-                        </View>
-
-                        <View style={[
-                            styles.premiumInputContainer,
-                            error && { borderColor: '#FF6B6B', backgroundColor: 'rgba(255, 107, 107, 0.05)' }
-                        ]}>
-                            <View style={[styles.inputGlow, error && { backgroundColor: '#FF6B6B' }]} />
-                            <TextInput
-                                style={styles.codeInput}
-                                placeholder={t('mission.join_code_placeholder')}
-                                placeholderTextColor="rgba(255,255,255,0.15)"
-                                value={manualCode}
-                                onChangeText={(val) => {
-                                    setManualCode(val);
-                                    if (error) setError(false);
-                                }}
-                                autoCapitalize="characters"
-                                autoCorrect={false}
-                                maxLength={20}
-                            />
-                            <TouchableOpacity
-                                onPress={handleJoin}
-                                disabled={!manualCode.trim()}
-                                style={[
-                                    styles.connectBtnAction,
-                                    manualCode.trim() ? styles.connectBtnActive : styles.connectBtnDisabled,
-                                    error && { backgroundColor: '#FF6B6B' }
-                                ]}
-                            >
-                                <ThemedText type="code" style={styles.connectBtnText}>
-                                    {t('mission.btn_join_code')}
+                    {/* Manual Entry Section */}
+                    <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
+                        <View style={styles.inputWrapper}>
+                            <View style={styles.labelRow}>
+                                <Ionicons name="keypad-outline" size={12} color="rgba(255,255,255,0.4)" />
+                                <ThemedText type="code" style={styles.inputLabel}>
+                                    {t('mission.join_code_label')}
                                 </ThemedText>
-                                <Ionicons
-                                    name="chevron-forward"
-                                    size={16}
-                                    color={manualCode.trim() ? (error ? "#FFF" : "#000") : "rgba(255,255,255,0.3)"}
+                            </View>
+
+                            <View style={[
+                                styles.premiumInputContainer,
+                                error && { borderColor: '#FF6B6B', backgroundColor: 'rgba(255, 107, 107, 0.05)' }
+                            ]}>
+                                <View style={[styles.inputGlow, error && { backgroundColor: '#FF6B6B' }]} />
+                                <TextInput
+                                    style={styles.codeInput}
+                                    placeholder={t('mission.join_code_placeholder')}
+                                    placeholderTextColor="rgba(255,255,255,0.15)"
+                                    value={manualCode}
+                                    onChangeText={(val) => {
+                                        setManualCode(val);
+                                        if (error) setError(false);
+                                    }}
+                                    autoCapitalize="characters"
+                                    autoCorrect={false}
+                                    maxLength={20}
                                 />
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={handleJoin}
+                                    disabled={!manualCode.trim()}
+                                    style={[
+                                        styles.connectBtnAction,
+                                        manualCode.trim() ? styles.connectBtnActive : styles.connectBtnDisabled,
+                                        error && { backgroundColor: '#FF6B6B' }
+                                    ]}
+                                >
+                                    <ThemedText type="code" style={styles.connectBtnText}>
+                                        {t('mission.btn_join_code')}
+                                    </ThemedText>
+                                    <Ionicons
+                                        name="chevron-forward"
+                                        size={16}
+                                        color={manualCode.trim() ? (error ? "#FFF" : "#000") : "rgba(255,255,255,0.3)"}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                            {error && (
+                                <Animated.View entering={FadeInDown} style={styles.errorContainer}>
+                                    <Ionicons name="alert-circle" size={12} color="#FF6B6B" />
+                                    <ThemedText type="code" style={styles.errorText}>
+                                        {t('mission.mission_not_found')}
+                                    </ThemedText>
+                                </Animated.View>
+                            )}
                         </View>
-                        {error && (
-                            <Animated.View entering={FadeInDown} style={styles.errorContainer}>
-                                <Ionicons name="alert-circle" size={12} color="#FF6B6B" />
-                                <ThemedText type="code" style={styles.errorText}>
-                                    {t('mission.mission_not_found')}
-                                </ThemedText>
-                            </Animated.View>
-                        )}
+
+                        <View style={styles.dividerContainer}>
+                            <View style={styles.dividerLine} />
+                            <ThemedText type="code" style={styles.dividerText}>{t('common.or')}</ThemedText>
+                            <View style={styles.dividerLine} />
+                        </View>
+
+                        {/* Scan Option */}
+                        <TouchableOpacity
+                            onPress={handleScan}
+                            style={styles.scanOption}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.scanIconContainer}>
+                                <Ionicons name="scan-outline" size={32} color="#FFF" />
+                            </View>
+                            <View>
+                                <ThemedText type="subtitle" style={styles.scanTitle}>{t('home.join_mission_title')}</ThemedText>
+                                <ThemedText type="code" style={styles.scanSubtitle}>{t('lobby.scan_instruction')}</ThemedText>
+                            </View>
+                        </TouchableOpacity>
+                    </Animated.View>
+
+                    <View style={styles.footer}>
+                        <ThemedText type="code" style={styles.footerTag}>SECURE_PROTOCOL_v4.2</ThemedText>
                     </View>
-
-                    <View style={styles.dividerContainer}>
-                        <View style={styles.dividerLine} />
-                        <ThemedText type="code" style={styles.dividerText}>{t('common.or')}</ThemedText>
-                        <View style={styles.dividerLine} />
-                    </View>
-
-                    {/* Scan Option */}
-                    <TouchableOpacity
-                        onPress={handleScan}
-                        style={styles.scanOption}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.scanIconContainer}>
-                            <Ionicons name="scan-outline" size={32} color="#FFF" />
-                        </View>
-                        <View>
-                            <ThemedText type="subtitle" style={styles.scanTitle}>{t('home.join_mission_title')}</ThemedText>
-                            <ThemedText type="code" style={styles.scanSubtitle}>{t('lobby.scan_instruction')}</ThemedText>
-                        </View>
-                    </TouchableOpacity>
-                </Animated.View>
-
-                <View style={styles.footer}>
-                    <ThemedText type="code" style={styles.footerTag}>SECURE_PROTOCOL_v4.2</ThemedText>
                 </View>
             </View>
         </View>
@@ -174,7 +176,15 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         opacity: 0.15,
     },
+    tabletCenteredContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     content: {
+        width: '100%',
+        maxWidth: 1100,
+        maxHeight: 800,
         flex: 1,
         paddingHorizontal: 25,
         justifyContent: 'space-between',

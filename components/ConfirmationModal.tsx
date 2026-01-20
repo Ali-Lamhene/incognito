@@ -112,6 +112,8 @@ const styles = StyleSheet.create({
     },
     container: {
         width: '85%',
+        maxWidth: 500,
+        marginHorizontal: 'auto',
         backgroundColor: '#0a0a0a',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.2)',

@@ -84,41 +84,43 @@ export default function CreateMissionScreen() {
                 />
             </View>
 
-            <View style={[
-                styles.content,
-                { paddingTop: insets.top + 20, marginBottom: insets.bottom, paddingBottom: 20 }
-            ]}>
+            <View style={styles.tabletCenteredContainer}>
+                <View style={[
+                    styles.content,
+                    { paddingTop: insets.top + 20, paddingBottom: 20 + insets.bottom }
+                ]}>
 
-                {/* Header */}
-                <Animated.View entering={FadeInDown.delay(100).duration(600)}>
-                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                        <ThemedText type="code" style={styles.backText}>{'<< ' + t('mission.abort_mission')}</ThemedText>
-                    </TouchableOpacity>
-                    <ThemedText type="subtitle" style={styles.screenTitle}>{t('mission.create_title')}</ThemedText>
-                    <View style={styles.headerLine} />
-                </Animated.View>
+                    {/* Header */}
+                    <Animated.View entering={FadeInDown.delay(100).duration(600)}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                            <ThemedText type="code" style={styles.backText}>{'<< ' + t('mission.abort_mission')}</ThemedText>
+                        </TouchableOpacity>
+                        <ThemedText type="subtitle" style={styles.screenTitle}>{t('mission.create_title')}</ThemedText>
+                        <View style={styles.headerLine} />
+                    </Animated.View>
 
-                {/* Parameters Form */}
-                <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                    {renderSelector(t('mission.threat_level'), THREAT_LEVELS, threatLevel, setThreatLevel)}
-                    {renderSelector(t('mission.duration'), DURATIONS, duration, setDuration)}
-                    {renderSelector(t('mission.protocol'), PROTOCOLS, protocol, setProtocol)}
-                </Animated.View>
+                    {/* Parameters Form */}
+                    <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
+                        {renderSelector(t('mission.threat_level'), THREAT_LEVELS, threatLevel, setThreatLevel)}
+                        {renderSelector(t('mission.duration'), DURATIONS, duration, setDuration)}
+                        {renderSelector(t('mission.protocol'), PROTOCOLS, protocol, setProtocol)}
+                    </Animated.View>
 
-                {/* Footer Action */}
-                <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
-                    <View style={styles.summaryBox}>
-                        <ThemedText type="code" style={styles.summaryText}>
-                            {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
-                        </ThemedText>
-                    </View>
+                    {/* Footer Action */}
+                    <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
+                        <View style={styles.summaryBox}>
+                            <ThemedText type="code" style={styles.summaryText}>
+                                {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
+                            </ThemedText>
+                        </View>
 
-                    <MainButton
-                        title={t('mission.btn_init')}
-                        onPress={handleCreate}
-                        style={styles.createButton}
-                    />
-                </Animated.View>
+                        <MainButton
+                            title={t('mission.btn_init')}
+                            onPress={handleCreate}
+                            style={styles.createButton}
+                        />
+                    </Animated.View>
+                </View>
             </View>
         </View>
     );
@@ -145,7 +147,15 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         opacity: 0.15,
     },
+    tabletCenteredContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     content: {
+        width: '100%',
+        maxWidth: 1100,
+        maxHeight: 800,
         flex: 1,
         paddingHorizontal: 25,
         justifyContent: 'space-between',
@@ -230,7 +240,6 @@ const styles = StyleSheet.create({
     },
     summaryBox: {
         alignItems: 'center',
-        marginBottom: 10,
     },
     summaryText: {
         fontSize: 10,

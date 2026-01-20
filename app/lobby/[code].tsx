@@ -217,100 +217,101 @@ export default function LobbyScreen() {
                 />
             </View>
 
-            <ScrollView
-                style={{ flex: 1, marginBottom: insets.bottom }}
-                contentContainerStyle={[
-                    styles.scrollContent,
-                    {
-                        paddingTop: insets.top + 20,
-                        paddingBottom: 20
-                    }
-                ]}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={styles.tabletCenteredContainer}>
+                <ScrollView
+                    style={styles.scrollContainer}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        {
+                            paddingTop: insets.top + 20,
+                            paddingBottom: 20 + insets.bottom
+                        }
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                >
 
-                {/* Header */}
-                <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-                    <View style={styles.headerTop}>
-                        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                            <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
-                        </TouchableOpacity>
-
-                        {isHost && (
-                            <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
-                                <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+                    {/* Header */}
+                    <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
+                        <View style={styles.headerTop}>
+                            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+                                <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
                             </TouchableOpacity>
-                        )}
-                    </View>
-                    <View style={{ marginTop: 10 }}>
-                        <ThemedText type="subtitle" style={styles.screenTitle}>{t('lobby.title')}</ThemedText>
-                        {isHost ? (
-                            <AnimatedWaitingText text={t('lobby.waiting')} />
-                        ) : (
-                            <ThemedText type="code" style={styles.subTitle}>{t('lobby.linked_msg')}</ThemedText>
-                        )}
-                    </View>
-                </Animated.View>
 
-                {/* Central Code & QR */}
-                <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.codeSection}>
-                    <Animated.View style={[styles.qrFrame, animatedScannerStyle]}>
-                        <View style={styles.qrContainer}>
-                            <QRCode
-                                value={code as string || 'ERROR'}
-                                size={180}
-                                color="black"
-                                backgroundColor="white"
-                            />
+                            {isHost && (
+                                <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
+                                    <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+                                </TouchableOpacity>
+                            )}
                         </View>
-                        <View style={styles.cornerTL} />
-                        <View style={styles.cornerTR} />
-                        <View style={styles.cornerBL} />
-                        <View style={styles.cornerBR} />
+                        <View style={{ marginTop: 10 }}>
+                            <ThemedText type="subtitle" style={styles.screenTitle}>{t('lobby.title')}</ThemedText>
+                            {isHost ? (
+                                <AnimatedWaitingText text={t('lobby.waiting')} />
+                            ) : (
+                                <ThemedText type="code" style={styles.subTitle}>{t('lobby.linked_msg')}</ThemedText>
+                            )}
+                        </View>
                     </Animated.View>
 
-                    <TouchableOpacity onPress={copyToClipboard} style={styles.codeDisplay}>
-                        <ThemedText type="futuristic" style={styles.missionCodeText}>{code}</ThemedText>
-                        <ThemedText type="code" style={styles.copyHint}>{t('lobby.copy_hint')}</ThemedText>
-                    </TouchableOpacity>
-                </Animated.View>
-
-                {/* Footer Action */}
-                {isHost && (
-                    <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
-                        <MainButton
-                            title={agents.length < 2 ? t('lobby.waiting_agents') : t('lobby.btn_deploy')}
-                            onPress={handleDeploy}
-                            disabled={agents.length < 2}
-                            style={styles.startButton}
-                        />
-                        {agents.length < 2 && (
-                            <ThemedText type="code" style={styles.aloneHint}>
-                                {t('lobby.recruitment_required')}
-                            </ThemedText>
-                        )}
-                    </Animated.View>
-                )}
-
-                {/* Agents List */}
-                <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.agentsSection}>
-                    <ThemedText type="code" style={styles.sectionLabel}>{t('lobby.agents_connected')} [{agents.length}]</ThemedText>
-                    <View style={styles.agentsGrid}>
-                        {agents.map((agent) => (
-                            <View key={agent.id} style={styles.agentBadge}>
-                                <View style={[styles.statusDot, { backgroundColor: agent.status === 'READY' ? '#FFF' : '#333' }]} />
-                                <ThemedText type="code" style={styles.agentName}>{agent.name}</ThemedText>
+                    {/* Central Code & QR */}
+                    <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.codeSection}>
+                        <Animated.View style={[styles.qrFrame, animatedScannerStyle]}>
+                            <View style={styles.qrContainer}>
+                                <QRCode
+                                    value={code as string || 'ERROR'}
+                                    size={180}
+                                    color="black"
+                                    backgroundColor="white"
+                                />
                             </View>
-                        ))}
-                        {/* Placeholder for empty slots */}
-                        {[...Array(1)].map((_, i) => (
-                            <SearchingSlot key={`empty-${i}`} />
-                        ))}
-                    </View>
-                </Animated.View>
+                            <View style={styles.cornerTL} />
+                            <View style={styles.cornerTR} />
+                            <View style={styles.cornerBL} />
+                            <View style={styles.cornerBR} />
+                        </Animated.View>
 
+                        <TouchableOpacity onPress={copyToClipboard} style={styles.codeDisplay}>
+                            <ThemedText type="futuristic" style={styles.missionCodeText}>{code}</ThemedText>
+                            <ThemedText type="code" style={styles.copyHint}>{t('lobby.copy_hint')}</ThemedText>
+                        </TouchableOpacity>
+                    </Animated.View>
 
-            </ScrollView>
+                    {/* Footer Action */}
+                    {isHost && (
+                        <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
+                            <MainButton
+                                title={agents.length < 2 ? t('lobby.waiting_agents') : t('lobby.btn_deploy')}
+                                onPress={handleDeploy}
+                                disabled={agents.length < 2}
+                                style={styles.startButton}
+                            />
+                            {agents.length < 2 && (
+                                <ThemedText type="code" style={styles.aloneHint}>
+                                    {t('lobby.recruitment_required')}
+                                </ThemedText>
+                            )}
+                        </Animated.View>
+                    )}
+
+                    {/* Agents List */}
+                    <Animated.View entering={FadeInUp.delay(400).duration(600)} style={styles.agentsSection}>
+                        <ThemedText type="code" style={styles.sectionLabel}>{t('lobby.agents_connected')} [{agents.length}]</ThemedText>
+                        <View style={styles.agentsGrid}>
+                            {agents.map((agent) => (
+                                <View key={agent.id} style={styles.agentBadge}>
+                                    <View style={[styles.statusDot, { backgroundColor: agent.status === 'READY' ? '#FFF' : '#333' }]} />
+                                    <ThemedText type="code" style={styles.agentName}>{agent.name}</ThemedText>
+                                </View>
+                            ))}
+                            {/* Placeholder for empty slots */}
+                            {[...Array(1)].map((_, i) => (
+                                <SearchingSlot key={`empty-${i}`} />
+                            ))}
+                        </View>
+                    </Animated.View>
+
+                </ScrollView>
+            </View>
 
             <ConfirmationModal
                 visible={showDestroyModal}
@@ -367,11 +368,23 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         opacity: 0.15,
     },
+    tabletCenteredContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scrollContainer: {
+        width: '100%',
+        maxWidth: 1100,
+        maxHeight: 900,
+        flex: 1,
+    },
     scrollContent: {
         flexGrow: 1, // Ensures it fills height if content is small
         paddingHorizontal: 25,
         justifyContent: 'space-between',
         gap: 15,
+        paddingBottom: 40,
     },
     header: {
         gap: 15,
@@ -475,6 +488,7 @@ const styles = StyleSheet.create({
     agentName: {
         color: '#FFF',
         fontSize: 12,
+        letterSpacing: 0.5,
     },
     emptyText: {
         color: '#FFF',

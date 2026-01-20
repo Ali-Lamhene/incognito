@@ -26,8 +26,6 @@ import { useProfileStore } from '../store/profileStore';
 import { useSession } from '../context/SessionContext';
 import { useTranslation } from '../hooks/useTranslation';
 
-// ... inside AgentHomeScreen ...
-
 export default function AgentHomeScreen() {
   const router = useRouter();
   const { height } = Dimensions.get('window');
@@ -48,7 +46,7 @@ export default function AgentHomeScreen() {
   const missionIdDisplay = session ? session.code : "NO_ACTIVE_MISSION";
   const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
 
-  // ... shared values ...
+  // shared values for animations
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
   const scanlineY = useSharedValue(-height);
@@ -64,7 +62,6 @@ export default function AgentHomeScreen() {
     if (!showSplash) {
       if (!hasLaunched) setHasLaunched(); // Mark as launched once splash is gone or skipped
 
-      // ... rest of animations
       dataScrollY.value = withRepeat(
         withTiming(-200, { duration: 10000, easing: Easing.linear }),
         -1,
@@ -76,6 +73,13 @@ export default function AgentHomeScreen() {
         withTiming(height, { duration: 4000, easing: Easing.linear }),
         -1,
         false
+      );
+
+      // AR Scanner line animation
+      scannerTranslateY.value = withRepeat(
+        withTiming(250, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
+        -1,
+        true
       );
     }
   }, [showSplash]);
@@ -102,15 +106,12 @@ export default function AgentHomeScreen() {
   }));
 
   const animatedContentStyle = useAnimatedStyle(() => ({
-    flex: 1, // Layout animations handle the entrance
+    flex: 1,
   }));
 
   const animatedDataStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: dataScrollY.value }],
   }));
-
-
-  // ... (inside AgentHomeScreen)
 
   if (showSplash) {
     return <AgentSplashScreen onComplete={handleSplashFinish} />;
@@ -123,7 +124,8 @@ export default function AgentHomeScreen() {
         onComplete={handleProfileComplete}
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
       />
-      {/* BACKGROUND: Blurred Secret Agent Desk - Edge to Edge */}
+
+      {/* BACKGROUND: Blurred Secret Agent Desk */}
       <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
         <Image
           source={require('../assets/images/agent_silhouette_rain.png')}
@@ -132,7 +134,7 @@ export default function AgentHomeScreen() {
         />
         <View style={styles.backgroundOverlay} />
 
-        {/* Manual HUD Grid */}
+        {/* HUD Grid */}
         <View style={styles.hudGrid}>
           {[...Array(6)].map((_, i) => (
             <View key={`h-${i}`} style={[styles.gridLineH, { top: `${(i + 1) * 15}%` }]} />
@@ -152,174 +154,174 @@ export default function AgentHomeScreen() {
         />
       </Animated.View>
 
-      <Animated.View style={[
-        styles.mainContent,
-        animatedContentStyle,
-        {
-          paddingTop: insets.top,
-          marginBottom: insets.bottom,
-          paddingLeft: 15,
-          paddingRight: 15,
-        }
-      ]}>
-        {/* HEADER: Technical Telemetry */}
-        <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.header}>
-          <TouchableOpacity
-            onPress={() => setShowProfileSetup(true)}
-            style={styles.logoGroup}
-          >
-            <View style={[styles.headerLogoRing, { borderColor: '#FFF' }]}>
-              {profile?.avatar ? (
-                <Ionicons name={profile.avatar as any} size={20} color="#FFF" />
-              ) : (
-                <Image
-                  source={require('../assets/images/incognito_logo.png')}
-                  style={styles.headerLogo}
-                  contentFit="contain"
-                />
-              )}
-            </View>
-            <View style={styles.agentInfo}>
-              <ThemedText type="code" style={styles.headerLabel}>{t('home.agent_active')}</ThemedText>
-              <ThemedText type="futuristic" style={[styles.agentName, { color: '#FFF' }]}>
-                {profile?.codename ? `#${profile.codename}` : t('common.unknown')}
-              </ThemedText>
-            </View>
-          </TouchableOpacity>
-          <View style={styles.telemetryGroup}>
-            <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
-              <Ionicons name="options" size={20} color="#FFF" style={{ opacity: 0.8 }} />
+      <View style={styles.tabletCenteredContainer}>
+        <Animated.View style={[
+          styles.mainContent,
+          animatedContentStyle,
+          {
+            paddingTop: insets.top,
+            paddingBottom: insets.bottom,
+            paddingLeft: 15,
+            paddingRight: 15,
+          }
+        ]}>
+          {/* HEADER: Technical Telemetry */}
+          <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.header}>
+            <TouchableOpacity
+              onPress={() => setShowProfileSetup(true)}
+              style={styles.logoGroup}
+            >
+              <View style={[styles.headerLogoRing, { borderColor: '#FFF' }]}>
+                {profile?.avatar ? (
+                  <Ionicons name={profile.avatar as any} size={20} color="#FFF" />
+                ) : (
+                  <Image
+                    source={require('../assets/images/incognito_logo.png')}
+                    style={styles.headerLogo}
+                    contentFit="contain"
+                  />
+                )}
+              </View>
+              <View style={styles.agentInfo}>
+                <ThemedText type="code" style={styles.headerLabel}>{t('home.agent_active')}</ThemedText>
+                <ThemedText type="futuristic" style={[styles.agentName, { color: '#FFF' }]}>
+                  {profile?.codename ? `#${profile.codename}` : t('common.unknown')}
+                </ThemedText>
+              </View>
             </TouchableOpacity>
-            <View style={styles.separatorV} />
-            <View style={styles.signalBadge}>
-              <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
-              <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.status_online')}</ThemedText>
+            <View style={styles.telemetryGroup}>
+              <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
+                <Ionicons name="options" size={20} color="#FFF" style={{ opacity: 0.8 }} />
+              </TouchableOpacity>
+              <View style={styles.separatorV} />
+              <View style={styles.signalBadge}>
+                <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
+                <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.status_online')}</ThemedText>
+              </View>
             </View>
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        {/* CENTRAL: Augmented Reality Dossier */}
-        <Animated.View entering={FadeIn.delay(1200).duration(1000)} style={styles.centerSection}>
-          <View style={styles.augmentedFrame}>
-            {/* Pro Corner Brackets */}
-            <View style={styles.cornerTL} />
-            <View style={styles.cornerTR} />
-            <View style={styles.cornerBL} />
-            <View style={styles.cornerBR} />
+          {/* CENTRAL: Augmented Reality Dossier */}
+          <Animated.View entering={FadeIn.delay(1200).duration(1000)} style={styles.centerSection}>
+            <View style={styles.augmentedFrame}>
+              <View style={styles.cornerTL} />
+              <View style={styles.cornerTR} />
+              <View style={styles.cornerBL} />
+              <View style={styles.cornerBR} />
 
-            {/* Tactical Borders */}
-            <View style={styles.tacticalBorderT} />
-            <View style={styles.tacticalBorderB} />
+              <View style={styles.tacticalBorderT} />
+              <View style={styles.tacticalBorderB} />
 
-            <View style={styles.scannerLineContainer}>
-              <Animated.View style={[styles.scannerLine, {
-                transform: [{ translateY: scannerTranslateY.value }]
-              }]} />
-            </View>
+              <View style={styles.scannerLineContainer}>
+                <Animated.View style={[styles.scannerLine, {
+                  transform: [{ translateY: scannerTranslateY.value }]
+                }]} />
+              </View>
 
-            <View style={styles.brandingGroup}>
-              <IncognitoLogo size={55} color="#FFFFFF" style={styles.mainLogo} />
+              <View style={styles.brandingGroup}>
+                <IncognitoLogo size={55} color="#FFFFFF" style={styles.mainLogo} />
 
-              <View style={styles.tacticalTitleStrip}>
-                {"INCOGNITO".split("").map((char, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.letterBlock,
-                      {
-                        backgroundColor: i % 2 === 0 ? '#000' : '#FFF',
-                        transform: [
-                          { rotate: `${(i % 3 - 1) * 4}deg` },
-                          { translateY: (i % 2 === 0 ? -2 : 2) }
-                        ],
-                        borderWidth: 1,
-                        borderColor: i % 2 === 0 ? '#333' : '#000',
-                      }
-                    ]}
-                  >
-                    <ThemedText
+                <View style={styles.tacticalTitleStrip}>
+                  {"INCOGNITO".split("").map((char, i) => (
+                    <View
+                      key={i}
                       style={[
-                        styles.stripLetter,
+                        styles.letterBlock,
                         {
-                          color: i % 2 === 0 ? '#FFF' : '#000',
-                          fontFamily: i % 3 === 0 ? 'serif' : 'monospace',
+                          backgroundColor: i % 2 === 0 ? '#000' : '#FFF',
+                          transform: [
+                            { rotate: `${(i % 3 - 1) * 4}deg` },
+                            { translateY: (i % 2 === 0 ? -2 : 2) }
+                          ],
+                          borderWidth: 1,
+                          borderColor: i % 2 === 0 ? '#333' : '#000',
                         }
                       ]}
                     >
-                      {char}
-                    </ThemedText>
-                  </View>
-                ))}
+                      <ThemedText
+                        style={[
+                          styles.stripLetter,
+                          {
+                            color: i % 2 === 0 ? '#FFF' : '#000',
+                            fontFamily: i % 3 === 0 ? 'serif' : 'monospace',
+                          }
+                        ]}
+                      >
+                        {char}
+                      </ThemedText>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.brandingFooter}>
+                  <ThemedText type="code" style={styles.classTag}>
+                    MISSION_ID: #{session ? session.code : "INFIL-9"} // {session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS"}
+                  </ThemedText>
+                </View>
+
+                <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
               </View>
 
-              <View style={styles.brandingFooter}>
-                <ThemedText type="code" style={styles.classTag}>
-                  MISSION_ID: #{session ? session.code : "INFIL-9"} // {session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS"}
-                </ThemedText>
+              <View style={styles.frameMetadata}>
+                <ThemedText type="code" style={styles.frameMetaText}>LOC_48.8566_2.3522</ThemedText>
+                <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
               </View>
-
-              <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
             </View>
-
-            <View style={styles.frameMetadata}>
-              <ThemedText type="code" style={styles.frameMetaText}>LOC_48.8566_2.3522</ThemedText>
-              <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
-            </View>
-          </View>
-        </Animated.View>
-
-        {/* BOTTOM: Mission Deployment */}
-        <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
-          <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
-            <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
-              {session ? `ACTIVE_PROTOCOL: ${session.code}` : 'DEPLOYMENT_PROTOCOL'}
-            </ThemedText>
-          </View>
-
-          {session ? (
-            <>
-              <MainButton
-                title="RETOURNER AU SALON"
-                onPress={() => router.push(`/lobby/${session.code}`)}
-                style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
-              />
-              <MainButton
-                title="ABANDONNER LA MISSION"
-                variant="outline"
-                onPress={async () => {
-                  await clearSession();
-                }}
-                style={[styles.secondaryAction, { marginTop: 10, borderColor: 'rgba(255, 107, 107, 0.3)' }]}
-              />
-            </>
-          ) : (
-            <>
-              <MainButton
-                title={t('home.create_mission_title')}
-                onPress={() => router.push('/mission/create')}
-                style={styles.primaryAction}
-              />
-              <MainButton
-                title={t('home.join_mission_subtitle')}
-                variant="outline"
-                onPress={() => router.push('/mission/join')}
-                style={[styles.secondaryAction, { marginTop: 10 }]}
-              />
-            </>
-          )}
-        </Animated.View>
-
-        {/* DATA OVERLAY: Side Stream */}
-        <View style={styles.sideDataOverlay}>
-          <Animated.View style={animatedDataStyle}>
-            {Array.from({ length: 25 }).map((_, i) => (
-              <ThemedText key={i} type="code" style={styles.driftText}>
-                {`>> ${Math.random().toString(16).slice(2, 8).toUpperCase()} // OK`}
-              </ThemedText>
-            ))}
           </Animated.View>
-        </View>
-      </Animated.View>
+
+          {/* BOTTOM: Mission Deployment */}
+          <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
+            <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
+              <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
+                {session ? `ACTIVE_PROTOCOL: ${session.code}` : 'DEPLOYMENT_PROTOCOL'}
+              </ThemedText>
+            </View>
+
+            {session ? (
+              <>
+                <MainButton
+                  title="RETOURNER AU SALON"
+                  onPress={() => router.push(`/lobby/${session.code}`)}
+                  style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
+                />
+                <MainButton
+                  title="ABANDONNER LA MISSION"
+                  variant="outline"
+                  onPress={async () => {
+                    await clearSession();
+                  }}
+                  style={[styles.secondaryAction, { marginTop: 10, borderColor: 'rgba(255, 107, 107, 0.3)' }]}
+                />
+              </>
+            ) : (
+              <>
+                <MainButton
+                  title={t('home.create_mission_title')}
+                  onPress={() => router.push('/mission/create')}
+                  style={styles.primaryAction}
+                />
+                <MainButton
+                  title={t('home.join_mission_subtitle')}
+                  variant="outline"
+                  onPress={() => router.push('/mission/join')}
+                  style={[styles.secondaryAction, { marginTop: 10 }]}
+                />
+              </>
+            )}
+          </Animated.View>
+
+          {/* DATA OVERLAY: Side Stream */}
+          <View style={styles.sideDataOverlay}>
+            <Animated.View style={animatedDataStyle}>
+              {Array.from({ length: 25 }).map((_, i) => (
+                <ThemedText key={i} type="code" style={styles.driftText}>
+                  {`>> ${Math.random().toString(16).slice(2, 8).toUpperCase()} // OK`}
+                </ThemedText>
+              ))}
+            </Animated.View>
+          </View>
+        </Animated.View>
+      </View>
     </View>
   );
 }
@@ -372,12 +374,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  safeArea: {
+  tabletCenteredContainer: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mainContent: {
+    width: '100%',
+    maxWidth: 1100,
+    maxHeight: 1000,
     flex: 1,
-    paddingHorizontal: 35, // Increased padding to avoid edges
+    paddingHorizontal: 35,
     justifyContent: 'space-between',
     paddingVertical: 20,
   },
@@ -430,10 +437,6 @@ const styles = StyleSheet.create({
     height: 12,
     backgroundColor: '#FFF',
     opacity: 0.2,
-  },
-  telemetryValue: {
-    fontSize: 8,
-    opacity: 0.3,
   },
   signalBadge: {
     flexDirection: 'row',
@@ -589,12 +592,6 @@ const styles = StyleSheet.create({
     opacity: 0.3,
     letterSpacing: 1,
   },
-  heroLine: {
-    width: 25,
-    height: 1,
-    backgroundColor: '#FFF',
-    opacity: 0.3,
-  },
   systemTag: {
     fontSize: 10,
     opacity: 0.4,
@@ -631,11 +628,13 @@ const styles = StyleSheet.create({
   },
   primaryAction: {
     backgroundColor: '#FFF',
-    height: 65,
+    height: 35,
+    marginBottom: 30,
   },
   secondaryAction: {
-    height: 65,
+    height: 35,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 30,
   },
   sideDataOverlay: {
     position: 'absolute',
