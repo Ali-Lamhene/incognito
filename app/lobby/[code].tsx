@@ -13,6 +13,8 @@ import { ThemedText } from '../../components/ThemedText';
 import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
 
+import { onDisconnect, ref, remove, serverTimestamp, set } from 'firebase/database';
+import { db } from '../../services/firebase';
 import { useProfileStore } from '../../store/profileStore';
 
 export default function LobbyScreen() {
@@ -21,10 +23,34 @@ export default function LobbyScreen() {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { session, clearSession, joinSession, isInitialized } = useSession();
+    const { session, clearSession, joinSession, isInitialized, agents: syncedAgents } = useSession();
     const { t } = useTranslation();
     const { profile } = useProfileStore();
     const [isExiting, setIsExiting] = useState(false);
+
+    // Enregistrement de l'agent sur Firebase
+    useEffect(() => {
+        if (!isInitialized || !code || !profile || isExiting) return;
+
+        const agentRef = ref(db, `missions/${code}/agents/${profile.id}`);
+
+        // S'enregistrer
+        set(agentRef, {
+            name: profile.codename,
+            avatar: profile.avatar,
+            status: 'READY',
+            lastSeen: serverTimestamp()
+        });
+
+        // Se retirer automatiquement en cas de déconnexion (fermeture app, perte réseau)
+        onDisconnect(agentRef).remove();
+
+        return () => {
+            // Optionnel: ne pas supprimer manuellement ici si on veut que l'agent reste 
+            // affiché un peu après un refresh, mais pour l'instant on nettoie.
+            remove(agentRef);
+        };
+    }, [code, profile?.id, isInitialized, isExiting]);
 
     useEffect(() => {
         if (isExiting) return;
@@ -38,13 +64,8 @@ export default function LobbyScreen() {
 
     const isHost = session?.role === 'HOST';
 
-    // Real connected agents (starting with self)
-    // Real connected agents (starting with self)
-    const [agents, setAgents] = useState(profile ? [{
-        id: profile.id,
-        name: profile.codename,
-        status: 'READY' // Self is always ready initially
-    }] : []);
+    // Remplacer l'état local par les agents synchronisés
+    const agents = syncedAgents;
 
     const scannerOpacity = useSharedValue(0.3);
 
@@ -62,11 +83,15 @@ export default function LobbyScreen() {
     }));
 
     const handleBack = () => {
-        // Always go back to Home, not potentially to Create screen
-        router.push('/');
+        if (!isHost) {
+            handleLeave();
+        } else {
+            router.push('/');
+        }
     };
 
     const [showDestroyModal, setShowDestroyModal] = useState(false);
+    const [showLeaveModal, setShowLeaveModal] = useState(false);
 
     const handleAbort = () => {
         setShowDestroyModal(true);
@@ -75,7 +100,18 @@ export default function LobbyScreen() {
     const confirmDestroy = async () => {
         setIsExiting(true);
         setShowDestroyModal(false);
-        await clearSession();
+        await clearSession(profile?.id);
+        router.replace('/');
+    };
+
+    const handleLeave = () => {
+        setShowLeaveModal(true);
+    };
+
+    const confirmLeave = async () => {
+        setIsExiting(true);
+        setShowLeaveModal(false);
+        await clearSession(profile?.id);
         router.replace('/');
     };
 
@@ -256,6 +292,16 @@ export default function LobbyScreen() {
                 onConfirm={confirmDestroy}
                 onCancel={() => setShowDestroyModal(false)}
                 variant="danger"
+            />
+
+            <ConfirmationModal
+                visible={showLeaveModal}
+                title={t('lobby.leave_title')}
+                message={t('lobby.leave_msg')}
+                confirmLabel={t('lobby.btn_leave')}
+                cancelLabel={t('common.cancel')}
+                onConfirm={confirmLeave}
+                onCancel={() => setShowLeaveModal(false)}
             />
         </View>
     );
