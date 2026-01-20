@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Pressable,
@@ -23,6 +23,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConfirmationModal } from "../../components/ConfirmationModal";
+import { MissionStartSplashScreen } from "../../components/MissionStartSplashScreen";
 import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -175,6 +176,7 @@ export default function ActiveMissionScreen() {
     string | null
   >(null);
   const [now, setNow] = useState(Date.now());
+  const [showStartSplash, setShowStartSplash] = useState(true);
 
   const scanPos = useSharedValue(0);
 
@@ -385,8 +387,28 @@ export default function ActiveMissionScreen() {
     processedRouletteIncident,
   ]);
 
+  if (showStartSplash) {
+    return (
+      <View style={[styles.container, { backgroundColor: '#000' }]}>
+        <Stack.Screen
+          options={{
+            animation: 'fade',
+            contentStyle: { backgroundColor: '#000' }
+          }}
+        />
+        <MissionStartSplashScreen onComplete={() => setShowStartSplash(false)} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          animation: 'fade',
+          contentStyle: { backgroundColor: '#000' }
+        }}
+      />
       {/* Background */}
       <View style={styles.backgroundContainer}>
         <Image
@@ -1462,6 +1484,7 @@ export default function ActiveMissionScreen() {
         onConfirm={handleConfirmUnmask}
         onCancel={() => setShowUnmaskModal(false)}
       />
+
     </View>
   );
 }
@@ -1473,6 +1496,7 @@ const styles = StyleSheet.create({
   },
   backgroundContainer: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#000",
   },
   backgroundImage: {
     width: "100%",

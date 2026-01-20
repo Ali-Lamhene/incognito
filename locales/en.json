@@ -161,14 +161,17 @@
         "btn_stay": "STAY",
         "impossible_title": "DECLARE IMPOSSIBLE?",
         "impossible_msg": "Do you claim that this challenge cannot be achieved under current conditions? The assembly will judge.",
-        "btn_new_objective": "NEW OBJECTIVE"
+        "btn_new_objective": "NEW OBJECTIVE",
+        "splash_active_title": "MISSION ACTIVATED",
+        "splash_active_msg": "ALL AGENTS DEPLOYED. MAINTAIN COVER."
     },
     "splash": {
         "init": "SYSTEM INITIALIZATION...",
         "loading_assets": "LOADING ASSETS...",
         "secure_connection": "SECURE CONNECTION...",
         "analyzing": "ANALYZING...",
-        "detection": "DETECTING SUSPECT #82B"
+        "detection": "DETECTING SUSPECT #82B",
+        "mission_start": "OPERATION LAUNCH"
     },
     "permissions": {
         "camera_msg": "Camera access required to scan frequencies.",

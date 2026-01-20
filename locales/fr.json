@@ -161,14 +161,17 @@
         "btn_stay": "RESTER",
         "impossible_title": "DÉCLARER IMPOSSIBLE ?",
         "impossible_msg": "Affirmez-vous que ce défi ne peut être réalisé dans les conditions actuelles ? L'assemblée en jugera.",
-        "btn_new_objective": "NOUVEL OBJECTIF"
+        "btn_new_objective": "NOUVEL OBJECTIF",
+        "splash_active_title": "MISSION ACTIVÉE",
+        "splash_active_msg": "TOUS LES AGENTS SONT DÉPLOYÉS. RESTEZ DISCRETS."
     },
     "splash": {
         "init": "INITIALISATION SYSTÈME...",
         "loading_assets": "CHARGEMENT RESSOURCES...",
         "secure_connection": "CONNEXION SÉCURISÉE...",
         "analyzing": "ANALYSE...",
-        "detection": "DÉTECTION SUSPECT #82B"
+        "detection": "DÉTECTION SUSPECT #82B",
+        "mission_start": "LANCEMENT OPÉRATION"
     },
     "permissions": {
         "camera_msg": "Accès caméra requis pour scanner les fréquences.",

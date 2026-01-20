@@ -9,7 +9,7 @@ export const Colors = {
     },
     dark: {
         text: '#F8FAFC',
-        background: '#020617', // Deep Midnight Blue/Black
+        background: '#000000', // Absolute Black
         primary: '#FFF', // Neutral White
         secondary: '#1E293B',
         accent: '#F43F5E', // Red alert accent

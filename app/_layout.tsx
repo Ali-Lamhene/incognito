@@ -2,9 +2,8 @@ import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Platform } from "react-native";
+import { Platform, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Colors } from "../constants/Colors";
 import { SessionProvider } from "../context/SessionContext";
 
 export default function RootLayout() {
@@ -21,18 +20,20 @@ export default function RootLayout() {
   }, [colorScheme, isDark]);
 
   return (
-    <SafeAreaProvider>
-      <SessionProvider>
-        <StatusBar style="light" backgroundColor="#000000" translucent={false} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: {
-              backgroundColor: Colors[colorScheme].background,
-            },
-          }}
-        />
-      </SessionProvider>
-    </SafeAreaProvider>
+    <View style={{ flex: 1, backgroundColor: '#000' }}>
+      <SafeAreaProvider>
+        <SessionProvider>
+          <StatusBar style="light" backgroundColor="#000000" translucent={false} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: {
+                backgroundColor: '#000',
+              },
+            }}
+          />
+        </SessionProvider>
+      </SafeAreaProvider>
+    </View>
   );
 }
