@@ -2,14 +2,14 @@ import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Colors } from "../constants/Colors";
 import { SessionProvider } from "../context/SessionContext";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const isDark = colorScheme === 'dark';
+  const colorScheme = 'dark';
+  const isDark = true;
 
   useEffect(() => {
     if (Platform.OS === 'android') {

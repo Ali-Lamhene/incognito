@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, useColorScheme, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Colors } from '../constants/Colors';
 
 interface MainButtonProps {
@@ -11,7 +11,7 @@ interface MainButtonProps {
 }
 
 export function MainButton({ onPress, title, variant = 'primary', style, textStyle }: MainButtonProps) {
-    const colorScheme = useColorScheme() ?? 'light';
+    const colorScheme = 'dark';
     const colors = Colors[colorScheme];
 
     const handlePress = () => {

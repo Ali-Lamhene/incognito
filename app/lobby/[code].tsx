@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1, // Ensures it fills height if content is small
         paddingHorizontal: 25,
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         gap: 15,
     },
     header: {

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -37,7 +37,7 @@ export default function AgentHomeScreen() {
   const { profile, isFirstSetupDone, createProfile, updateProfile } = useProfileStore();
   const { t } = useTranslation();
 
-  const colorScheme = useColorScheme() ?? 'light';
+  const colorScheme = 'dark';
   const colors = Colors[colorScheme];
 
   // Show splash only if app hasn't launched yet
