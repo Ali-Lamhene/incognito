@@ -22,7 +22,7 @@ export default function SettingsScreen() {
     };
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <View style={[styles.container, { paddingTop: insets.top, marginBottom: insets.bottom }]}>
             {/* Header */}
             <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
                 <TouchableOpacity onPress={handleBack} style={styles.backButton}>

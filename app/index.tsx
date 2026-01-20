@@ -157,7 +157,7 @@ export default function AgentHomeScreen() {
         animatedContentStyle,
         {
           paddingTop: insets.top,
-          paddingBottom: Math.max(insets.bottom, 10),
+          marginBottom: insets.bottom,
           paddingLeft: 15,
           paddingRight: 15,
         }

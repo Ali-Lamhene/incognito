@@ -279,14 +279,14 @@ export default function LobbyScreen() {
                 {isHost && (
                     <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
                         <MainButton
-                            title={agents.length < 2 ? "ATTENTE D'AGENTS" : t('lobby.btn_deploy')}
+                            title={agents.length < 2 ? t('lobby.waiting_agents') : t('lobby.btn_deploy')}
                             onPress={handleDeploy}
                             disabled={agents.length < 2}
                             style={styles.startButton}
                         />
                         {agents.length < 2 && (
                             <ThemedText type="code" style={styles.aloneHint}>
-                                RECRUTEMENT REQUIS : AU MOINS UN AUTRE AGENT DOIT REJOINDRE LE SALON.
+                                {t('lobby.recruitment_required')}
                             </ThemedText>
                         )}
                     </Animated.View>
@@ -335,9 +335,9 @@ export default function LobbyScreen() {
 
             <ConfirmationModal
                 visible={showStartModal}
-                title="Lancer l'opération ?"
-                message="Tous les agents sont-ils prêts pour l'infiltration ?"
-                confirmLabel="DÉPLOYER"
+                title={t('lobby.start_op_title')}
+                message={t('lobby.start_op_msg')}
+                confirmLabel={t('lobby.btn_deploy_simple')}
                 cancelLabel={t('common.cancel')}
                 onConfirm={confirmStart}
                 onCancel={() => setShowStartModal(false)}

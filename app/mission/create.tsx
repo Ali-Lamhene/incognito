@@ -86,7 +86,7 @@ export default function CreateMissionScreen() {
 
             <View style={[
                 styles.content,
-                { paddingTop: insets.top + 20, paddingBottom: Math.max(insets.bottom, 20) + 20 }
+                { paddingTop: insets.top + 20, marginBottom: insets.bottom, paddingBottom: 20 }
             ]}>
 
                 {/* Header */}

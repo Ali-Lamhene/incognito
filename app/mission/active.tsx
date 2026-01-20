@@ -11,7 +11,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ConfirmationModal } from '../../components/ConfirmationModal';
-import { MainButton } from '../../components/MainButton';
 import { ThemedText } from '../../components/ThemedText';
 import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -296,40 +295,29 @@ export default function ActiveMissionScreen() {
             </View>
 
             <ScrollView
-                contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 }]}
+                style={{ flex: 1, marginBottom: insets.bottom }}
+                contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: 0 }]}
             >
                 {/* Header Stratégique */}
                 <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
                     <View>
-                        <ThemedText type="code" style={styles.missionLabel}>OPÉRATION EN COURS</ThemedText>
+                        <ThemedText type="code" style={styles.missionLabel}>{t('mission.op_in_progress')}</ThemedText>
                         <View style={styles.codeContainer}>
                             <View style={styles.pulseDot} />
                             <ThemedText type="futuristic" style={styles.missionCode}>{session?.code}</ThemedText>
                         </View>
                     </View>
-
-                    <TouchableOpacity
-                        onPress={() => !agentInIncident && setShowAbortModal(true)}
-                        disabled={!!agentInIncident}
-                        style={[styles.abortButton, !!agentInIncident && { opacity: 0.3 }]}
-                    >
-                        <Ionicons
-                            name="exit-outline"
-                            size={22}
-                            color={agentInIncident ? "rgba(255,255,255,0.2)" : "#FF6B6B"}
-                        />
-                    </TouchableOpacity>
                 </Animated.View>
 
                 {/* Section Score Élargie */}
                 <Animated.View entering={FadeInDown.delay(100).duration(600)} style={styles.scoreOverviewSection}>
                     <View style={styles.scoreBadgeGlowLarge} />
                     <View style={styles.personalScoreBoxLarge}>
-                        <ThemedText type="code" style={styles.scoreLabelLarge}>CRÉDITS DE MISSION</ThemedText>
+                        <ThemedText type="code" style={styles.scoreLabelLarge}>{t('mission.mission_credits')}</ThemedText>
                         <ThemedText type="futuristic" style={styles.scoreValueLarge}>{me?.score || 0}</ThemedText>
                         <View style={styles.scoreStatusIndicator}>
                             <View style={[styles.statusDot, { backgroundColor: '#4CAF50' }]} />
-                            <ThemedText type="code" style={styles.statusText}>AGENCE VÉRIFIÉE</ThemedText>
+                            <ThemedText type="code" style={styles.statusText}>{t('mission.agency_verified')}</ThemedText>
                         </View>
                     </View>
                 </Animated.View>
@@ -351,13 +339,13 @@ export default function ActiveMissionScreen() {
                                     color="#FF6B6B"
                                 />
                                 <ThemedText type="code" style={styles.incidentTitle}>
-                                    {incidentType === 'IMPOSSIBLE' ? 'ANOMALIE SIGNALÉE' : 'DÉMASQUAGE EN COURS'}
+                                    {incidentType === 'IMPOSSIBLE' ? t('mission.anomaly_reported') : t('mission.unmasking_in_progress')}
                                 </ThemedText>
 
                                 {incidentType !== 'UNMASK_PROMPT' && (
                                     <View style={styles.voterTally}>
                                         <ThemedText type="code" style={styles.voterTallyText}>
-                                            {Object.keys(incidentVotes).length}/{agents.length - (incidentType === 'UNMASK_VOTE' ? 2 : 1)} VOTES
+                                            {Object.keys(incidentVotes).length}/{agents.length - (incidentType === 'UNMASK_VOTE' ? 2 : 1)} {t('mission.votes')}
                                         </ThemedText>
                                     </View>
                                 )}
@@ -368,8 +356,8 @@ export default function ActiveMissionScreen() {
                                 <>
                                     <ThemedText style={styles.incidentText}>
                                         {agentInIncident.id === profile?.id
-                                            ? "Majorité requise pour valider votre demande :"
-                                            : `${agentInIncident.name} (${agentInIncident.score || 0} pts) prétend que cet objectif est irréalisable :`}
+                                            ? t('mission.majority_required')
+                                            : t('mission.claim_impossible').replace('{{name}}', agentInIncident.name)}
                                     </ThemedText>
 
                                     <View style={styles.reportedChallengeBox}>
@@ -381,14 +369,14 @@ export default function ActiveMissionScreen() {
                                     <View style={styles.universalVoteSection}>
                                         <View style={styles.voteBreakdown}>
                                             <View style={[styles.voteColumn, countPossible > countFeasible && styles.voteColumnWinning]}>
-                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>INFAISABLE ({countPossible})</ThemedText>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>{t('mission.impossible')} ({countPossible})</ThemedText>
                                                 {agents.filter(a => incidentVotes[a.id] === 'IMPOSSIBLE').map(a => (
                                                     <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
                                                 ))}
                                             </View>
                                             <View style={styles.breakdownDivider} />
                                             <View style={[styles.voteColumn, countFeasible > countPossible && styles.voteColumnWinning]}>
-                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>RÉALISABLE ({countFeasible})</ThemedText>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>{t('mission.feasible')} ({countFeasible})</ThemedText>
                                                 {agents.filter(a => incidentVotes[a.id] === 'FEASIBLE').map(a => (
                                                     <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
                                                 ))}
@@ -402,14 +390,14 @@ export default function ActiveMissionScreen() {
                                                     style={[styles.voteBtn, myVote === 'IMPOSSIBLE' && styles.voteBtnSelectedImpossible]}
                                                 >
                                                     <Ionicons name="thumbs-up" size={14} color={myVote === 'IMPOSSIBLE' ? "#FFF" : "#FF6B6B"} />
-                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'IMPOSSIBLE' && { color: '#FFF' }]}>INFAISABLE</ThemedText>
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'IMPOSSIBLE' && { color: '#FFF' }]}>{t('mission.impossible')}</ThemedText>
                                                 </TouchableOpacity>
                                                 <TouchableOpacity
                                                     onPress={() => handleVote('FEASIBLE')}
                                                     style={[styles.voteBtn, myVote === 'FEASIBLE' && styles.voteBtnSelectedFeasible]}
                                                 >
                                                     <Ionicons name="thumbs-down" size={14} color={myVote === 'FEASIBLE' ? "#FFF" : "#4CAF50"} />
-                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'FEASIBLE' && { color: '#FFF' }]}>RÉALISABLE</ThemedText>
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'FEASIBLE' && { color: '#FFF' }]}>{t('mission.feasible')}</ThemedText>
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
@@ -420,11 +408,11 @@ export default function ActiveMissionScreen() {
                                                         style={[styles.applyMajorityBtn, { backgroundColor: countPossible > countFeasible ? '#4CAF50' : '#FF6B6B' }]}
                                                     >
                                                         <ThemedText type="code" style={styles.applyMajorityText}>
-                                                            {countPossible > countFeasible ? "VALIDER" : "ACCEPTER L'ÉCHEC"}
+                                                            {countPossible > countFeasible ? t('mission.validate') : t('mission.accept_failure')}
                                                         </ThemedText>
                                                     </TouchableOpacity>
                                                 ) : (
-                                                    <ThemedText style={styles.voterName}>Attente d'une majorité...</ThemedText>
+                                                    <ThemedText style={styles.voterName}>{t('mission.waiting_majority')}</ThemedText>
                                                 )}
                                             </View>
                                         )}
@@ -437,8 +425,8 @@ export default function ActiveMissionScreen() {
                                 <>
                                     <ThemedText style={styles.incidentText}>
                                         {agentInIncident.id === profile?.id
-                                            ? `L'Agent ${agentInIncident.incident?.unmaskerName} prétend vous avoir démasqué !`
-                                            : `L'Agent ${agentInIncident.incident?.unmaskerName} tente de démasquer ${agentInIncident.name}...`}
+                                            ? t('mission.unmask_attempt_self').replace('{{name}}', agentInIncident.incident?.unmaskerName || '')
+                                            : t('mission.unmask_attempt_other').replace('{{unmasker}}', agentInIncident.incident?.unmaskerName || '').replace('{{target}}', agentInIncident.name || '')}
                                     </ThemedText>
 
                                     {agentInIncident.id === profile?.id ? (
@@ -458,7 +446,7 @@ export default function ActiveMissionScreen() {
                                         </View>
                                     ) : (
                                         <View style={styles.subjectWaitBoxCompact}>
-                                            <ThemedText style={styles.voterName}>En attente de la réponse de {agentInIncident.name}...</ThemedText>
+                                            <ThemedText style={styles.voterName}>{t('mission.waiting_response_from').replace('{{name}}', agentInIncident.name || '')}</ThemedText>
                                         </View>
                                     )}
                                 </>
@@ -468,8 +456,7 @@ export default function ActiveMissionScreen() {
                             {incidentType === 'UNMASK_VOTE' && (
                                 <>
                                     <ThemedText style={styles.incidentText}>
-                                        {agentInIncident.name} nie avoir été démasqué. L'assemblée doit juger.
-                                        Voici la mission que {agentInIncident.name} devait accomplir :
+                                        {t('mission.deny_unmask_msg').replace('{{name}}', agentInIncident.name || '')}
                                     </ThemedText>
 
                                     <View style={[styles.reportedChallengeBox, { borderColor: '#A29BFE' }]}>
@@ -479,19 +466,19 @@ export default function ActiveMissionScreen() {
                                     </View>
 
                                     <ThemedText style={styles.incidentText}>
-                                        {agentInIncident.incident?.unmaskerName} avait-il raison ?
+                                        {t('mission.was_he_right').replace('{{unmasker}}', agentInIncident.incident?.unmaskerName || '')}
                                     </ThemedText>
 
                                     <View style={styles.universalVoteSection}>
                                         <View style={styles.voteBreakdown}>
                                             <View style={[styles.voteColumn, countYes > countNo && styles.voteColumnWinning]}>
-                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>OUI ({countYes})</ThemedText>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#4CAF50' }]}>{t('mission.yes')} ({countYes})</ThemedText>
                                                 {agents.filter(a => incidentVotes[a.id] === 'YES').map(a => (
                                                     <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
                                                 ))}
                                             </View>
                                             <View style={[styles.voteColumn, countNo > countYes && styles.voteColumnWinning]}>
-                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>NON ({countNo})</ThemedText>
+                                                <ThemedText type="code" style={[styles.columnTitle, { color: '#FF6B6B' }]}>{t('mission.no')} ({countNo})</ThemedText>
                                                 {agents.filter(a => incidentVotes[a.id] === 'NO').map(a => (
                                                     <ThemedText key={a.id} style={styles.voterName}>• {a.name}</ThemedText>
                                                 ))}
@@ -504,13 +491,13 @@ export default function ActiveMissionScreen() {
                                                     onPress={() => handleVote('YES')}
                                                     style={[styles.voteBtn, myVote === 'YES' && styles.voteBtnSelectedFeasible]}
                                                 >
-                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'YES' && { color: '#FFF' }]}>IL A RAISON</ThemedText>
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'YES' && { color: '#FFF' }]}>{t('mission.he_is_right')}</ThemedText>
                                                 </TouchableOpacity>
                                                 <TouchableOpacity
                                                     onPress={() => handleVote('NO')}
                                                     style={[styles.voteBtn, myVote === 'NO' && styles.voteBtnSelectedImpossible]}
                                                 >
-                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'NO' && { color: '#FFF' }]}>IL SE TROMPE</ThemedText>
+                                                    <ThemedText type="code" style={[styles.voteBtnText, myVote === 'NO' && { color: '#FFF' }]}>{t('mission.he_is_wrong')}</ThemedText>
                                                 </TouchableOpacity>
                                             </View>
                                         ) : (
@@ -519,8 +506,8 @@ export default function ActiveMissionScreen() {
                                                     <View style={[styles.applyMajorityBtn, { backgroundColor: 'rgba(255, 107, 107, 0.2)', borderColor: '#FF6B6B', borderWidth: 1 }]}>
                                                         <Ionicons name="sync" size={18} color="#FF6B6B" />
                                                         <View>
-                                                            <ThemedText type="code" style={[styles.applyMajorityText, { color: '#FF6B6B' }]}>ARBITRAGE EN COURS...</ThemedText>
-                                                            <ThemedText style={styles.applyMajoritySub}>Le système choisit un vainqueur de manière aléatoire.</ThemedText>
+                                                            <ThemedText type="code" style={[styles.applyMajorityText, { color: '#FF6B6B' }]}>{t('mission.arbitration_in_progress')}</ThemedText>
+                                                            <ThemedText style={styles.applyMajoritySub}>{t('mission.random_selection_msg')}</ThemedText>
                                                         </View>
                                                     </View>
                                                 ) : (countYes !== countNo && (countYes > 0 || countNo > 0)) ? (
@@ -529,13 +516,13 @@ export default function ActiveMissionScreen() {
                                                         style={[styles.applyMajorityBtn, { backgroundColor: countYes > countNo ? '#4CAF50' : '#FF6B6B' }]}
                                                     >
                                                         <ThemedText type="code" style={styles.applyMajorityText}>
-                                                            {countYes > countNo ? "VALIDER LE DÉMASQUAGE" : "ACCUSER À TORT"}
+                                                            {countYes > countNo ? t('mission.validate_unmasking') : t('mission.wrong_accusation')}
                                                         </ThemedText>
                                                     </TouchableOpacity>
                                                 ) : (
                                                     <View style={styles.subjectWaitBoxCompact}>
                                                         <ThemedText style={styles.voterName}>
-                                                            {maxVoters <= 0 ? "Initialisation de l'arbitrage..." : "Attente d'une majorité de votes..."}
+                                                            {maxVoters <= 0 ? t('mission.init_arbitration') : t('mission.waiting_votes')}
                                                         </ThemedText>
                                                     </View>
                                                 )}
@@ -553,9 +540,9 @@ export default function ActiveMissionScreen() {
                 <Animated.View entering={FadeInUp.delay(200).duration(800)} style={styles.cardContainer}>
                     <View style={styles.terminalHeader}>
                         <View style={styles.terminalDot} />
-                        <ThemedText type="code" style={styles.terminalTitle}>TERMINAL DE MISSION v2.0</ThemedText>
+                        <ThemedText type="code" style={styles.terminalTitle}>{t('mission.terminal_v2')}</ThemedText>
                         <View style={styles.clearanceBadge}>
-                            <ThemedText type="code" style={styles.clearanceText}>TOP SECRET</ThemedText>
+                            <ThemedText type="code" style={styles.clearanceText}>{t('mission.top_secret')}</ThemedText>
                         </View>
                     </View>
 
@@ -570,7 +557,7 @@ export default function ActiveMissionScreen() {
                                 color={isCompleted ? "#4CAF50" : (me?.incident ? "#FF6B6B" : "#FFF")}
                             />
                             <ThemedText type="code" style={[styles.cardTitle, isCompleted && { color: '#4CAF50' }, me?.incident && { color: '#FF6B6B' }]}>
-                                {isCompleted ? "VÉRIFICATION RÉUSSIE" : (me?.incident ? "IDENTITÉ SUSPENDUE" : "IDENTIFICATION REQUISE")}
+                                {isCompleted ? t('mission.verification_success') : (me?.incident ? t('mission.identity_suspended') : t('mission.identification_required'))}
                             </ThemedText>
                         </View>
 
@@ -593,8 +580,8 @@ export default function ActiveMissionScreen() {
                                 >
                                     <Ionicons name="hammer-outline" size={32} color="#FF6B6B" />
                                     <View>
-                                        <ThemedText style={[styles.revealText, { color: '#FF6B6B' }]}>JUGE EN COURS</ThemedText>
-                                        <ThemedText style={styles.revealSubtext}>L'assemblée décide de votre sort...</ThemedText>
+                                        <ThemedText style={[styles.revealText, { color: '#FF6B6B' }]}>{t('mission.judgement_in_progress')}</ThemedText>
+                                        <ThemedText style={styles.revealSubtext}>{t('mission.judgement_msg')}</ThemedText>
                                     </View>
                                 </Animated.View>
                             ) : !isRevealed && !isCompleted ? (
@@ -608,8 +595,8 @@ export default function ActiveMissionScreen() {
                                         <Ionicons name="lock-closed" size={32} color="rgba(255,255,255,0.6)" />
                                     </View>
                                     <View>
-                                        <ThemedText style={styles.revealText}>DÉCRYPTAGE REQUIS</ThemedText>
-                                        <ThemedText style={styles.revealSubtext}>Taper pour scanner l'empreinte</ThemedText>
+                                        <ThemedText style={styles.revealText}>{t('mission.decryption_required')}</ThemedText>
+                                        <ThemedText style={styles.revealSubtext}>{t('mission.tap_to_scan')}</ThemedText>
                                     </View>
                                 </Animated.View>
                             ) : (
@@ -626,20 +613,20 @@ export default function ActiveMissionScreen() {
                                         showsVerticalScrollIndicator={false}
                                     >
                                         <ThemedText style={[styles.challengeText, isCompleted && styles.challengeTextCompleted]}>
-                                            {myChallenge?.text || (me ? "Aucun objectif assigné." : "Recherche de votre profil...")}
+                                            {myChallenge?.text || (me ? t('mission.no_objective') : t('mission.searching_profile'))}
                                         </ThemedText>
                                     </ScrollView>
                                     <View style={styles.quoteMarkBR} />
 
                                     {!myChallenge?.text && status === 'ACTIVE' && (
                                         <ThemedText style={styles.errorSubtext}>
-                                            Contactez le quartier général (l'hôte).
+                                            {t('mission.contact_hq')}
                                         </ThemedText>
                                     )}
 
                                     <View style={styles.hideHint}>
                                         <Ionicons name="eye-off-outline" size={10} color="rgba(255,255,255,0.3)" />
-                                        <ThemedText type="code" style={styles.hideHintText}>TAP POUR SÉCURISER</ThemedText>
+                                        <ThemedText type="code" style={styles.hideHintText}>{t('mission.tap_to_secure')}</ThemedText>
                                     </View>
                                 </Animated.View>
                             )}
@@ -647,24 +634,33 @@ export default function ActiveMissionScreen() {
 
                         {!me?.pendingValidation && !me?.completed && !me?.incident && (
                             <View style={{ gap: 15 }}>
-                                <MainButton
-                                    title="CONFIRMER OBJECTIF"
+                                <TouchableOpacity
                                     onPress={handleComplete}
-                                    style={styles.completeBtn}
-                                />
+                                    activeOpacity={0.7}
+                                    style={styles.tacticalCompleteBtn}
+                                >
+                                    <View style={styles.btnContentRow}>
+                                        <Ionicons name="finger-print" size={20} color="#4CAF50" />
+                                        <ThemedText type="futuristic" style={styles.tacticalCompleteText}>
+                                            {t('mission.complete_objective')}
+                                        </ThemedText>
+                                    </View>
+                                    <View style={styles.btnCornerTL} />
+                                    <View style={styles.btnCornerBR} />
+                                </TouchableOpacity>
                                 <View style={{ flexDirection: 'row', gap: 10 }}>
                                     <TouchableOpacity
                                         onPress={handleBluff}
                                         style={[styles.bluffBtn, { flex: 1 }]}
                                     >
-                                        <Ionicons name="eye-off" size={12} color="rgba(162, 155, 254, 0.6)" />
+                                        <Ionicons name="timer-outline" size={14} color="#FFD93D" />
                                         <ThemedText
                                             type="code"
                                             style={styles.bluffBtnText}
                                             numberOfLines={1}
                                             adjustsFontSizeToFit
                                         >
-                                            BLUFF
+                                            {t('mission.btn_bluff')}
                                         </ThemedText>
                                     </TouchableOpacity>
 
@@ -679,7 +675,7 @@ export default function ActiveMissionScreen() {
                                             numberOfLines={1}
                                             adjustsFontSizeToFit
                                         >
-                                            MISSION IMPOSSIBLE
+                                            {t('mission.impossible_objective')}
                                         </ThemedText>
                                     </TouchableOpacity>
                                 </View>
@@ -687,21 +683,19 @@ export default function ActiveMissionScreen() {
                         )}
 
                         {me?.pendingValidation && (
-                            <View style={[styles.pendingBadge, me.pendingValidation.isBluff && styles.pendingBadgeBluff]}>
+                            <View style={styles.pendingBadge}>
                                 <Ionicons
-                                    name={me.pendingValidation.isBluff ? "eye-outline" : "timer-outline"}
+                                    name="timer-outline"
                                     size={16}
-                                    color={me.pendingValidation.isBluff ? "#A29BFE" : "#FFD93D"}
+                                    color="#FFD93D"
                                     style={{ marginRight: 8 }}
                                 />
                                 <View>
-                                    <ThemedText type="code" style={[styles.pendingBadgeText, me.pendingValidation.isBluff && { color: '#A29BFE' }]}>
-                                        {me.pendingValidation.isBluff ? "MODE BLUFF ACTIVÉ" : "VÉRIFICATION"} : {Math.max(0, Math.floor((60000 - (now - me.pendingValidation.startedAt)) / 1000))}s
+                                    <ThemedText type="code" style={styles.pendingBadgeText}>
+                                        {t('mission.verification_in_progress').replace('{{time}}', Math.max(0, Math.floor((60000 - (now - me.pendingValidation.startedAt)) / 1000)).toString())}
                                     </ThemedText>
-                                    <ThemedText style={[styles.pendingBadgeSub, me.pendingValidation.isBluff && { color: 'rgba(162, 155, 254, 0.7)' }]}>
-                                        {me.pendingValidation.isBluff
-                                            ? "Les autres croient que vous travaillez... Appâtez-les !"
-                                            : "Restez discret, l'Agence vérifie vos traces..."}
+                                    <ThemedText style={styles.pendingBadgeSub}>
+                                        {t('mission.transfer_hq_msg')}
                                     </ThemedText>
                                 </View>
                             </View>
@@ -709,7 +703,7 @@ export default function ActiveMissionScreen() {
 
                         {me?.incident && (
                             <View style={styles.incidentStatus}>
-                                <ThemedText type="code" style={styles.incidentStatusText}>Score actuel : {me.score || 0}</ThemedText>
+                                <ThemedText type="code" style={styles.incidentStatusText}>{t('mission.current_score').replace('{{score}}', (me.score || 1).toString())}</ThemedText>
                             </View>
                         )}
 
@@ -723,7 +717,7 @@ export default function ActiveMissionScreen() {
 
                 {/* Surveillance des autres agents */}
                 <View style={styles.agentsHeader}>
-                    <ThemedText type="code" style={styles.sectionTitle}>ÉTAT DES UNITÉS DE TERRAIN</ThemedText>
+                    <ThemedText type="code" style={styles.sectionTitle}>{t('mission.field_units_status')}</ThemedText>
                     <View style={styles.liveIndicator}>
                         <View style={styles.liveDot} />
                         <ThemedText type="code" style={styles.liveText}>LIVE</ThemedText>
@@ -771,11 +765,11 @@ export default function ActiveMissionScreen() {
                                     </View>
                                     {agent.pendingValidation ? (
                                         <View style={styles.criticalStatus}>
-                                            <ThemedText style={[styles.agentStatusText, { color: '#FFD93D' }]}>ÉMISSION SUSPECTE ({Math.max(0, Math.floor((60000 - (now - agent.pendingValidation.startedAt)) / 1000))}s)</ThemedText>
+                                            <ThemedText style={[styles.agentStatusText, { color: '#FFD93D' }]}>{t('mission.suspicious_transmission').replace('{{time}}', Math.max(0, Math.floor((60000 - (now - agent.pendingValidation.startedAt)) / 1000)).toString())}</ThemedText>
                                             <View style={styles.alertPulse} />
                                         </View>
                                     ) : (
-                                        <ThemedText style={styles.agentStatusText}>OPÉRATIONNEL</ThemedText>
+                                        <ThemedText style={styles.agentStatusText}>{t('mission.operational')}</ThemedText>
                                     )}
                                 </View>
                             </View>
@@ -795,7 +789,7 @@ export default function ActiveMissionScreen() {
                                         (!!agentInIncident) && styles.unmaskTextDisabled,
                                         agent.pendingValidation && styles.unmaskTextActive
                                     ]}>
-                                        {!!agentInIncident ? "VOTE..." : (agent.pendingValidation ? "DÉMASQUER !" : "DÉMASQUER")}
+                                        {!!agentInIncident ? t('mission.voting_in_progress') : (agent.pendingValidation ? t('mission.unmask_now_excl') : t('mission.unmask_now'))}
                                     </ThemedText>
                                 </TouchableOpacity>
                             )}
@@ -815,7 +809,7 @@ export default function ActiveMissionScreen() {
                         color={agentInIncident ? "rgba(255,255,255,0.1)" : "rgba(255,107,107,0.6)"}
                     />
                     <ThemedText type="code" style={[styles.leaveGameText, !!agentInIncident && styles.leaveGameTextDisabled]}>
-                        {agentInIncident ? "VOTE EN COURS..." : "QUITTER LE SALON"}
+                        {agentInIncident ? t('mission.voting_in_progress') : t('mission.leave_lobby')}
                     </ThemedText>
                 </TouchableOpacity>
             </ScrollView>
@@ -826,8 +820,8 @@ export default function ActiveMissionScreen() {
                     <View style={styles.rouletteContainer}>
                         <View style={styles.rouletteHeader}>
                             <Ionicons name="flash" size={30} color="#FF6B6B" />
-                            <ThemedText type="futuristic" style={styles.rouletteTitle}>ARBITRAGE ALÉATOIRE</ThemedText>
-                            <ThemedText style={styles.rouletteSub}>Égalité parfaite... Le QG tranche !</ThemedText>
+                            <ThemedText type="futuristic" style={styles.rouletteTitle}>{t('mission.random_arbitration')}</ThemedText>
+                            <ThemedText style={styles.rouletteSub}>{t('mission.tie_break_msg')}</ThemedText>
                         </View>
 
                         <View style={styles.rouletteBox}>
@@ -836,8 +830,8 @@ export default function ActiveMissionScreen() {
                                 <View style={{ width: '100%' }}>
                                     <RouletteStrip
                                         names={[
-                                            agentInIncident?.incident?.unmaskerName || 'ACCCUSATEUR',
-                                            agentInIncident?.name || 'SUSPECT'
+                                            agentInIncident?.incident?.unmaskerName || t('common.unknown'),
+                                            agentInIncident?.name || t('common.unknown')
                                         ]}
                                         winnerName={rouletteWinner ? (rouletteWinner === agentInIncident?.id ? agentInIncident.name : agentInIncident?.incident?.unmaskerName || '') : null}
                                     />
@@ -848,7 +842,7 @@ export default function ActiveMissionScreen() {
                         {rouletteWinner && (
                             <Animated.View entering={FadeInUp} style={styles.winnerTag}>
                                 <ThemedText type="futuristic" style={styles.winnerName}>
-                                    VERDICT : {agents.find(a => a.id === rouletteWinner)?.name} 
+                                    {t('mission.verdict').replace('{{name}}', agents.find(a => a.id === rouletteWinner)?.name || '')}
                                 </ThemedText>
                             </Animated.View>
                         )}
@@ -878,17 +872,17 @@ export default function ActiveMissionScreen() {
                         </View>
                         <View style={{ flex: 1 }}>
                             <ThemedText type="code" style={styles.eventLabel}>
-                                {event.type === 'SUSPECT' ? 'ACTIVITÉ SUSPECTE' :
-                                    event.type === 'SUCCESS' ? 'MISSION RÉUSSIE' :
-                                        event.type === 'UNMASKED' ? 'DÉMASQUAGE' :
-                                            event.type === 'BLUFF_SUCCESS' ? 'BLUFF RÉUSSI' : 'ERREUR TACTIQUE'}
+                                {event.type === 'SUSPECT' ? t('mission.event_suspect') :
+                                    event.type === 'SUCCESS' ? t('mission.event_success') :
+                                        event.type === 'UNMASKED' ? t('mission.event_unmasked') :
+                                            event.type === 'BLUFF_SUCCESS' ? t('mission.event_bluff') : t('mission.event_error')}
                             </ThemedText>
                             <ThemedText style={styles.eventText} numberOfLines={2}>
-                                {event.type === 'SUSPECT' ? `${event.agentName} sous surveillance...` :
-                                    event.type === 'SUCCESS' ? `${event.agentName} s'est infiltré (+${event.points})` :
-                                        event.type === 'UNMASKED' ? `${event.targetName} a démasqué ${event.agentName} ! Mission : ${event.missionText}` :
-                                            event.type === 'BLUFF_SUCCESS' ? `${event.agentName} a piégé ${event.targetName} (+${event.points})` :
-                                                `${event.agentName} : accusation erronée sur ${event.targetName} (${event.points})`}
+                                {event.type === 'SUSPECT' ? t('mission.event_suspect_msg').replace('{{name}}', event.agentName || '') :
+                                    event.type === 'SUCCESS' ? t('mission.event_success_msg').replace('{{name}}', event.agentName || '').replace('{{points}}', event.points?.toString() || '0') :
+                                        event.type === 'UNMASKED' ? t('mission.event_unmasked_msg').replace('{{unmasker}}', event.targetName || '').replace('{{agent}}', event.agentName || '').replace('{{mission}}', event.missionText || '') :
+                                            event.type === 'BLUFF_SUCCESS' ? t('mission.event_bluff_msg').replace('{{name}}', event.agentName || '').replace('{{target}}', event.targetName || '').replace('{{points}}', event.points?.toString() || '0') :
+                                                t('mission.event_error_msg').replace('{{name}}', event.agentName || '').replace('{{target}}', event.targetName || '').replace('{{points}}', event.points?.toString() || '0')}
                             </ThemedText>
                         </View>
                     </Animated.View>
@@ -897,10 +891,10 @@ export default function ActiveMissionScreen() {
 
             <ConfirmationModal
                 visible={showAbortModal}
-                title="ABANDONNER ?"
-                message="Voulez-vous vraiment quitter cette mission ? Vous perdrez toute votre progression actuelle."
-                confirmLabel="QUITTER LA MISSION"
-                cancelLabel="RESTER"
+                title={t('mission.abort_title')}
+                message={t('mission.abort_msg')}
+                confirmLabel={t('mission.btn_leave_mission')}
+                cancelLabel={t('mission.btn_stay')}
                 variant="danger"
                 onConfirm={handleAbort}
                 onCancel={() => setShowAbortModal(false)}
@@ -908,10 +902,10 @@ export default function ActiveMissionScreen() {
 
             <ConfirmationModal
                 visible={showImpossibleModal}
-                title="DÉCLARER IMPOSSIBLE ?"
-                message="Affirmez-vous que ce défi ne peut être réalisé dans les conditions actuelles ? L'assemblée en jugera."
-                confirmLabel="NOUVEL OBJECTIF"
-                cancelLabel="ANNULER"
+                title={t('mission.impossible_title')}
+                message={t('mission.impossible_msg')}
+                confirmLabel={t('mission.btn_new_objective')}
+                cancelLabel={t('common.cancel')}
                 onConfirm={handleImpossible}
                 onCancel={() => setShowImpossibleModal(false)}
             />
@@ -1131,8 +1125,46 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         opacity: 0.9,
     },
-    completeBtn: {
+    tacticalCompleteBtn: {
+        height: 60,
+        backgroundColor: 'rgba(76, 175, 80, 0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(76, 175, 80, 0.3)',
+        borderRadius: 4,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
         marginTop: 10,
+    },
+    btnContentRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    tacticalCompleteText: {
+        fontSize: 14,
+        color: '#4CAF50',
+        letterSpacing: 2,
+    },
+    btnCornerTL: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 10,
+        height: 10,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderColor: '#4CAF50',
+    },
+    btnCornerBR: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 10,
+        height: 10,
+        borderBottomWidth: 2,
+        borderRightWidth: 2,
+        borderColor: '#4CAF50',
     },
     completedBadge: {
         backgroundColor: 'rgba(76, 175, 80, 0.15)',
@@ -1244,6 +1276,7 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         borderWidth: 1,
         borderColor: 'rgba(255,107,107,0.3)',
+        backgroundColor: 'rgba(255,107,107,0.05)',
     },
     unmaskBtnDisabled: {
         borderColor: 'rgba(255,255,255,0.05)',
@@ -1254,6 +1287,9 @@ const styles = StyleSheet.create({
         color: '#FF6B6B',
         fontWeight: 'bold',
         letterSpacing: 1,
+        textShadowColor: 'rgba(255, 107, 107, 0.4)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 8,
     },
     unmaskTextDisabled: {
         color: 'rgba(255,255,255,0.3)',
@@ -1267,7 +1303,8 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 40,
         borderWidth: 1,
-        borderColor: 'rgba(255,107,107,0.2)',
+        borderColor: 'rgba(255,107,107,0.3)',
+        backgroundColor: 'rgba(255,107,107,0.05)',
         borderRadius: 8,
     },
     leaveGameButtonDisabled: {
@@ -1276,9 +1313,12 @@ const styles = StyleSheet.create({
     },
     leaveGameText: {
         fontSize: 10,
-        color: 'rgba(255,107,107,0.6)',
+        color: '#FF6B6B',
         letterSpacing: 2,
         fontWeight: 'bold',
+        textShadowColor: 'rgba(255, 107, 107, 0.4)',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 8,
     },
     leaveGameTextDisabled: {
         color: 'rgba(255,255,255,0.15)',
@@ -1726,8 +1766,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     pendingBadgeBluff: {
-        backgroundColor: 'rgba(162, 155, 254, 0.1)',
-        borderColor: 'rgba(162, 155, 254, 0.3)',
+        backgroundColor: 'rgba(255, 217, 61, 0.1)',
+        borderColor: 'rgba(255, 217, 61, 0.3)',
     },
     rouletteOverlay: {
         position: 'absolute',
@@ -1857,15 +1897,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 6,
         paddingVertical: 12,
-        backgroundColor: 'rgba(123, 104, 238, 0.05)',
+        backgroundColor: 'rgba(255, 217, 61, 0.05)',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: 'rgba(123, 104, 238, 0.2)',
+        borderColor: 'rgba(255, 217, 61, 0.2)',
         borderStyle: 'dashed',
     },
     bluffBtnText: {
         fontSize: 9,
-        color: 'rgba(123, 104, 238, 0.8)',
+        color: '#FFD93D',
         fontWeight: 'bold',
         letterSpacing: 0.5,
     },
@@ -1899,7 +1939,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255, 107, 107, 0.3)',
     },
     eventToast_BLUFF_SUCCESS: {
-        borderColor: 'rgba(162, 155, 254, 0.3)',
+        borderColor: 'rgba(255, 217, 61, 0.3)',
     },
     eventToast_FAILED_UNMASK: {
         borderColor: 'rgba(255, 255, 255, 0.1)',
