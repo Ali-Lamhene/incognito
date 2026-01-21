@@ -12,6 +12,7 @@ type MissionSession = {
     duration?: string;
     protocol?: string;
     startedAt?: number;
+    pausedAt?: number;
     events?: Record<string, MissionEvent>;
 };
 
@@ -142,6 +143,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     duration: data.duration || prev.duration,
                     protocol: data.protocol || prev.protocol,
                     startedAt: data.startedAt || prev.startedAt,
+                    pausedAt: data.pausedAt || null,
                 } : null);
             } else {
                 setAgents([]);
@@ -363,12 +365,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
     const reportImpossibleChallenge = async (agentId: string) => {
         if (!session?.code) return;
-        await update(ref(db, `missions/${session.code}/agents/${agentId}`), {
-            incident: {
+        await update(ref(db, `missions/${session.code}`), {
+            [`agents/${agentId}/incident`]: {
                 type: 'IMPOSSIBLE',
                 reportedAt: Date.now(),
                 votes: {}
-            }
+            },
+            pausedAt: serverTimestamp()
         });
     };
 
@@ -400,6 +403,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             updates[`missions/${session.code}/agents/${agentId}/score`] = increment(-10);
         }
 
+        // Reprise du minuteur
+        const pausedAt = missionData.pausedAt;
+        const currentStartedAt = missionData.startedAt;
+        if (pausedAt && currentStartedAt) {
+            const pauseDuration = Date.now() - pausedAt;
+            updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
+            updates[`missions/${session.code}/pausedAt`] = null;
+        }
+
         await update(ref(db), updates);
     };
 
@@ -415,11 +427,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         if (!target || !validator) return false;
 
         // On place la cible en état de PROMPT
-        await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
-            type: 'UNMASK_PROMPT',
-            unmaskerId: validatorId,
-            unmaskerName: validator.name,
-            reportedAt: Date.now()
+        await update(ref(db, `missions/${session.code}`), {
+            [`agents/${targetId}/incident`]: {
+                type: 'UNMASK_PROMPT',
+                unmaskerId: validatorId,
+                unmaskerName: validator.name,
+                reportedAt: Date.now()
+            },
+            pausedAt: serverTimestamp() // On met en pause le minuteur
         });
 
         // Event initial
@@ -450,6 +465,23 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
             updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
             updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
+
+            // Nouvelle mission pour celui qui a été démasqué
+            const usedChallengeIds = Object.values(missionData.agents || {})
+                .map((a: any) => a.challenge?.id)
+                .filter(id => !!id);
+            const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
+            const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
+            updates[`missions/${session.code}/agents/${targetId}/challenge`] = nextChallenge;
+
+            // Reprise du minuteur
+            const currentStartedAt = missionData.startedAt;
+            const pausedAt = missionData.pausedAt;
+            if (pausedAt && currentStartedAt) {
+                const pauseDuration = Date.now() - pausedAt;
+                updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
+                updates[`missions/${session.code}/pausedAt`] = null;
+            }
 
             await update(ref(db), updates);
 
@@ -499,6 +531,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
             updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
 
+            // Nouvelle mission pour celui qui a été démasqué
+            const usedChallengeIds = Object.values(missionData.agents || {})
+                .map((a: any) => a.challenge?.id)
+                .filter(id => !!id);
+            const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
+            const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
+            updates[`missions/${session.code}/agents/${targetId}/challenge`] = nextChallenge;
+
             await pushEvent({
                 type: 'UNMASKED',
                 agentId: targetId,
@@ -522,6 +562,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         }
 
         updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
+
+        // Reprise du minuteur
+        const currentStartedAt = missionData.startedAt;
+        const pausedAt = missionData.pausedAt;
+        if (pausedAt && currentStartedAt) {
+            const pauseDuration = Date.now() - pausedAt;
+            updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
+            updates[`missions/${session.code}/pausedAt`] = null;
+        }
+
         await update(ref(db), updates);
     };
 

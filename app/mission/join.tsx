@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(255,255,255,0.1)',
     },
     scanTitle: {
-        fontSize: 18,
+        fontSize: 16,
         letterSpacing: 1,
         color: '#FFF',
     },

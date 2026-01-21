@@ -66,6 +66,7 @@
         "duration": "FENÊTRE OPÉRATIONNELLE",
         "protocol": "PROTOCOLE D'ENGAGEMENT",
         "btn_init": "INITIALISER LE SALON",
+        "duration_error": "VALEUR REFUSÉE PAR LE QG",
         "config_summary": "CONFIG",
         "mission_not_found": "MISSION INTROUVABLE : ACCÈS REFUSÉ",
         "join_code_label": "ACCRÉDITATION MISSION",

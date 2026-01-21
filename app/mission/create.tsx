@@ -132,18 +132,25 @@ export default function CreateMissionScreen() {
                                             </TouchableOpacity>
 
                                             {opt === 'CUSTOM' && isSelected && (
-                                                <Animated.View entering={FadeInDown} style={styles.customInputContainer}>
-                                                    <TextInput
-                                                        style={styles.customInput}
-                                                        value={customDuration}
-                                                        onChangeText={setCustomDuration}
-                                                        keyboardType="numeric"
-                                                        placeholder="60"
-                                                        placeholderTextColor="rgba(255,255,255,0.3)"
-                                                        maxLength={3}
-                                                    />
-                                                    <ThemedText type="code" style={styles.customInputUnit}>MIN</ThemedText>
-                                                </Animated.View>
+                                                <View>
+                                                    <Animated.View entering={FadeInDown} style={styles.customInputContainer}>
+                                                        <TextInput
+                                                            style={styles.customInput}
+                                                            value={customDuration}
+                                                            onChangeText={setCustomDuration}
+                                                            keyboardType="numeric"
+                                                            placeholder="60"
+                                                            placeholderTextColor="rgba(255,255,255,0.3)"
+                                                            maxLength={3}
+                                                        />
+                                                        <ThemedText type="code" style={styles.customInputUnit}>MIN</ThemedText>
+                                                    </Animated.View>
+                                                    {duration === 'CUSTOM' && parseInt(customDuration) <= 0 && (
+                                                        <ThemedText type="code" style={{ fontSize: 7, color: '#FF6B6B', marginTop: 4, position: 'absolute', bottom: -12, width: 100 }}>
+                                                            {t('mission.duration_error')}
+                                                        </ThemedText>
+                                                    )}
+                                                </View>
                                             )}
                                         </View>
                                     );
@@ -164,6 +171,7 @@ export default function CreateMissionScreen() {
                         <MainButton
                             title={t('mission.btn_init')}
                             onPress={handleCreate}
+                            disabled={duration === 'CUSTOM' && (parseInt(customDuration) <= 0 || isNaN(parseInt(customDuration)))}
                             style={styles.createButton}
                         />
                     </Animated.View>

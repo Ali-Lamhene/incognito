@@ -191,7 +191,10 @@ export default function ActiveMissionScreen() {
   const durationMs = parseDuration(session?.duration);
   const startTime = session?.startedAt || 0;
   const endTime = startTime + durationMs;
-  const timeLeft = Math.max(0, endTime - now);
+  const isPaused = !!session?.pausedAt;
+  const timeLeft = isPaused
+    ? Math.max(0, endTime - (session?.pausedAt || 0))
+    : Math.max(0, endTime - now);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -261,7 +264,7 @@ export default function ActiveMissionScreen() {
       setNow(currentTime); // Force UI update
 
       // Handle timeout if host
-      if (isHost && status === "ACTIVE") {
+      if (isHost && status === "ACTIVE" && !isPaused) {
         const dMs = parseDuration(session?.duration);
         const sTime = session?.startedAt || 0;
         if (sTime > 0 && currentTime >= sTime + dMs) {
@@ -514,7 +517,7 @@ export default function ActiveMissionScreen() {
                 style={[styles.statusDot, { backgroundColor: "#4CAF50" }]}
               />
               <ThemedText type="code" style={styles.statusText}>
-                {t("mission.agency_verified")}
+                #{me?.name?.toUpperCase()}
               </ThemedText>
             </View>
           </View>
@@ -1003,7 +1006,7 @@ export default function ActiveMissionScreen() {
                 ]}
               >
                 {isCompleted
-                  ? t("mission.verification_success")
+                  ? `#${me?.name?.toUpperCase()}`
                   : me?.incident
                     ? t("mission.identity_suspended")
                     : t("mission.identification_required")}

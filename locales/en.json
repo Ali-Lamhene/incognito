@@ -66,6 +66,7 @@
         "duration": "OPERATIONAL WINDOW",
         "protocol": "ENGAGEMENT PROTOCOL",
         "btn_init": "INITIALIZE LOBBY",
+        "duration_error": "VALUE REJECTED BY HQ",
         "config_summary": "CONFIG",
         "mission_not_found": "MISSION NOT FOUND: ACCESS DENIED",
         "join_code_label": "MISSION ACCREDITATION",
