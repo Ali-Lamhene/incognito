@@ -65,6 +65,7 @@ type SessionContextType = {
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
     startMission: () => Promise<void>;
+    finishMission: () => Promise<void>;
     checkSessionExists: (code: string) => Promise<boolean>;
     completeChallenge: (agentId: string) => Promise<void>;
     triggerBluff: (agentId: string) => Promise<void>;
@@ -248,6 +249,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         updates[`missions/${session.code}/startedAt`] = serverTimestamp();
 
         await update(ref(db), updates);
+    };
+
+    const finishMission = async () => {
+        if (!session || session.role !== 'HOST') return;
+        await update(ref(db, `missions/${session.code}`), {
+            status: 'FINISHED'
+        });
     };
 
     const clearSession = async (agentId?: string) => {
@@ -521,7 +529,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         <SessionContext.Provider value={{
             session, isInitialized, agents, events, status,
             createSession, joinSession, clearSession,
-            startMission, checkSessionExists, completeChallenge, triggerBluff, finalizeChallengePoints,
+            startMission, finishMission, checkSessionExists, completeChallenge, triggerBluff, finalizeChallengePoints,
             reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent,
             respondToUnmask, resolveUnmaskVote, pushEvent, triggerRouletteTirage
         }}>

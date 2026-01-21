@@ -173,7 +173,9 @@
         "secure_connection": "CONNEXION SÉCURISÉE...",
         "analyzing": "ANALYSE...",
         "detection": "DÉTECTION SUSPECT #82B",
-        "mission_start": "LANCEMENT OPÉRATION"
+        "mission_start": "LANCEMENT OPÉRATION",
+        "mission_complete": "SIGNAL INTERROMPU",
+        "exfiltration": "EXFILTRATION EN COURS..."
     },
     "permissions": {
         "camera_msg": "Accès caméra requis pour scanner les fréquences.",

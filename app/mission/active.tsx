@@ -23,6 +23,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConfirmationModal } from "../../components/ConfirmationModal";
+import { MissionCompleteSplashScreen } from "../../components/MissionCompleteSplashScreen";
 import { MissionStartSplashScreen } from "../../components/MissionStartSplashScreen";
 import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
@@ -149,6 +150,8 @@ export default function ActiveMissionScreen() {
     agents,
     events,
     status,
+    startMission,
+    finishMission,
     clearSession,
     completeChallenge,
     triggerBluff,
@@ -177,6 +180,7 @@ export default function ActiveMissionScreen() {
   >(null);
   const [now, setNow] = useState(Date.now());
   const [showStartSplash, setShowStartSplash] = useState(true);
+  const [showCompleteSplash, setShowCompleteSplash] = useState(false);
 
   const parseDuration = (d?: string) => {
     if (!d) return 0;
@@ -238,6 +242,11 @@ export default function ActiveMissionScreen() {
       return;
     }
 
+    if (status === "FINISHED") {
+      setShowCompleteSplash(true);
+      return;
+    }
+
     scanPos.value = withRepeat(withTiming(1, { duration: 3000 }), -1, false);
   }, [status]);
 
@@ -250,6 +259,15 @@ export default function ActiveMissionScreen() {
     const interval = setInterval(() => {
       const currentTime = Date.now();
       setNow(currentTime); // Force UI update
+
+      // Handle timeout if host
+      if (isHost && status === "ACTIVE") {
+        const dMs = parseDuration(session?.duration);
+        const sTime = session?.startedAt || 0;
+        if (sTime > 0 && currentTime >= sTime + dMs) {
+          finishMission();
+        }
+      }
 
       agents.forEach((agent) => {
         if (agent.pendingValidation) {
@@ -417,6 +435,20 @@ export default function ActiveMissionScreen() {
           }}
         />
         <MissionStartSplashScreen onComplete={() => setShowStartSplash(false)} />
+      </View>
+    );
+  }
+
+  if (showCompleteSplash) {
+    return (
+      <View style={[styles.container, { backgroundColor: '#000' }]}>
+        <Stack.Screen
+          options={{
+            animation: 'fade',
+            contentStyle: { backgroundColor: '#000' }
+          }}
+        />
+        <MissionCompleteSplashScreen onComplete={() => router.replace("/mission/results")} />
       </View>
     );
   }

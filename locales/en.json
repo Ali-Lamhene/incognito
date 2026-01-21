@@ -173,7 +173,9 @@
         "secure_connection": "SECURE CONNECTION...",
         "analyzing": "ANALYZING...",
         "detection": "DETECTING SUSPECT #82B",
-        "mission_start": "OPERATION LAUNCH"
+        "mission_start": "OPERATION LAUNCH",
+        "mission_complete": "SIGNAL TERMINATED",
+        "exfiltration": "EXFILTRATION IN PROGRESS..."
     },
     "permissions": {
         "camera_msg": "Camera access required to scan frequencies.",
