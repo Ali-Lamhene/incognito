@@ -178,6 +178,26 @@ export default function ActiveMissionScreen() {
   const [now, setNow] = useState(Date.now());
   const [showStartSplash, setShowStartSplash] = useState(true);
 
+  const parseDuration = (d?: string) => {
+    if (!d) return 0;
+    const match = d.match(/(\d+)/);
+    return match ? parseInt(match[1]) * 60 * 1000 : 0;
+  };
+
+  const durationMs = parseDuration(session?.duration);
+  const startTime = session?.startedAt || 0;
+  const endTime = startTime + durationMs;
+  const timeLeft = Math.max(0, endTime - now);
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const isLowTime = timeLeft < 60000 && timeLeft > 0;
+
   const scanPos = useSharedValue(0);
 
   const me = agents.find((a) => a.id === profile?.id);
@@ -911,9 +931,15 @@ export default function ActiveMissionScreen() {
             <ThemedText type="code" style={styles.terminalTitle}>
               {t("mission.terminal_v2")}
             </ThemedText>
-            <View style={styles.clearanceBadge}>
-              <ThemedText type="code" style={styles.clearanceText}>
-                {t("mission.top_secret")}
+
+            <View style={[styles.timerBadgeTerminal, isLowTime && styles.timerBadgeTerminalLow]}>
+              <Ionicons
+                name="time-outline"
+                size={10}
+                color={isLowTime ? "#FF6B6B" : "rgba(255,255,255,0.5)"}
+              />
+              <ThemedText type="code" style={[styles.timerValueTerminal, isLowTime && { color: "#FF6B6B" }]}>
+                {formatTime(timeLeft)}
               </ThemedText>
             </View>
           </View>
@@ -2292,6 +2318,26 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.6)",
     fontWeight: "bold",
     letterSpacing: 1,
+  },
+  timerBadgeTerminal: {
+    marginLeft: "auto",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  timerBadgeTerminalLow: {
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+    borderColor: "rgba(255, 107, 107, 0.2)",
+    borderWidth: 1,
+  },
+  timerValueTerminal: {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.6)",
+    fontFamily: "monospace",
   },
   impossibleBtn: {
     flexDirection: "row",

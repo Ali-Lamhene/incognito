@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MainButton } from '../../components/MainButton';
@@ -13,7 +13,7 @@ import { generateMissionCode } from '../../utils/missionCode';
 import { useTranslation } from '../../hooks/useTranslation';
 
 const THREAT_LEVELS = ['RECRUIT', 'AGENT', 'DOUBLE_ZERO'];
-const DURATIONS = ['15_MIN', '45_MIN', '2_HOURS', 'INFINITE'];
+const DURATIONS = ['15_MIN', '30_MIN', '45_MIN', 'CUSTOM'];
 const PROTOCOLS = ['SOCIAL', 'ABSURD', 'RISKY'];
 
 export default function CreateMissionScreen() {
@@ -24,14 +24,17 @@ export default function CreateMissionScreen() {
 
     // Mission Parameters State
     const [threatLevel, setThreatLevel] = useState('AGENT');
-    const [duration, setDuration] = useState('45_MIN');
+    const [duration, setDuration] = useState('15_MIN');
     const [protocol, setProtocol] = useState('SOCIAL');
+    const [customDuration, setCustomDuration] = useState('60');
 
     const handleCreate = async () => {
         const missionCode = generateMissionCode();
-        await createSession(missionCode, threatLevel);
+        const finalDuration = duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`);
 
-        console.log("Mission Initialized:", { threatLevel, duration, protocol, missionCode });
+        await createSession(missionCode, threatLevel, finalDuration, protocol);
+
+        console.log("Mission Initialized:", { threatLevel, duration: finalDuration, protocol, missionCode });
         router.push(`/lobby/${missionCode}`);
     };
 
@@ -102,7 +105,51 @@ export default function CreateMissionScreen() {
                     {/* Parameters Form */}
                     <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
                         {renderSelector(t('mission.threat_level'), THREAT_LEVELS, threatLevel, setThreatLevel)}
-                        {renderSelector(t('mission.duration'), DURATIONS, duration, setDuration)}
+                        <View style={styles.selectorContainer}>
+                            <ThemedText type="code" style={styles.selectorLabel}>{t('mission.duration')}</ThemedText>
+                            <View style={styles.optionsRow}>
+                                {DURATIONS.map((opt) => {
+                                    const isSelected = duration === opt;
+                                    return (
+                                        <View key={opt} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                            <TouchableOpacity
+                                                onPress={() => setDuration(opt)}
+                                                style={[
+                                                    styles.optionButton,
+                                                    isSelected && styles.optionButtonSelected
+                                                ]}
+                                            >
+                                                <ThemedText
+                                                    type="code"
+                                                    style={[
+                                                        styles.optionText,
+                                                        isSelected && styles.optionTextSelected
+                                                    ]}
+                                                >
+                                                    {t(`mission.options.${opt}`)}
+                                                </ThemedText>
+                                                {isSelected && <View style={styles.selectedCorner} />}
+                                            </TouchableOpacity>
+
+                                            {opt === 'CUSTOM' && isSelected && (
+                                                <Animated.View entering={FadeInDown} style={styles.customInputContainer}>
+                                                    <TextInput
+                                                        style={styles.customInput}
+                                                        value={customDuration}
+                                                        onChangeText={setCustomDuration}
+                                                        keyboardType="numeric"
+                                                        placeholder="60"
+                                                        placeholderTextColor="rgba(255,255,255,0.3)"
+                                                        maxLength={3}
+                                                    />
+                                                    <ThemedText type="code" style={styles.customInputUnit}>MIN</ThemedText>
+                                                </Animated.View>
+                                            )}
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        </View>
                         {renderSelector(t('mission.protocol'), PROTOCOLS, protocol, setProtocol)}
                     </Animated.View>
 
@@ -110,7 +157,7 @@ export default function CreateMissionScreen() {
                     <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
                         <View style={styles.summaryBox}>
                             <ThemedText type="code" style={styles.summaryText}>
-                                {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
+                                {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
                             </ThemedText>
                         </View>
 
@@ -247,5 +294,27 @@ const styles = StyleSheet.create({
     },
     createButton: {
         width: '100%',
+    },
+    customInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.4)',
+        paddingHorizontal: 5,
+        marginLeft: 5,
+    },
+    customInput: {
+        color: '#FFF',
+        fontFamily: 'monospace',
+        fontSize: 14,
+        width: 40,
+        textAlign: 'center',
+        paddingVertical: 0,
+    },
+    customInputUnit: {
+        fontSize: 8,
+        color: '#FFF',
+        opacity: 0.5,
+        marginLeft: 4,
     }
 });

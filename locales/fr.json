@@ -76,9 +76,11 @@
             "AGENT": "AGENT",
             "DOUBLE_ZERO": "DOUBLE ZÉRO",
             "15_MIN": "15 MIN",
+            "30_MIN": "30 MIN",
             "45_MIN": "45 MIN",
             "2_HOURS": "2 HEURES",
             "INFINITE": "∞",
+            "CUSTOM": "PERSO",
             "SOCIAL": "SOCIAL",
             "ABSURD": "ABSURDE",
             "RISKY": "RISQUÉ"

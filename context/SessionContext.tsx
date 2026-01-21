@@ -9,6 +9,9 @@ type MissionSession = {
     role: 'HOST' | 'AGENT';
     createdAt: number;
     threatLevel?: string;
+    duration?: string;
+    protocol?: string;
+    startedAt?: number;
     events?: Record<string, MissionEvent>;
 };
 
@@ -58,7 +61,7 @@ type SessionContextType = {
     agents: Agent[];
     events: MissionEvent[];
     status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
-    createSession: (code: string, threatLevel: string) => Promise<void>;
+    createSession: (code: string, threatLevel: string, duration: string, protocol: string) => Promise<void>;
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
     startMission: () => Promise<void>;
@@ -130,6 +133,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 } else {
                     setEvents([]);
                 }
+
+                // Sync Session Metadata
+                setSession(prev => prev ? {
+                    ...prev,
+                    threatLevel: data.threatLevel || prev.threatLevel,
+                    duration: data.duration || prev.duration,
+                    protocol: data.protocol || prev.protocol,
+                    startedAt: data.startedAt || prev.startedAt,
+                } : null);
             } else {
                 setAgents([]);
                 setEvents([]);
@@ -163,16 +175,20 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
-    const createSession = async (code: string, threatLevel: string) => {
+    const createSession = async (code: string, threatLevel: string, duration: string, protocol: string) => {
         const newSession: MissionSession = {
             code,
             role: 'HOST',
             createdAt: Date.now(),
-            threatLevel
+            threatLevel,
+            duration,
+            protocol
         };
 
         await set(ref(db, `missions/${code}`), {
             threatLevel,
+            duration,
+            protocol,
             createdAt: serverTimestamp(),
             status: 'LOBBY',
             hostId: 'TBD'
