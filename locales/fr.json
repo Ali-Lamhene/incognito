@@ -159,7 +159,7 @@
         "event_bluff": "BLUFF RÉUSSI",
         "event_error": "ERREUR TACTIQUE",
         "event_suspect_msg": "{{name}} sous surveillance...",
-        "event_success_msg": "{{name}} s'est infiltré (+{{points}})",
+        "event_success_msg": "{{name}} a réussi : {{mission}} (+{{points}})",
         "event_unmasked_msg": "{{unmasker}} a démasqué {{agent}} ! Mission : {{mission}}",
         "event_bluff_msg": "{{name}} a piégé {{target}} (+{{points}})",
         "event_error_msg": "{{name}} : accusation erronée sur {{target}} ({{points}})",

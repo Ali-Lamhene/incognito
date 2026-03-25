@@ -354,6 +354,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     type: 'SUCCESS',
                     agentId,
                     agentName: agentData.name,
+                    missionText: agentData.pendingValidation.challengeText,
                     points: 10
                 });
             }

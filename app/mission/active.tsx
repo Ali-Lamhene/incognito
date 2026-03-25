@@ -1485,6 +1485,7 @@ export default function ActiveMissionScreen() {
                     : event.type === "SUCCESS"
                       ? t("mission.event_success_msg")
                         .replace("{{name}}", event.agentName || "")
+                        .replace("{{mission}}", event.missionText || "")
                         .replace(
                           "{{points}}",
                           event.points?.toString() || "0",
