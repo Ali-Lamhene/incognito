@@ -13,7 +13,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 export default function SettingsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { soundEnabled, notificationsEnabled, language, toggleSound, toggleNotifications, setLanguage } = useSettingsStore();
+    const { soundEnabled, language, toggleSound, setLanguage } = useSettingsStore();
     const { profile } = useProfileStore();
     const { t } = useTranslation();
 
@@ -69,21 +69,6 @@ export default function SettingsScreen() {
                         <Switch
                             value={soundEnabled}
                             onValueChange={toggleSound}
-                            trackColor={{ false: '#333', true: '#4ADE80' }}
-                            thumbColor={'#FFF'}
-                        />
-                    </View>
-
-
-                    {/* Notifications */}
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLabel}>
-                            <Ionicons name="notifications-outline" size={20} color="#FFF" />
-                            <ThemedText type="default">{t('settings.notifications')}</ThemedText>
-                        </View>
-                        <Switch
-                            value={notificationsEnabled}
-                            onValueChange={toggleNotifications}
                             trackColor={{ false: '#333', true: '#4ADE80' }}
                             thumbColor={'#FFF'}
                         />

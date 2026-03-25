@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Modal, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Switch, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
+import { useSettingsStore } from '../store/settingsStore';
 import { MainButton } from './MainButton';
 import { ThemedText } from './ThemedText';
 
@@ -24,6 +25,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
     const [selectedEmblem, setSelectedEmblem] = useState(initialData?.avatar || AGENT_EMBLEMS[0]);
     const [selectedColor, setSelectedColor] = useState(initialData?.color || AGENT_COLORS[0]);
     const { t } = useTranslation();
+    const { soundEnabled, language, toggleSound, setLanguage } = useSettingsStore();
 
     // Reset state when visible or initialData changes
     React.useEffect(() => {
@@ -69,7 +71,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                             <View style={[styles.line, { backgroundColor: '#FFF' }]} />
                         </View>
 
-                        <View style={styles.formContainer}>
+                        <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
                             <View style={styles.inputGroup}>
                                 <ThemedText type="code" style={styles.label}>{t('profile.label_codename')}</ThemedText>
                                 <TextInput
@@ -105,13 +107,53 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                                     ))}
                                 </View>
                             </View>
-                        </View>
+
+                            {/* New Settings Section */}
+                            <View style={styles.settingsSection}>
+                                <ThemedText type="code" style={styles.label}>{t('settings.section_device')}</ThemedText>
+                                
+                                <View style={styles.settingRow}>
+                                    <View style={styles.settingLabel}>
+                                        <Ionicons name="volume-high-outline" size={16} color="#FFF" />
+                                        <ThemedText type="code" style={styles.settingText}>{t('settings.audio_fx')}</ThemedText>
+                                    </View>
+                                    <Switch
+                                        value={soundEnabled}
+                                        onValueChange={toggleSound}
+                                        trackColor={{ false: '#333', true: '#FFF' }}
+                                        thumbColor={soundEnabled ? '#000' : '#FFF'}
+                                        style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+                                    />
+                                </View>
+
+                                <View style={styles.settingRow}>
+                                    <View style={styles.settingLabel}>
+                                        <Ionicons name="language-outline" size={16} color="#FFF" />
+                                        <ThemedText type="code" style={styles.settingText}>{t('settings.language')}</ThemedText>
+                                    </View>
+                                    <View style={styles.langToggle}>
+                                        <TouchableOpacity
+                                            onPress={() => setLanguage('fr')}
+                                            style={[styles.langOption, language === 'fr' && styles.langActive]}
+                                        >
+                                            <ThemedText type="code" style={[styles.langText, { color: language === 'fr' ? '#000' : '#FFF' }]}>FR</ThemedText>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => setLanguage('en')}
+                                            style={[styles.langOption, language === 'en' && styles.langActive]}
+                                        >
+                                            <ThemedText type="code" style={[styles.langText, { color: language === 'en' ? '#000' : '#FFF' }]}>EN</ThemedText>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </ScrollView>
 
                         <MainButton
                             title={initialData ? t('common.confirm') : t('profile.btn_create')}
                             onPress={handleConfirm}
                             style={[styles.button, { backgroundColor: '#FFF' }]}
-                            textStyle={{ color: '#000' }}
+                            textStyle={{ color: '#000', fontSize: 12 }}
                         />
 
                         {/* Decoration */}
@@ -163,10 +205,11 @@ const styles = StyleSheet.create({
         borderRadius: 1,
     },
     formContainer: {
-        gap: 20,
+        maxHeight: 400,
     },
     inputGroup: {
         gap: 10,
+        marginBottom: 20,
     },
     label: {
         fontSize: 10,
@@ -218,6 +261,50 @@ const styles = StyleSheet.create({
     button: {
         marginTop: 10,
         borderWidth: 0,
+        height: 50,
+    },
+    settingsSection: {
+        marginTop: 10,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        gap: 10,
+    },
+    settingRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 5,
+    },
+    settingLabel: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    settingText: {
+        fontSize: 10,
+        opacity: 0.8,
+    },
+    langToggle: {
+        flexDirection: 'row',
+        gap: 4,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        padding: 2,
+        borderRadius: 2,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
+    },
+    langOption: {
+        paddingVertical: 2,
+        paddingHorizontal: 6,
+        borderRadius: 1,
+    },
+    langActive: {
+        backgroundColor: '#FFF',
+    },
+    langText: {
+        fontSize: 8,
+        fontWeight: 'bold',
     },
     cornerTL: { position: 'absolute', top: -1, left: -1, width: 10, height: 10, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
     cornerBR: { position: 'absolute', bottom: -1, right: -1, width: 10, height: 10, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
