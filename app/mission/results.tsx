@@ -10,6 +10,7 @@ import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useProfileStore } from "../../store/profileStore";
+import { ConfirmationModal } from "../../components/ConfirmationModal";
 
 export default function ResultsScreen() {
     const router = useRouter();
@@ -21,6 +22,7 @@ export default function ResultsScreen() {
     const [frozenAgents] = React.useState([...agents]);
     const sortedAgents = [...frozenAgents].sort((a, b) => (b.score || 0) - (a.score || 0));
     const isHost = session?.role === 'HOST';
+    const [showExitModal, setShowExitModal] = React.useState(false);
 
     const handleBackHome = async () => {
         await clearSession(profile?.id);
@@ -41,8 +43,16 @@ export default function ResultsScreen() {
 
             {/* CONFIDENTIAL Watermark */}
             <View style={styles.watermarkContainer} pointerEvents="none">
-                <ThemedText type="futuristic" style={styles.watermarkText}>CONFIDENTIAL</ThemedText>
+                <ThemedText type="futuristic" style={styles.watermarkText}>{t('results.confidential')}</ThemedText>
             </View>
+
+            <ConfirmationModal
+                visible={showExitModal}
+                title={t('lobby.leave_title')}
+                message={t('mission.abort_msg')}
+                onConfirm={handleBackHome}
+                onCancel={() => setShowExitModal(false)}
+            />
 
             <ScrollView
                 style={{ flex: 1, marginBottom: insets.bottom }}
@@ -54,11 +64,11 @@ export default function ResultsScreen() {
                     <View style={styles.headerTop}>
                         <View style={styles.statusDot} />
                         <ThemedText type="code" style={styles.missionLabel}>
-                            MISSION_REPORT // {session?.code}
+                            {t('results.report_id')} // {session?.code}
                         </ThemedText>
                     </View>
                     <ThemedText type="futuristic" style={styles.screenTitle}>
-                        FINAL DEBRIEF
+                        {t('results.debrief')}
                     </ThemedText>
                     <View style={styles.headerLineContainer}>
                         <View style={styles.headerLine} />
@@ -70,14 +80,14 @@ export default function ResultsScreen() {
                 {/* Summary Stats Card */}
                 <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.statsCard}>
                     <View style={styles.statItem}>
-                        <ThemedText type="code" style={styles.statLabel}>AGENTS_DEPLOYED</ThemedText>
+                        <ThemedText type="code" style={styles.statLabel}>{t('results.agents_deployed')}</ThemedText>
                         <ThemedText type="futuristic" style={styles.statValue}>{agents.length}</ThemedText>
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <ThemedText type="code" style={styles.statLabel}>THREAT_LEVEL</ThemedText>
+                        <ThemedText type="code" style={styles.statLabel}>{t('results.threat_level')}</ThemedText>
                         <ThemedText type="futuristic" style={[styles.statValue, { color: '#FF6B6B' }]}>
-                            {session?.threatLevel === 'DOUBLE_ZERO' ? 'MAX' : session?.threatLevel || 'AGENT'}
+                            {session?.threatLevel === 'DOUBLE_ZERO' ? 'MAX' : session?.threatLevel ? t(`mission.options.${session.threatLevel}`) : 'AGENT'}
                         </ThemedText>
                     </View>
                 </Animated.View>
@@ -106,7 +116,7 @@ export default function ResultsScreen() {
                             style={[styles.podiumPlace, styles.firstPlace]}
                         >
                             <View style={styles.mvpBadge}>
-                                <ThemedText type="code" style={styles.mvpText}>MVP</ThemedText>
+                                <ThemedText type="code" style={styles.mvpText}>{t('results.mvp')}</ThemedText>
                             </View>
                             <View style={styles.mvpGlow} />
                             <Ionicons name={sortedAgents[0].avatar as any || "person"} size={44} color="#FFF" />
@@ -114,7 +124,7 @@ export default function ResultsScreen() {
                                 {sortedAgents[0].name.toUpperCase()}
                             </ThemedText>
                             <ThemedText type="futuristic" style={styles.firstPlaceScore}>{sortedAgents[0].score || 0}</ThemedText>
-                            <ThemedText type="code" style={styles.creditsLabel}>CREDITS</ThemedText>
+                            <ThemedText type="code" style={styles.creditsLabel}>{t('results.credits')}</ThemedText>
                         </Animated.View>
                     )}
 
@@ -137,9 +147,9 @@ export default function ResultsScreen() {
                 {/* Agents Table List */}
                 <Animated.View entering={FadeInUp.delay(800).duration(600)} style={styles.tableContainer}>
                     <View style={styles.tableHeader}>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>OPERATIONAL_UNIT</ThemedText>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>STATUS</ThemedText>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>RANK_PTS</ThemedText>
+                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.operational_unit')}</ThemedText>
+                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.status')}</ThemedText>
+                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.rank_pts')}</ThemedText>
                     </View>
 
                     {sortedAgents.map((agent, index) => (
@@ -159,7 +169,7 @@ export default function ResultsScreen() {
                             <View style={styles.rowStatusBox}>
                                 <View style={[styles.statusIndicator, (agent.score || 0) > 0 ? styles.statusPositive : styles.statusNegative]} />
                                 <ThemedText type="code" style={styles.statusLabelSmall}>
-                                    {(agent.score || 0) > 0 ? 'CLEARED' : 'SUSPICIOUS'}
+                                    {(agent.score || 0) > 0 ? t('results.cleared') : t('results.suspicious')}
                                 </ThemedText>
                             </View>
 
@@ -171,8 +181,8 @@ export default function ResultsScreen() {
                 {/* Footer Action */}
                 <Animated.View entering={FadeInUp.delay(1200).duration(600)} style={styles.footer}>
                     <MainButton
-                        title="RETOURNER AU QUARTIER GÉNÉRAL"
-                        onPress={handleBackHome}
+                        title={t('results.return_to_hq')}
+                        onPress={() => setShowExitModal(true)}
                         style={styles.homeButton}
                         textStyle={{ fontSize: 11, letterSpacing: 1 }}
                     />

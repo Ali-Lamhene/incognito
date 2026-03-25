@@ -279,7 +279,7 @@ export default function AgentHomeScreen() {
 
                 <View style={styles.brandingFooter}>
                   <ThemedText type="code" style={styles.classTag}>
-                    MISSION_ID: #{session ? session.code : "INFIL-9"} // {session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS"}
+                    {t('results.report_id')}: #{session ? session.code : "INFIL-9"} // {session ? t('mission.op_in_progress') : "CLASSIFIED_ACCESS"}
                   </ThemedText>
                 </View>
 
@@ -297,19 +297,19 @@ export default function AgentHomeScreen() {
           <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
             <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
               <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
-                {session ? `ACTIVE_PROTOCOL: ${session.code}` : 'DEPLOYMENT_PROTOCOL'}
+                {session ? `${t('home.active_protocol')}: ${session.code}` : t('home.deployment_protocol')}
               </ThemedText>
             </View>
 
             {session ? (
               <>
                 <MainButton
-                  title="RETOURNER AU SALON"
+                  title={t('home.return_to_lobby')}
                   onPress={() => router.push(`/lobby/${session.code}`)}
                   style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
                 />
                 <MainButton
-                  title="ABANDONNER LA MISSION"
+                  title={t('home.abort_mission')}
                   variant="outline"
                   onPress={async () => {
                     await clearSession();

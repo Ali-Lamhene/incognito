@@ -1232,7 +1232,7 @@ export default function ActiveMissionScreen() {
           <View style={styles.liveIndicator}>
             <View style={styles.liveDot} />
             <ThemedText type="code" style={styles.liveText}>
-              LIVE
+              {t('mission.live') || 'LIVE'}
             </ThemedText>
           </View>
         </View>

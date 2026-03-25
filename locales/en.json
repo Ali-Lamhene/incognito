@@ -15,7 +15,11 @@
         "create_mission_subtitle": "NEW OPERATION",
         "join_mission_title": "SCAN QR CODE",
         "join_mission_subtitle": "JOIN INFILTRATION",
-        "rules": "RULES"
+        "rules": "RULES",
+        "return_to_lobby": "RETURN TO LOBBY",
+        "abort_mission": "ABORT MISSION",
+        "deployment_protocol": "DEPLOYMENT PROTOCOL",
+        "active_protocol": "ACTIVE_PROTOCOL"
     },
     "settings": {
         "title": "SYSTEM CONFIG",
@@ -168,6 +172,21 @@
         "btn_new_objective": "NEW OBJECTIVE",
         "splash_active_title": "MISSION ACTIVATED",
         "splash_active_msg": "ALL AGENTS DEPLOYED. MAINTAIN COVER."
+    },
+    "results": {
+        "confidential": "CONFIDENTIAL",
+        "debrief": "FINAL DEBRIEF",
+        "agents_deployed": "AGENTS DEPLOYED",
+        "threat_level": "THREAT LEVEL",
+        "mvp": "MVP",
+        "credits": "CREDITS",
+        "operational_unit": "OPERATIONAL UNIT",
+        "status": "STATUS",
+        "rank_pts": "RANK PTS",
+        "cleared": "CLEARED",
+        "suspicious": "SUSPICIOUS",
+        "return_to_hq": "RETURN TO HEADQUARTERS",
+        "report_id": "MISSION_REPORT"
     },
     "splash": {
         "init": "SYSTEM INITIALIZATION...",

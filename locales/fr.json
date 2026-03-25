@@ -15,7 +15,11 @@
         "create_mission_subtitle": "NOUVELLE OPÉRATION",
         "join_mission_title": "SCANNER UN QR CODE",
         "join_mission_subtitle": "REJOINDRE L'INFILTRATION",
-        "rules": "RÈGLES"
+        "rules": "RÈGLES",
+        "return_to_lobby": "RETOURNER AU SALON",
+        "abort_mission": "ABANDONNER LA MISSION",
+        "deployment_protocol": "PROTOCOLE DE DÉPLOIEMENT",
+        "active_protocol": "PROTOCOLE ACTIF"
     },
     "settings": {
         "title": "CONFIG SYSTÈME",
@@ -168,6 +172,21 @@
         "btn_new_objective": "NOUVEL OBJECTIF",
         "splash_active_title": "MISSION ACTIVÉE",
         "splash_active_msg": "TOUS LES AGENTS SONT DÉPLOYÉS. RESTEZ DISCRETS."
+    },
+    "results": {
+        "confidential": "CONFIDENTIEL",
+        "debrief": "DÉBRIEFING FINAL",
+        "agents_deployed": "AGENTS DÉPLOYÉS",
+        "threat_level": "NIVEAU DE MENACE",
+        "mvp": "MVP",
+        "credits": "CRÉDITS",
+        "operational_unit": "UNITÉ OPÉRATIONNELLE",
+        "status": "STATUT",
+        "rank_pts": "PTS DE RANG",
+        "cleared": "ACQUITTÉ",
+        "suspicious": "SUSPECT",
+        "return_to_hq": "RETOURNER AU QUARTIER GÉNÉRAL",
+        "report_id": "RAPPORT_MISSION"
     },
     "splash": {
         "init": "INITIALISATION SYSTÈME...",
