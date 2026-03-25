@@ -18,6 +18,7 @@ import { AgentSplashScreen } from '../components/AgentSplashScreen';
 import { IncognitoLogo } from '../components/IncognitoLogo';
 import { MainButton } from '../components/MainButton';
 import { ProfileSetupModal } from '../components/ProfileSetupModal';
+import { RulesModal } from '../components/RulesModal';
 import { ThemedText } from '../components/ThemedText';
 import { Colors } from '../constants/Colors';
 import { useAppState } from '../store/appState';
@@ -42,6 +43,7 @@ export default function AgentHomeScreen() {
   const [showSplash, setShowSplash] = useState(!hasLaunched);
   // Show setup only if splash is done AND profile not set
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   const missionIdDisplay = session ? session.code : "NO_ACTIVE_MISSION";
   const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
@@ -50,6 +52,16 @@ export default function AgentHomeScreen() {
   const dataScrollY = useSharedValue(0);
   const scannerTranslateY = useSharedValue(0);
   const scanlineY = useSharedValue(-height);
+  const rulesPulse = useSharedValue(1);
+
+  useEffect(() => {
+    // Pulse animation for rules button
+    rulesPulse.value = withRepeat(
+      withTiming(1.1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+  }, []);
 
   useEffect(() => {
     // If not showing splash and profile not setup, show modal
@@ -113,6 +125,11 @@ export default function AgentHomeScreen() {
     transform: [{ translateY: dataScrollY.value }],
   }));
 
+  const rulesPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: rulesPulse.value }],
+    opacity: 0.8 + (rulesPulse.value - 1) * 2,
+  }));
+
   if (showSplash) {
     return <AgentSplashScreen onComplete={handleSplashFinish} />;
   }
@@ -123,6 +140,11 @@ export default function AgentHomeScreen() {
         visible={showProfileSetup}
         onComplete={handleProfileComplete}
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
+      />
+      
+      <RulesModal
+        visible={showRules}
+        onClose={() => setShowRules(false)}
       />
 
       {/* BACKGROUND: Blurred Secret Agent Desk */}
@@ -194,10 +216,12 @@ export default function AgentHomeScreen() {
                 <Ionicons name="options" size={20} color="#FFF" style={{ opacity: 0.8 }} />
               </TouchableOpacity>
               <View style={styles.separatorV} />
-              <View style={styles.signalBadge}>
-                <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
-                <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.status_online')}</ThemedText>
-              </View>
+              <Animated.View style={rulesPulseStyle}>
+                <TouchableOpacity onPress={() => setShowRules(true)} style={styles.signalBadge}>
+                  <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
+                  <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.rules')}</ThemedText>
+                </TouchableOpacity>
+              </Animated.View>
             </View>
           </Animated.View>
 

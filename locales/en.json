@@ -14,7 +14,8 @@
         "create_mission_title": "CREATE MISSION",
         "create_mission_subtitle": "NEW OPERATION",
         "join_mission_title": "SCAN QR CODE",
-        "join_mission_subtitle": "JOIN INFILTRATION"
+        "join_mission_subtitle": "JOIN INFILTRATION",
+        "rules": "RULES"
     },
     "settings": {
         "title": "SYSTEM CONFIG",
@@ -181,5 +182,22 @@
     "permissions": {
         "camera_msg": "Camera access required to scan frequencies.",
         "camera_btn": "GRANT ACCESS"
+    },
+    "rules": {
+        "title": "OPERATIONAL PROTOCOLS",
+        "intro": "Welcome Agent. Here are your infiltration directives:",
+        "rule_1_title": "01. SECRET OBJECTIVE",
+        "rule_1_text": "Each agent receives a confidential mission. Your goal is to accomplish it without being detected.",
+        "rule_2_title": "02. INFILTRATION AND DOUBLE AGENT",
+        "rule_2_text": "Observe other agents. Try to guess their secret objective while protecting your own.",
+        "rule_3_title": "03. THE ART OF BLUFFING",
+        "rule_3_text": "Act as if you have a different objective. If you trap another agent, you earn bonus points.",
+        "rule_4_title": "04. UNMASKING PROTOCOL",
+        "rule_4_text": "If you unmask an agent, report it. If they deny it, the assembly must vote to decide.",
+        "rule_5_title": "05. VOTING AND JUDGEMENT",
+        "rule_5_text": "The assembly votes to validate an unmasking. A majority is required to convict a suspect.",
+        "rule_6_title": "06. RANDOM DESIGNATION",
+        "rule_6_text": "If no majority is reached during the vote, HQ (the system) decides randomly.",
+        "footer": "Good luck, Agent. HQ is counting on you."
     }
 }

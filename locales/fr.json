@@ -14,7 +14,8 @@
         "create_mission_title": "CRÉER UNE MISSION",
         "create_mission_subtitle": "NOUVELLE OPÉRATION",
         "join_mission_title": "SCANNER UN QR CODE",
-        "join_mission_subtitle": "REJOINDRE L'INFILTRATION"
+        "join_mission_subtitle": "REJOINDRE L'INFILTRATION",
+        "rules": "RÈGLES"
     },
     "settings": {
         "title": "CONFIG SYSTÈME",
@@ -181,5 +182,22 @@
     "permissions": {
         "camera_msg": "Accès caméra requis pour scanner les fréquences.",
         "camera_btn": "AUTORISER L'ACCÈS"
+    },
+    "rules": {
+        "title": "PROTOCOLES D'OPÉRATION",
+        "intro": "Bienvenue Agent. Voici vos directives pour l'infiltration :",
+        "rule_1_title": "01. OBJECTIF SECRET",
+        "rule_1_text": "Chaque agent reçoit une mission confidentielle. Votre but est de l'accomplir sans vous faire repérer.",
+        "rule_2_title": "02. INFILTRATION ET AGENT DOUBLE",
+        "rule_2_text": "Observez les autres agents. Essayez de deviner leur objectif secret tout en protégeant le vôtre.",
+        "rule_3_title": "03. L'ART DU BLUFF",
+        "rule_3_text": "Agissez comme si vous aviez un objectif différent. Si vous piégez un autre agent, vous gagnez des points bonus.",
+        "rule_4_title": "04. PROTOCOLE DE DÉMASQUAGE",
+        "rule_4_text": "Si vous démasquez un agent, signalez-le. S'il nie, l'assemblée devra voter pour trancher.",
+        "rule_5_title": "05. VOTE ET JUGEMENT",
+        "rule_5_text": "L'assemblée vote pour valider ou non un démasquage. Une majorité est requise pour condamner un suspect.",
+        "rule_6_title": "06. DÉSIGNATION ALÉATOIRE",
+        "rule_6_text": "Si aucune majorité n'est atteinte lors du vote, le QG (le système) tranche de manière aléatoire.",
+        "footer": "Bonne chance, Agent. Le QG compte sur vous."
     }
 }
