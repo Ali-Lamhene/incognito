@@ -13,6 +13,7 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
+import SoundService from '../services/SoundService';
 import { ThemedText } from './ThemedText';
 
 const { width, height } = Dimensions.get('window');
@@ -32,6 +33,9 @@ export function MissionCompleteSplashScreen({ onComplete }: MissionCompleteSplas
     const overlayOpacity = useSharedValue(0.8);
 
     useEffect(() => {
+        // Play success sound
+        SoundService.playSFX('SUCCESS');
+
         // Initial entrance
         opacity.value = withTiming(1, { duration: 500 });
 

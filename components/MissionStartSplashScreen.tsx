@@ -10,6 +10,7 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
+import SoundService from '../services/SoundService';
 import { ThemedText } from './ThemedText';
 
 const { width, height } = Dimensions.get('window');
@@ -29,6 +30,9 @@ export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScree
     const progress = useSharedValue(0);
 
     useEffect(() => {
+        // Play mission start sound
+        SoundService.playSFX('MISSION_START');
+
         // Entrance sequence
         contentOpacity.value = withTiming(1, { duration: 1200 });
         imageScale.value = withTiming(1, { duration: 7000, easing: Easing.out(Easing.quad) });
