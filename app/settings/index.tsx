@@ -13,7 +13,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 export default function SettingsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { soundEnabled, language, toggleSound, setLanguage } = useSettingsStore();
+    const { soundEnabled, musicEnabled, hapticsEnabled, language, toggleSound, toggleMusic, toggleHaptics, setLanguage } = useSettingsStore();
     const { profile } = useProfileStore();
     const { t } = useTranslation();
 
@@ -60,7 +60,7 @@ export default function SettingsScreen() {
                 <View style={styles.section}>
                     <ThemedText type="code" style={styles.sectionTitle}>{t('settings.section_device')}</ThemedText>
 
-                    {/* Audio */}
+                    {/* Audio SFX */}
                     <View style={styles.settingRow}>
                         <View style={styles.settingLabel}>
                             <Ionicons name="volume-high-outline" size={20} color="#FFF" />
@@ -69,6 +69,34 @@ export default function SettingsScreen() {
                         <Switch
                             value={soundEnabled}
                             onValueChange={toggleSound}
+                            trackColor={{ false: '#333', true: '#4ADE80' }}
+                            thumbColor={'#FFF'}
+                        />
+                    </View>
+
+                    {/* Ambient Music */}
+                    <View style={styles.settingRow}>
+                        <View style={styles.settingLabel}>
+                            <Ionicons name="musical-notes-outline" size={20} color="#FFF" />
+                            <ThemedText type="default">{t('settings.ambient_music') || 'Musique d\'ambiance'}</ThemedText>
+                        </View>
+                        <Switch
+                            value={musicEnabled}
+                            onValueChange={toggleMusic}
+                            trackColor={{ false: '#333', true: '#4ADE80' }}
+                            thumbColor={'#FFF'}
+                        />
+                    </View>
+
+                    {/* Haptics */}
+                    <View style={styles.settingRow}>
+                        <View style={styles.settingLabel}>
+                            <Ionicons name="pulse" size={20} color="#FFF" />
+                            <ThemedText type="default">{t('settings.haptics') || 'Vibrations (Mode Furtif)'}</ThemedText>
+                        </View>
+                        <Switch
+                            value={hapticsEnabled}
+                            onValueChange={toggleHaptics}
                             trackColor={{ false: '#333', true: '#4ADE80' }}
                             thumbColor={'#FFF'}
                         />

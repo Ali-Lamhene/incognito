@@ -26,6 +26,8 @@
         "section_profile": "PROFIL AGENT",
         "section_device": "PARAMÈTRES APPAREIL",
         "audio_fx": "EFFETS AUDIO",
+        "ambient_music": "MUSIQUE AMBIANCE",
+        "haptics": "VIBRATIONS (FURTIF)",
         "notifications": "NOTIFICATIONS",
         "language": "LANGUE",
         "section_info": "INFOS SYSTÈME",

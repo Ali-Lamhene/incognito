@@ -28,6 +28,7 @@ import { MissionStartSplashScreen } from "../../components/MissionStartSplashScr
 import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
+import SoundService from "../../services/SoundService";
 import { useProfileStore } from "../../store/profileStore";
 
 const RouletteStrip = ({
@@ -250,6 +251,9 @@ export default function ActiveMissionScreen() {
       return;
     }
 
+    // Stop home ambient music when mission is active
+    SoundService.stopBackgroundMusic();
+
     scanPos.value = withRepeat(withTiming(1, { duration: 3000 }), -1, false);
   }, [status]);
 
@@ -282,7 +286,10 @@ export default function ActiveMissionScreen() {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      SoundService.stopBackgroundMusic(); // Safety stop
+    };
   }, [agents]);
 
   // Toast management: appear for 5s then disappear
@@ -309,6 +316,7 @@ export default function ActiveMissionScreen() {
   const handleComplete = async () => {
     if (profile?.id) {
       await completeChallenge(profile.id);
+      SoundService.playSFX('SUCCESS');
       setIsRevealed(false); // Re-hide after completion
     }
   };
@@ -345,6 +353,7 @@ export default function ActiveMissionScreen() {
 
   const handleConfirmUnmask = async () => {
     if (profile?.id && targetIdToUnmask) {
+      SoundService.playSFX('TENSION_STINGER');
       await unmaskAgent(targetIdToUnmask, profile.id);
       setShowUnmaskModal(false);
       setTargetIdToUnmask(null);
@@ -427,6 +436,22 @@ export default function ActiveMissionScreen() {
     agentInIncident?.incident?.rouletteWinnerId,
     processedRouletteIncident,
   ]);
+
+  // Handle Heartbeat sound when time is low
+  useEffect(() => {
+    if (isLowTime && status === "ACTIVE" && !isPaused) {
+      SoundService.playBackgroundMusic('HEARTBEAT');
+    } else if (status === "ACTIVE") {
+      SoundService.stopBackgroundMusic();
+    }
+  }, [isLowTime, status, isPaused]);
+
+  // Handle Roulette sound
+  useEffect(() => {
+    if (isRouletteActive) {
+      SoundService.playSFX('ROULETTE');
+    }
+  }, [isRouletteActive]);
 
   if (showStartSplash) {
     return (

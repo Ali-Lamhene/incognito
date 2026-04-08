@@ -26,6 +26,7 @@ import { useProfileStore } from '../store/profileStore';
 
 import { useSession } from '../context/SessionContext';
 import { useTranslation } from '../hooks/useTranslation';
+import SoundService from '../services/SoundService';
 
 export default function AgentHomeScreen() {
   const router = useRouter();
@@ -72,6 +73,9 @@ export default function AgentHomeScreen() {
 
   useEffect(() => {
     if (!showSplash) {
+      // Start ambient music
+      SoundService.playBackgroundMusic('HOME_AMBIENT');
+
       if (!hasLaunched) setHasLaunched(); // Mark as launched once splash is gone or skipped
 
       dataScrollY.value = withRepeat(
