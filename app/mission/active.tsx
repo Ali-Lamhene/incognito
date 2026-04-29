@@ -492,7 +492,7 @@ export default function ActiveMissionScreen() {
       {/* Background */}
       <View style={styles.backgroundContainer}>
         <Image
-          source={require("../../assets/images/suspect_photo_bg.png")}
+          source={require("../../assets/images/suspect_photo_bg.jpg")}
           style={styles.backgroundImage}
           contentFit="cover"
         />

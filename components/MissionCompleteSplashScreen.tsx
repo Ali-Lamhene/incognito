@@ -113,7 +113,7 @@ export function MissionCompleteSplashScreen({ onComplete }: MissionCompleteSplas
         <Animated.View style={[styles.container, containerStyle]}>
             <View style={StyleSheet.absoluteFill}>
                 <Image
-                    source={require('../assets/images/exfiltration_splash_noir.png')}
+                    source={require('../assets/images/exfiltration_splash_noir.jpg')}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     priority="high"
@@ -123,7 +123,7 @@ export function MissionCompleteSplashScreen({ onComplete }: MissionCompleteSplas
             {/* Noise Layer */}
             <Animated.View style={[styles.noiseContainer, noiseStyle]}>
                 <Image
-                    source={require('../assets/images/tactical_texture.png')}
+                    source={require('../assets/images/tactical_texture.jpg')}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                 />

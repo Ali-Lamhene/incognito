@@ -154,7 +154,7 @@ export default function AgentHomeScreen() {
       {/* BACKGROUND: Blurred Secret Agent Desk */}
       <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
         <Image
-          source={require('../assets/images/agent_silhouette_rain.png')}
+          source={require('../assets/images/agent_silhouette_rain.jpg')}
           style={styles.backgroundImage}
           contentFit="cover"
         />
@@ -174,7 +174,7 @@ export default function AgentHomeScreen() {
         <Animated.View style={[styles.atmosphereScanline, scanlineStyle]} />
 
         <Image
-          source={require('../assets/images/tactical_texture.png')}
+          source={require('../assets/images/tactical_texture.jpg')}
           style={styles.tacticalOverlay}
           contentFit="cover"
         />
@@ -202,7 +202,7 @@ export default function AgentHomeScreen() {
                   <Ionicons name={profile.avatar as any} size={20} color="#FFF" />
                 ) : (
                   <Image
-                    source={require('../assets/images/incognito_logo.png')}
+                    source={require('../assets/images/icon_logo.png')}
                     style={styles.headerLogo}
                     contentFit="contain"
                   />

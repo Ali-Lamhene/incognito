@@ -34,7 +34,7 @@ export default function ResultsScreen() {
             {/* Background Layers */}
             <View style={styles.backgroundContainer}>
                 <Image
-                    source={require("../../assets/images/agent_silhouette_rain.png")}
+                    source={require("../../assets/images/agent_silhouette_rain.jpg")}
                     style={styles.backgroundImage}
                     contentFit="cover"
                 />

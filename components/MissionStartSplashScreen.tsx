@@ -85,7 +85,7 @@ export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScree
             {/* Background Image - Like Home Splash but Mission specific */}
             <Animated.View style={[StyleSheet.absoluteFill, animatedImageStyle]}>
                 <Image
-                    source={require('../assets/images/surveillance_target_v4.png')}
+                    source={require('../assets/images/surveillance_target_v4.jpg')}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     priority="high"
@@ -94,7 +94,7 @@ export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScree
 
             {/* Tactical Grid */}
             <Image
-                source={require('../assets/images/tactical_texture.png')}
+                source={require('../assets/images/tactical_texture.jpg')}
                 style={styles.tacticalOverlay}
                 contentFit="cover"
             />

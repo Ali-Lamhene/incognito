@@ -211,13 +211,13 @@ export default function LobbyScreen() {
             {/* BACKGROUND: Surveillance Desk for Planning Phase */}
             <View style={styles.backgroundContainer}>
                 <Image
-                    source={require('../../assets/images/surveillance_desk_monochrome.png')}
+                    source={require('../../assets/images/surveillance_desk_monochrome.jpg')}
                     style={styles.backgroundImage}
                     contentFit="cover"
                 />
                 <View style={styles.backgroundOverlay} />
                 <Image
-                    source={require('../../assets/images/tactical_texture.png')}
+                    source={require('../../assets/images/tactical_texture.jpg')}
                     style={styles.tacticalOverlay}
                     contentFit="cover"
                 />

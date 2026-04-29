@@ -40,13 +40,13 @@ export default function JoinMissionScreen() {
             {/* Background for consistency */}
             <View style={styles.backgroundContainer}>
                 <Image
-                    source={require('../../assets/images/agent_silhouette_rain.png')}
+                    source={require('../../assets/images/agent_silhouette_rain.jpg')}
                     style={styles.backgroundImage}
                     contentFit="cover"
                 />
                 <View style={styles.backgroundOverlay} />
                 <Image
-                    source={require('../../assets/images/tactical_texture.png')}
+                    source={require('../../assets/images/tactical_texture.jpg')}
                     style={styles.tacticalOverlay}
                     contentFit="cover"
                 />

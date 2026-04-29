@@ -80,7 +80,7 @@ export function AgentSplashScreen({ onComplete }: AgentSplashScreenProps) {
             {/* Background Suspect Image with Zoom effect */}
             <Animated.View style={[StyleSheet.absoluteFill, animatedImageStyle]}>
                 <Image
-                    source={require('../assets/images/suspect_photo_bg.png')}
+                    source={require('../assets/images/suspect_photo_bg.jpg')}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                 />

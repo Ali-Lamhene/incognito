@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incognito - Branding & Assets</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@300;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --primary-color: #FFFFFF;
+            --accent-color: #333333;
+            --glow-color: rgba(255, 255, 255, 0.2);
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --scanline-color: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Background */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--scanline-color);
+            z-index: 10;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 14px;
+            letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.3);
+            width: 100%;
+            max-width: 1024px;
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        /* Branding Assets Grid */
+        .assets-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 60px;
+            width: 100%;
+            max-width: 1024px;
+        }
+
+        .asset-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* THE LOGO */
+        .logo-main {
+            width: 200px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 0 10px var(--glow-color));
+        }
+
+        /* Tactical Title Strip */
+        .tactical-title {
+            display: flex;
+            gap: 8px;
+            margin-top: 30px;
+        }
+
+        .letter-block {
+            width: 40px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--bg-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .letter-block.black { background: #000; color: #FFF; border: 1px solid #222; }
+        .letter-block.white { background: #FFF; color: #000; border: 1px solid #000; }
+
+        .letter-block:nth-child(odd) { transform: rotate(-2deg) translateY(-3px); }
+        .letter-block:nth-child(even) { transform: rotate(1deg) translateY(3px); }
+
+        /* PLAY STORE ICON */
+        .play-store-icon {
+            width: 512px;
+            height: 512px;
+            background: #000;
+            border-radius: 96px; /* Play Store Radius approx */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,1), 0 0 30px rgba(255,255,255,0.05);
+            border: 1px solid #111;
+        }
+
+        .play-store-icon .logo-icon {
+            width: 280px;
+            height: 280px;
+        }
+
+        .play-store-icon-label {
+            position: absolute;
+            bottom: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            letter-spacing: 8px;
+            opacity: 0.3;
+        }
+
+        /* FEATURE GRAPHIC (1024x500) */
+        .feature-graphic {
+            width: 1024px;
+            height: 500px;
+            background: #000;
+            border: 1px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+
+        .feature-graphic .bg-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 70% 30%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.03) 0%, transparent 40%),
+                #000;
+            z-index: 1;
+        }
+
+        .feature-graphic .perspective-grid {
+            position: absolute;
+            bottom: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background-size: 80px 80px;
+            transform: perspective(500px) rotateX(60deg);
+            z-index: 2;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%);
+        }
+
+        .feature-graphic .glow-aura {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 2;
+            filter: blur(60px);
+        }
+
+        .feature-graphic .content {
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .feature-graphic .ui-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .line { position: absolute; background: rgba(255,255,255,0.1); }
+        .line-h { height: 1px; width: 100px; }
+        .line-v { width: 1px; height: 100px; }
+
+        /* Binoculars SVG replicate */
+        .binoculars-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* HUD BANNER (1024x500) */
+        .hud-banner {
+            width: 1024px;
+            height: 500px;
+            background: #000;
+            border: 1px solid var(--accent-color);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+
+        .hud-banner .mission-data {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 5;
+            flex: 1;
+        }
+
+        .hud-banner .mission-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            line-height: 1.5;
+        }
+
+        .hud-banner .status-badge {
+            background: #FFF;
+            color: #000;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .hud-banner .big-title {
+            font-size: 60px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            line-height: 0.9;
+            margin-top: 20px;
+        }
+
+        .hud-banner .logo-side {
+            width: 400px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .hud-banner .scanner-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.02) 50%, transparent);
+            animation: scan-side 6s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes scan-side {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* MOBILE MOCKUPS */
+        .mockups-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+        }
+
+        .phone-mockup {
+            background: #000;
+            border: 4px solid #111;
+            border-radius: 30px;
+            height: 500px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .phone-mockup .caption {
+            background: rgba(255,255,255,0.9);
+            color: #000;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .phone-mockup .screen-content {
+            padding: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #050505;
+        }
+
+        .phone-mockup .screen-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mockup-ui-element {
+            width: 80%;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+
+        .mockup-button {
+            width: 100%;
+            height: 35px;
+            background: #FFF;
+            border-radius: 2px;
+        }
+
+        .mockup-card {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 10px;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+
+        /* FINAL STORE ASSETS (Export Ready) */
+        .store-asset-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .store-asset {
+            width: 450px;
+            height: 800px;
+            background: #000;
+            border: 1px solid #222;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        }
+
+        .store-asset .asset-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 50% 100%, rgba(255,255,255,0.05) 0%, transparent 80%);
+        }
+
+        .store-asset .asset-title {
+            font-size: 38px;
+            font-weight: 900;
+            text-align: center;
+            z-index: 10;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+
+        .store-asset .asset-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            opacity: 0.5;
+            z-index: 10;
+            margin-bottom: 40px;
+        }
+
+        .store-asset .phone-frame-large {
+            width: 280px;
+            height: 560px;
+            background: #050505;
+            border: 8px solid #1a1a1a;
+            border-radius: 40px;
+            z-index: 5;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-frame-large .screen-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #222;
+            background: #050505;
+            position: relative;
+        }
+
+        .phone-frame-large .screen-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .phone-frame-large .notch {
+            width: 100px;
+            height: 25px;
+            background: #1a1a1a;
+            align-self: center;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+
+        .footer-info {
+            margin-top: 100px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            opacity: 0.2;
+            letter-spacing: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-grid"></div>
+    <div class="scanline"></div>
+
+    <header>
+        <h1>System Branding Assets</h1>
+        <div class="tactical-title">
+            <div class="letter-block black">I</div>
+            <div class="letter-block white">N</div>
+            <div class="letter-block black">C</div>
+            <div class="letter-block white">O</div>
+            <div class="letter-block black">G</div>
+            <div class="letter-block white">N</div>
+            <div class="letter-block black">I</div>
+            <div class="letter-block white">T</div>
+            <div class="letter-block black">O</div>
+        </div>
+    </header>
+
+    <div class="assets-container">
+        
+        <!-- LOGO SECTION -->
+        <div class="asset-box">
+            <div class="section-title">01 // Primary Logo (Vector)</div>
+            <div class="logo-main">
+                <svg class="binoculars-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="30" cy="55" r="20" stroke="white" stroke-width="6"/>
+                    <circle cx="70" cy="55" r="20" stroke="white" stroke-width="6"/>
+                    <path d="M45 45 Q50 40 55 45" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M35 35 L45 35 L50 25 L55 35 L65 35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <rect x="47" y="28" width="6" height="12" rx="2" fill="white"/>
+                    <path d="M22 45 A12 12 0 0 1 35 48" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    <path d="M62 45 A12 12 0 0 1 75 48" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- APP ICON SECTION -->
+        <div class="asset-box">
+            <div class="section-title">02 // Play Store App Icon (512x512)</div>
+            <div class="play-store-icon">
+                <div class="logo-icon">
+                    <svg class="binoculars-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="30" cy="55" r="20" stroke="white" stroke-width="6"/>
+                        <circle cx="70" cy="55" r="20" stroke="white" stroke-width="6"/>
+                        <path d="M45 45 Q50 40 55 45" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                        <path d="M35 35 L45 35 L50 25 L55 35 L65 35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="47" y="28" width="6" height="12" rx="2" fill="white"/>
+                        <path d="M22 45 A12 12 0 0 1 35 48" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                        <path d="M62 45 A12 12 0 0 1 75 48" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURE GRAPHIC SECTION -->
+        <div class="asset-box">
+            <div class="section-title">03 // Play Store Feature Graphic (1024x500)</div>
+            <div class="feature-graphic">
+                <div class="bg-pattern"></div>
+                <div class="perspective-grid"></div>
+                <div class="glow-aura" style="top: 0%; left: 0%;"></div>
+                <div class="glow-aura" style="bottom: -10%; right: -10%;"></div>
+                <div class="ui-lines">
+                    <div class="line line-h" style="top: 20%; left: 10%;"></div>
+                    <div class="line line-v" style="top: 10%; left: 20%;"></div>
+                    <div class="line line-h" style="bottom: 20%; right: 10%;"></div>
+                    <div class="line line-v" style="bottom: 10%; right: 20%;"></div>
+                    <!-- Corners -->
+                    <div class="line" style="width: 20px; height: 20px; border-top: 2px solid white; border-left: 2px solid white; top: 40px; left: 40px; opacity: 0.3;"></div>
+                    <div class="line" style="width: 20px; height: 20px; border-bottom: 2px solid white; border-right: 2px solid white; bottom: 40px; right: 40px; opacity: 0.3;"></div>
+                </div>
+                <div class="content">
+                    <div class="logo-main" style="width: 140px; height: 140px;">
+                        <svg class="binoculars-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="30" cy="55" r="20" stroke="white" stroke-width="6"/>
+                            <circle cx="70" cy="55" r="20" stroke="white" stroke-width="6"/>
+                            <path d="M45 45 Q50 40 55 45" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M35 35 L45 35 L50 25 L55 35 L65 35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect x="47" y="28" width="6" height="12" rx="2" fill="white"/>
+                        </svg>
+                    </div>
+                    <div class="tactical-title" style="margin-top: 20px;">
+                        <div class="letter-block black" style="width: 30px; height: 40px; font-size: 24px;">I</div>
+                        <div class="letter-block white" style="width: 30px; height: 40px; font-size: 24px;">N</div>
+                        <div class="letter-block black" style="width: 30px; height: 40px; font-size: 24px;">C</div>
+                        <div class="letter-block white" style="width: 30px; height: 40px; font-size: 24px;">O</div>
+                        <div class="letter-block black" style="width: 30px; height: 40px; font-size: 24px;">G</div>
+                        <div class="letter-block white" style="width: 30px; height: 40px; font-size: 24px;">N</div>
+                        <div class="letter-block black" style="width: 30px; height: 40px; font-size: 24px;">I</div>
+                        <div class="letter-block white" style="width: 30px; height: 40px; font-size: 24px;">T</div>
+                        <div class="letter-block black" style="width: 30px; height: 40px; font-size: 24px;">O</div>
+                    </div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 5px; margin-top: 20px; opacity: 0.5;">SOCIAL DETECTION ENGINE</div>
+                </div>
+            </div>
+        <!-- HUD MARKETING BANNER -->
+        <div class="asset-box">
+            <div class="section-title">04 // Marketing Presentation Image (1024x500)</div>
+            <div class="hud-banner">
+                <div class="scanner-effect"></div>
+                <div class="mission-data">
+                    <div class="status-badge">MISSION_IN_PROGRESS</div>
+                    <div class="mission-text">
+                        >> TARGET_IDENTIFIED: PARTY_GUESTS<br>
+                        >> PROTOCOL: SOCIAL_INFILTRATION<br>
+                        >> STATUS: STEALTH_ACTIVE<br>
+                        >> DATA_LEAK: █████████████
+                    </div>
+                    <div class="big-title">SOYEZ<br>DISCRET.</div>
+                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 5px; margin-top: auto; opacity: 0.6;">
+                        INCOGNITO // SOCIAL GAME
+                    </div>
+                </div>
+                <div class="logo-side">
+                    <div style="width: 250px; height: 250px; filter: drop-shadow(0 0 30px rgba(255,255,255,0.1));">
+                        <svg class="binoculars-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="30" cy="55" r="20" stroke="white" stroke-width="6"/>
+                            <circle cx="70" cy="55" r="20" stroke="white" stroke-width="6"/>
+                            <path d="M45 45 Q50 40 55 45" stroke="white" stroke-width="6" stroke-linecap="round"/>
+                            <path d="M35 35 L45 35 L50 25 L55 35 L65 35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <rect x="47" y="28" width="6" height="12" rx="2" fill="white"/>
+                            <path d="M22 45 A12 12 0 0 1 35 48" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-info">
+        GEN_BRAND_V1 // AUTHORIZED ACCESS ONLY // 2024
+    </div>
+
+    <!-- MOBILE SCREENSHOTS MOCKUPS -->
+    <div class="asset-box" style="margin-top: 60px;">
+        <div class="section-title">05 // App Store Screenshots Mockups</div>
+        <div class="mockups-grid">
+            
+            <!-- Screen 1 -->
+            <div class="phone-mockup">
+                <div class="caption">Infiltrez vos soirées</div>
+                <div class="screen-content">
+                    <img src="SCREEN_1.PNG" alt="Screen 1">
+                </div>
+            </div>
+
+            <!-- Screen 2 -->
+            <div class="phone-mockup">
+                <div class="caption">Niveaux de Risque</div>
+                <div class="screen-content">
+                    <img src="SCREEN_2.PNG" alt="Screen 2">
+                </div>
+            </div>
+
+            <!-- Screen 3 -->
+            <div class="phone-mockup">
+                <div class="caption">Défis Secrets</div>
+                <div class="screen-content">
+                    <img src="SCREEN_3.PNG" alt="Screen 3">
+                </div>
+            </div>
+
+            <!-- Screen 4 -->
+            <div class="phone-mockup">
+                <div class="caption">Restez Incognito</div>
+                <div class="screen-content">
+                    <img src="SCREEN_4.PNG" alt="Screen 4">
+                </div>
+            </div>
+
+            <!-- Screen 5 -->
+            <div class="phone-mockup">
+                <div class="caption">Démasquez les autres</div>
+                <div class="screen-content">
+                    <img src="SCREEN_5.PNG" alt="Screen 5">
+                </div>
+            </div>
+
+            <!-- Screen 6 -->
+            <div class="phone-mockup">
+                <div class="caption">Mission Accomplie</div>
+                <div class="screen-content">
+                    <img src="SCREEN_6.PNG" alt="Screen 6">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FINAL PLAY STORE ASSETS -->
+    <div class="asset-box" style="margin-top: 100px;">
+        <div class="section-title">06 // Final Play Store Assets (1242x2208 Style)</div>
+        <p style="font-size: 12px; opacity: 0.5; font-family: 'JetBrains Mono', monospace; width: 100%;">NOTE: Prends une capture d'écran de ces cadres directement pour ton Play Store.</p>
+        
+        <div class="store-asset-container">
+            
+            <!-- Asset 1 -->
+            <div class="store-asset">
+                <div class="asset-bg"></div>
+                <div class="asset-title">INCOGNITO.</div>
+                <div class="asset-subtitle">L'infiltreur d'élite</div>
+                <div class="phone-frame-large">
+                    <div class="notch"></div>
+                    <div class="screen-placeholder">
+                        <img src="assets/images/SCREEN_1.png" alt="Screen 1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset 2 -->
+            <div class="store-asset">
+                <div class="asset-bg" style="background: radial-gradient(circle at 0% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);"></div>
+                <div class="asset-title">MISSIONS.</div>
+                <div class="asset-subtitle">Protocole Secret</div>
+                <div class="phone-frame-large">
+                    <div class="notch"></div>
+                    <div class="screen-placeholder">
+                        <img src="assets/images/SCREEN_2.png" alt="Screen 2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset 3 -->
+            <div class="store-asset">
+                <div class="asset-bg" style="background: radial-gradient(circle at 100% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);"></div>
+                <div class="asset-title">FURTIF.</div>
+                <div class="asset-subtitle">Ne soyez pas suspect</div>
+                <div class="phone-frame-large">
+                    <div class="notch" style="background: #1a1a1a;"></div>
+                    <div class="screen-placeholder">
+                        <img src="assets/images/SCREEN_3.png" alt="Screen 3">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Asset 4 -->
+            <div class="store-asset">
+                <div class="asset-bg" style="background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 70%);"></div>
+                <div class="asset-title">AGENT.</div>
+                <div class="asset-subtitle">Traquez vos amis</div>
+                <div class="phone-frame-large">
+                    <div class="notch"></div>
+                    <div class="screen-placeholder">
+                        <img src="assets/images/SCREEN_4.png" alt="Screen 4">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
