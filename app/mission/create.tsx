@@ -8,13 +8,10 @@ import { MainButton } from '../../components/MainButton';
 import { ThemedText } from '../../components/ThemedText';
 
 import { useSession } from '../../context/SessionContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import { generateMissionCode } from '../../utils/missionCode';
 
-import { useTranslation } from '../../hooks/useTranslation';
-
-const THREAT_LEVELS = ['RECRUIT', 'AGENT', 'DOUBLE_ZERO'];
 const DURATIONS = ['15_MIN', '30_MIN', '45_MIN', 'CUSTOM'];
-const PROTOCOLS = ['SOCIAL', 'ABSURD', 'RISKY'];
 
 export default function CreateMissionScreen() {
     const router = useRouter();
@@ -22,10 +19,12 @@ export default function CreateMissionScreen() {
     const { createSession } = useSession();
     const { t } = useTranslation();
 
-    // Mission Parameters State
-    const [threatLevel, setThreatLevel] = useState('AGENT');
+    // Default configuration constants (no longer configurable by user)
+    const threatLevel = 'AGENT';
+    const protocol = 'SOCIAL';
+
+    // Configurable Mission Parameters State
     const [duration, setDuration] = useState('15_MIN');
-    const [protocol, setProtocol] = useState('SOCIAL');
     const [customDuration, setCustomDuration] = useState('60');
 
     const handleCreate = async () => {
@@ -38,41 +37,9 @@ export default function CreateMissionScreen() {
         router.push(`/lobby/${missionCode}`);
     };
 
-    const renderSelector = (label: string, options: string[], selected: string, onSelect: (val: string) => void) => (
-        <View style={styles.selectorContainer}>
-            <ThemedText type="code" style={styles.selectorLabel}>{label}</ThemedText>
-            <View style={styles.optionsRow}>
-                {options.map((opt) => {
-                    const isSelected = selected === opt;
-                    return (
-                        <TouchableOpacity
-                            key={opt}
-                            onPress={() => onSelect(opt)}
-                            style={[
-                                styles.optionButton,
-                                isSelected && styles.optionButtonSelected
-                            ]}
-                        >
-                            <ThemedText
-                                type="code"
-                                style={[
-                                    styles.optionText,
-                                    isSelected && styles.optionTextSelected
-                                ]}
-                            >
-                                {t(`mission.options.${opt}`)}
-                            </ThemedText>
-                            {isSelected && <View style={styles.selectedCorner} />}
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
-        </View>
-    );
-
     return (
         <View style={styles.container}>
-            {/* Background reuse for consistency */}
+            {/* Background */}
             <View style={styles.backgroundContainer}>
                 <Image
                     source={require('../../assets/images/agent_silhouette_rain.jpg')}
@@ -104,7 +71,6 @@ export default function CreateMissionScreen() {
 
                     {/* Parameters Form */}
                     <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                        {renderSelector(t('mission.threat_level'), THREAT_LEVELS, threatLevel, setThreatLevel)}
                         <View style={styles.selectorContainer}>
                             <ThemedText type="code" style={styles.selectorLabel}>{t('mission.duration')}</ThemedText>
                             <View style={styles.optionsRow}>
@@ -146,7 +112,7 @@ export default function CreateMissionScreen() {
                                                         <ThemedText type="code" style={styles.customInputUnit}>MIN</ThemedText>
                                                     </Animated.View>
                                                     {duration === 'CUSTOM' && parseInt(customDuration) <= 0 && (
-                                                        <ThemedText type="code" style={{ fontSize: 7, color: '#FF6B6B', marginTop: 4, position: 'absolute', bottom: -12, width: 100 }}>
+                                                        <ThemedText type="code" style={styles.durationErrorText}>
                                                             {t('mission.duration_error')}
                                                         </ThemedText>
                                                     )}
@@ -157,22 +123,21 @@ export default function CreateMissionScreen() {
                                 })}
                             </View>
                         </View>
-                        {renderSelector(t('mission.protocol'), PROTOCOLS, protocol, setProtocol)}
                     </Animated.View>
 
                     {/* Footer Action */}
                     <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
                         <View style={styles.summaryBox}>
                             <ThemedText type="code" style={styles.summaryText}>
-                                {t('mission.config_summary')}: {t(`mission.options.${threatLevel}`)} / {duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`)} / {t(`mission.options.${protocol}`)}
+                                {t('mission.config_summary')}: {duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`)}
                             </ThemedText>
                         </View>
 
                         <MainButton
-                            title={t('mission.btn_init')}
-                            onPress={handleCreate}
-                            disabled={duration === 'CUSTOM' && (parseInt(customDuration) <= 0 || isNaN(parseInt(customDuration)))}
-                            style={styles.createButton}
+                             title={t('mission.btn_init')}
+                             onPress={handleCreate}
+                             disabled={duration === 'CUSTOM' && (parseInt(customDuration) <= 0 || isNaN(parseInt(customDuration)))}
+                             style={styles.createButton}
                         />
                     </Animated.View>
                 </View>
@@ -192,7 +157,7 @@ const styles = StyleSheet.create({
     backgroundImage: {
         width: '100%',
         height: '100%',
-        opacity: 0.3, // Darker for form readability
+        opacity: 0.3,
     },
     backgroundOverlay: {
         ...StyleSheet.absoluteFillObject,
@@ -324,5 +289,13 @@ const styles = StyleSheet.create({
         color: '#FFF',
         opacity: 0.5,
         marginLeft: 4,
-    }
+    },
+    durationErrorText: {
+        fontSize: 7,
+        color: '#FF6B6B',
+        marginTop: 4,
+        position: 'absolute',
+        bottom: -12,
+        width: 100,
+    },
 });
