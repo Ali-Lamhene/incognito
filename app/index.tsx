@@ -1,26 +1,13 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
-} from 'react-native-reanimated';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentSplashScreen } from '../components/AgentSplashScreen';
-import { IncognitoLogo } from '../components/IncognitoLogo';
 import { MainButton } from '../components/MainButton';
 import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { RulesModal } from '../components/RulesModal';
 import { ThemedText } from '../components/ThemedText';
-import { Colors } from '../constants/Colors';
 import { useAppState } from '../store/appState';
 import { useProfileStore } from '../store/profileStore';
 
@@ -28,41 +15,25 @@ import { useSession } from '../context/SessionContext';
 import { useTranslation } from '../hooks/useTranslation';
 import SoundService from '../services/SoundService';
 
+// Refactored Subcomponents
+import { AgentHeader } from '../components/AgentHeader';
+import { AgentHomeBackground } from '../components/AgentHomeBackground';
+import { DossierFrame } from '../components/DossierFrame';
+import { SideDataStream } from '../components/SideDataStream';
+
 export default function AgentHomeScreen() {
   const router = useRouter();
-  const { height } = Dimensions.get('window');
   const insets = useSafeAreaInsets();
   const { session, clearSession } = useSession();
   const { hasLaunched, setHasLaunched } = useAppState();
   const { profile, isFirstSetupDone, createProfile, updateProfile } = useProfileStore();
   const { t } = useTranslation();
 
-  const colorScheme = 'dark';
-  const colors = Colors[colorScheme];
-
   // Show splash only if app hasn't launched yet
   const [showSplash, setShowSplash] = useState(!hasLaunched);
   // Show setup only if splash is done AND profile not set
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [showRules, setShowRules] = useState(false);
-
-  const missionIdDisplay = session ? session.code : "NO_ACTIVE_MISSION";
-  const missionStatus = session ? "IN_PROGRESS" : "CLASSIFIED_ACCESS";
-
-  // shared values for animations
-  const dataScrollY = useSharedValue(0);
-  const scannerTranslateY = useSharedValue(0);
-  const scanlineY = useSharedValue(-height);
-  const rulesPulse = useSharedValue(1);
-
-  useEffect(() => {
-    // Pulse animation for rules button
-    rulesPulse.value = withRepeat(
-      withTiming(1.1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true
-    );
-  }, []);
 
   useEffect(() => {
     // If not showing splash and profile not setup, show modal
@@ -77,28 +48,8 @@ export default function AgentHomeScreen() {
       SoundService.playBackgroundMusic('HOME_AMBIENT');
 
       if (!hasLaunched) setHasLaunched(); // Mark as launched once splash is gone or skipped
-
-      dataScrollY.value = withRepeat(
-        withTiming(-200, { duration: 10000, easing: Easing.linear }),
-        -1,
-        false
-      );
-
-      // Global scanline animation
-      scanlineY.value = withRepeat(
-        withTiming(height, { duration: 4000, easing: Easing.linear }),
-        -1,
-        false
-      );
-
-      // AR Scanner line animation
-      scannerTranslateY.value = withRepeat(
-        withTiming(250, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
-        -1,
-        true
-      );
     }
-  }, [showSplash]);
+  }, [showSplash, hasLaunched, setHasLaunched]);
 
   const handleSplashFinish = () => {
     setShowSplash(false);
@@ -117,23 +68,6 @@ export default function AgentHomeScreen() {
     setShowProfileSetup(false);
   };
 
-  const scanlineStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: scanlineY.value }],
-  }));
-
-  const animatedContentStyle = useAnimatedStyle(() => ({
-    flex: 1,
-  }));
-
-  const animatedDataStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: dataScrollY.value }],
-  }));
-
-  const rulesPulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: rulesPulse.value }],
-    opacity: 0.8 + (rulesPulse.value - 1) * 2,
-  }));
-
   if (showSplash) {
     return <AgentSplashScreen onComplete={handleSplashFinish} />;
   }
@@ -151,39 +85,12 @@ export default function AgentHomeScreen() {
         onClose={() => setShowRules(false)}
       />
 
-      {/* BACKGROUND: Blurred Secret Agent Desk */}
-      <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
-        <Image
-          source={require('../assets/images/agent_silhouette_rain.jpg')}
-          style={styles.backgroundImage}
-          contentFit="cover"
-        />
-        <View style={styles.backgroundOverlay} />
-
-        {/* HUD Grid */}
-        <View style={styles.hudGrid}>
-          {[...Array(6)].map((_, i) => (
-            <View key={`h-${i}`} style={[styles.gridLineH, { top: `${(i + 1) * 15}%` }]} />
-          ))}
-          {[...Array(6)].map((_, i) => (
-            <View key={`v-${i}`} style={[styles.gridLineV, { left: `${(i + 1) * 15}%` }]} />
-          ))}
-        </View>
-
-        {/* Moving Scanline */}
-        <Animated.View style={[styles.atmosphereScanline, scanlineStyle]} />
-
-        <Image
-          source={require('../assets/images/tactical_texture.jpg')}
-          style={styles.tacticalOverlay}
-          contentFit="cover"
-        />
-      </Animated.View>
+      {/* BACKGROUND: Blurred Secret Agent Desk & Telemetry Scanline */}
+      <AgentHomeBackground />
 
       <View style={styles.tabletCenteredContainer}>
-        <Animated.View style={[
+        <View style={[
           styles.mainContent,
-          animatedContentStyle,
           {
             paddingTop: insets.top,
             paddingBottom: insets.bottom,
@@ -192,110 +99,15 @@ export default function AgentHomeScreen() {
           }
         ]}>
           {/* HEADER: Technical Telemetry */}
-          <Animated.View entering={FadeInDown.delay(800).duration(800)} style={styles.header}>
-            <TouchableOpacity
-              onPress={() => setShowProfileSetup(true)}
-              style={styles.logoGroup}
-            >
-              <View style={[styles.headerLogoRing, { borderColor: '#FFF' }]}>
-                {profile?.avatar ? (
-                  <Ionicons name={profile.avatar as any} size={20} color="#FFF" />
-                ) : (
-                  <Image
-                    source={require('../assets/images/icon_logo.png')}
-                    style={styles.headerLogo}
-                    contentFit="contain"
-                  />
-                )}
-              </View>
-              <View style={styles.agentInfo}>
-                <ThemedText type="code" style={styles.headerLabel}>{t('home.agent_active')}</ThemedText>
-                <ThemedText type="futuristic" style={[styles.agentName, { color: '#FFF' }]}>
-                  {profile?.codename ? `#${profile.codename}` : t('common.unknown')}
-                </ThemedText>
-              </View>
-            </TouchableOpacity>
-            <View style={styles.telemetryGroup}>
-              <TouchableOpacity onPress={() => router.push('/settings')} style={styles.settingsButton}>
-                <Ionicons name="options" size={20} color="#FFF" style={{ opacity: 0.8 }} />
-              </TouchableOpacity>
-              <View style={styles.separatorV} />
-              <Animated.View style={rulesPulseStyle}>
-                <TouchableOpacity onPress={() => setShowRules(true)} style={styles.signalBadge}>
-                  <View style={[styles.pulseDot, { backgroundColor: '#FFF' }]} />
-                  <ThemedText type="code" style={{ color: '#FFF', fontSize: 8 }}>{t('home.rules')}</ThemedText>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </Animated.View>
+          <AgentHeader
+            profile={profile}
+            onProfilePress={() => setShowProfileSetup(true)}
+            onSettingsPress={() => router.push('/settings')}
+            onRulesPress={() => setShowRules(true)}
+          />
 
           {/* CENTRAL: Augmented Reality Dossier */}
-          <Animated.View entering={FadeIn.delay(1200).duration(1000)} style={styles.centerSection}>
-            <View style={styles.augmentedFrame}>
-              <View style={styles.cornerTL} />
-              <View style={styles.cornerTR} />
-              <View style={styles.cornerBL} />
-              <View style={styles.cornerBR} />
-
-              <View style={styles.tacticalBorderT} />
-              <View style={styles.tacticalBorderB} />
-
-              <View style={styles.scannerLineContainer}>
-                <Animated.View style={[styles.scannerLine, {
-                  transform: [{ translateY: scannerTranslateY.value }]
-                }]} />
-              </View>
-
-              <View style={styles.brandingGroup}>
-                <IncognitoLogo size={55} color="#FFFFFF" style={styles.mainLogo} />
-
-                <View style={styles.tacticalTitleStrip}>
-                  {"INCOGNITO".split("").map((char, i) => (
-                    <View
-                      key={i}
-                      style={[
-                        styles.letterBlock,
-                        {
-                          backgroundColor: i % 2 === 0 ? '#000' : '#FFF',
-                          transform: [
-                            { rotate: `${(i % 3 - 1) * 4}deg` },
-                            { translateY: (i % 2 === 0 ? -2 : 2) }
-                          ],
-                          borderWidth: 1,
-                          borderColor: i % 2 === 0 ? '#333' : '#000',
-                        }
-                      ]}
-                    >
-                      <ThemedText
-                        style={[
-                          styles.stripLetter,
-                          {
-                            color: i % 2 === 0 ? '#FFF' : '#000',
-                            fontFamily: i % 3 === 0 ? 'serif' : 'monospace',
-                          }
-                        ]}
-                      >
-                        {char}
-                      </ThemedText>
-                    </View>
-                  ))}
-                </View>
-
-                <View style={styles.brandingFooter}>
-                  <ThemedText type="code" style={styles.classTag}>
-                    {t('results.report_id')}: #{session ? session.code : "INFIL-9"} // {session ? t('mission.op_in_progress') : "CLASSIFIED_ACCESS"}
-                  </ThemedText>
-                </View>
-
-                <ThemedText type="futuristic" style={styles.systemTag}>SOCIAL DETECTION ENGINE</ThemedText>
-              </View>
-
-              <View style={styles.frameMetadata}>
-                <ThemedText type="code" style={styles.frameMetaText}>LOC_48.8566_2.3522</ThemedText>
-                <ThemedText type="code" style={styles.frameMetaText}>THREAT_LEVEL: STABLE</ThemedText>
-              </View>
-            </View>
-          </Animated.View>
+          <DossierFrame session={session} />
 
           {/* BOTTOM: Mission Deployment */}
           <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
@@ -339,16 +151,8 @@ export default function AgentHomeScreen() {
           </Animated.View>
 
           {/* DATA OVERLAY: Side Stream */}
-          <View style={styles.sideDataOverlay}>
-            <Animated.View style={animatedDataStyle}>
-              {Array.from({ length: 25 }).map((_, i) => (
-                <ThemedText key={i} type="code" style={styles.driftText}>
-                  {`>> ${Math.random().toString(16).slice(2, 8).toUpperCase()} // OK`}
-                </ThemedText>
-              ))}
-            </Animated.View>
-          </View>
-        </Animated.View>
+          <SideDataStream />
+        </View>
       </View>
     </View>
   );
@@ -358,49 +162,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  backgroundContainer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  backgroundImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.5,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5, 5, 8, 0.75)',
-  },
-  tacticalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.15,
-  },
-  hudGrid: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.015,
-  },
-  gridLineH: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: '#FFF',
-  },
-  gridLineV: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: '#FFF',
-  },
-  atmosphereScanline: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   tabletCenteredContainer: {
     flex: 1,
@@ -415,227 +176,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
     justifyContent: 'space-between',
     paddingVertical: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 10,
-  },
-  logoGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  headerLogoRing: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  headerLogo: {
-    width: 24,
-    height: 24,
-  },
-  agentInfo: {
-    gap: 0,
-  },
-  headerLabel: {
-    fontSize: 8,
-    opacity: 0.4,
-  },
-  agentName: {
-    fontSize: 10,
-    color: '#FFF',
-    letterSpacing: 1,
-  },
-  telemetryGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  settingsButton: {
-    padding: 5,
-  },
-  separatorV: {
-    width: 1,
-    height: 12,
-    backgroundColor: '#FFF',
-    opacity: 0.2,
-  },
-  signalBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  pulseDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-  },
-  centerSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  augmentedFrame: {
-    width: '100%',
-    paddingVertical: 45,
-    paddingHorizontal: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  cornerTL: {
-    position: 'absolute',
-    top: 10,
-    left: '12%',
-    width: 6,
-    height: 6,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: '#FFF',
-    opacity: 0.5,
-  },
-  cornerTR: {
-    position: 'absolute',
-    top: 10,
-    right: '12%',
-    width: 6,
-    height: 6,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderColor: '#FFF',
-    opacity: 0.5,
-  },
-  cornerBL: {
-    position: 'absolute',
-    bottom: 10,
-    left: '12%',
-    width: 6,
-    height: 6,
-    borderBottomWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: '#FFF',
-    opacity: 0.5,
-  },
-  cornerBR: {
-    position: 'absolute',
-    bottom: 10,
-    right: '12%',
-    width: 6,
-    height: 6,
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    borderColor: '#FFF',
-    opacity: 0.5,
-  },
-  tacticalBorderT: {
-    position: 'absolute',
-    top: 5,
-    left: '15%',
-    width: 20,
-    height: 2,
-    backgroundColor: '#FFF',
-    opacity: 0.4,
-  },
-  tacticalBorderB: {
-    position: 'absolute',
-    bottom: 5,
-    right: '15%',
-    width: 20,
-    height: 2,
-    backgroundColor: '#FFF',
-    opacity: 0.4,
-  },
-  scannerLineContainer: {
-    ...StyleSheet.absoluteFillObject,
-    overflow: 'hidden',
-  },
-  scannerLine: {
-    width: '100%',
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#FFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-  },
-  brandingGroup: {
-    alignItems: 'center',
-    gap: 0,
-  },
-  tacticalTitleStrip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    marginTop: 10,
-    paddingHorizontal: 10,
-  },
-  letterBlock: {
-    width: 24,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 1,
-  },
-  stripLetter: {
-    fontSize: 20,
-    fontWeight: '900',
-    fontFamily: 'monospace',
-    letterSpacing: 0,
-  },
-  mainLogo: {
-    width: 55,
-    height: 55,
-    marginBottom: 0,
-  },
-  brandingFooter: {
-    marginTop: 15,
-    paddingHorizontal: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingVertical: 2,
-    borderRadius: 2,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-    marginVertical: 15,
-  },
-  classTag: {
-    fontSize: 7,
-    opacity: 0.3,
-    letterSpacing: 1,
-  },
-  systemTag: {
-    fontSize: 10,
-    opacity: 0.4,
-    letterSpacing: 3,
-  },
-  frameMetadata: {
-    position: 'absolute',
-    bottom: 10,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-  },
-  frameMetaText: {
-    fontSize: 7,
-    opacity: 0.2,
   },
   actionSection: {
     gap: 2,
@@ -663,18 +203,5 @@ const styles = StyleSheet.create({
     height: 35,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     marginBottom: 30,
-  },
-  sideDataOverlay: {
-    position: 'absolute',
-    right: 10,
-    top: 150,
-    height: 300,
-    width: 100,
-    opacity: 0.15,
-  },
-  driftText: {
-    fontSize: 7,
-    marginBottom: 4,
-    color: '#FFF',
   },
 });
