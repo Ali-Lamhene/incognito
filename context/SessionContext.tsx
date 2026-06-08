@@ -26,7 +26,7 @@ type MissionEvent = {
     missionText?: string;
 };
 
-type Agent = {
+export type Agent = {
     id: string;
     name: string;
     avatar: string;
