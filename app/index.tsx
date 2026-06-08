@@ -128,7 +128,7 @@ export default function AgentHomeScreen() {
                   title={t('home.abort_mission')}
                   variant="outline"
                   onPress={async () => {
-                    await clearSession();
+                    await clearSession(profile?.id);
                   }}
                   style={[styles.secondaryAction, { marginTop: 10, borderColor: 'rgba(255, 107, 107, 0.3)' }]}
                 />

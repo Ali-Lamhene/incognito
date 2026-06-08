@@ -3,6 +3,7 @@ import { child, get, increment, onValue, ref, remove, serverTimestamp, set, upda
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
+import { useProfileStore } from '../store/profileStore';
 
 type MissionSession = {
     code: string;
@@ -203,6 +204,20 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const exists = await checkSessionExists(normalizedCode);
         if (!exists) return false;
 
+        // Check if there is already a saved host session for this code in AsyncStorage to avoid race conditions
+        try {
+            const saved = await AsyncStorage.getItem('incognito_session');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.code === normalizedCode && parsed.role === 'HOST') {
+                    setSession(parsed);
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.error('Error reading saved session from AsyncStorage', e);
+        }
+
         if (session && session.code === normalizedCode && session.role === 'HOST') return true;
 
         const newSession: MissionSession = {
@@ -255,19 +270,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const clearSession = async (agentId?: string) => {
         if (!session?.code) return;
 
+        const resolvedAgentId = agentId || useProfileStore.getState().profile?.id;
+
         try {
-            if (agentId) {
-                await remove(ref(db, `missions/${session.code}/agents/${agentId}`));
-            }
-
             if (session.role === 'HOST') {
-                const snapshot = await get(ref(db, `missions/${session.code}/agents`));
-                const agentsData = snapshot.val();
-                const otherAgentsCount = agentsData ? Object.keys(agentsData).length : 0;
-
-                if (otherAgentsCount === 0) {
-                    await remove(ref(db, `missions/${session.code}`));
-                }
+                await remove(ref(db, `missions/${session.code}`));
+            } else if (resolvedAgentId) {
+                await remove(ref(db, `missions/${session.code}/agents/${resolvedAgentId}`));
             }
         } catch (e) {
             console.error('Erreur lors de la fermeture de session Firebase', e);
