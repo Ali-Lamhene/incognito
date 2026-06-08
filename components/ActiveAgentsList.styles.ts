@@ -1,0 +1,153 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  agentsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.05)",
+    paddingBottom: 10,
+  },
+  liveIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(76, 175, 80, 0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  liveDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#4CAF50",
+  },
+  liveText: {
+    fontSize: 8,
+    color: "#4CAF50",
+    fontWeight: "bold",
+  },
+  sectionTitle: {
+    fontSize: 10,
+    opacity: 0.5,
+    letterSpacing: 1.5,
+  },
+  agentsList: {
+    gap: 12,
+  },
+  agentRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.02)",
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+  },
+  agentRowCompleted: {
+    borderColor: "rgba(76, 175, 80, 0.2)",
+    backgroundColor: "rgba(76, 175, 80, 0.02)",
+  },
+  agentRowIncident: {
+    borderColor: "rgba(255, 107, 107, 0.3)",
+    backgroundColor: "rgba(255, 107, 107, 0.05)",
+  },
+  agentInfo: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginRight: 10,
+  },
+  agentAvatarPlaceholder: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#0a0a0a",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarCompleted: {
+    borderColor: "#4CAF50",
+    backgroundColor: "rgba(76, 175, 80, 0.1)",
+  },
+  avatarIncident: {
+    borderColor: "#FF6B6B",
+    backgroundColor: "rgba(255, 107, 107, 0.1)",
+  },
+  agentName: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+  },
+  agentStatusText: {
+    fontSize: 8,
+    color: "#4CAF50",
+    fontWeight: "bold",
+    letterSpacing: 1,
+    marginTop: 2,
+  },
+  agentScoreBadge: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  agentScoreText: {
+    fontSize: 8,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "bold",
+  },
+  criticalStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  alertPulse: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#FFD93D",
+  },
+  unmaskBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,107,107,0.3)",
+    backgroundColor: "rgba(255,107,107,0.05)",
+  },
+  unmaskBtnDisabled: {
+    borderColor: "rgba(255,255,255,0.05)",
+    opacity: 0.5,
+  },
+  unmaskBtnActive: {
+    backgroundColor: "rgba(255, 217, 61, 0.15)",
+    borderColor: "#FFD93D",
+    borderWidth: 2,
+  },
+  unmaskText: {
+    fontSize: 9,
+    color: "#FF6B6B",
+    fontWeight: "bold",
+    letterSpacing: 1,
+    textShadowColor: "rgba(255, 107, 107, 0.4)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
+  unmaskTextDisabled: {
+    color: "rgba(255,255,255,0.3)",
+  },
+  unmaskTextActive: {
+    color: "#FFD93D",
+    textShadowColor: "rgba(255, 217, 61, 0.5)",
+    textShadowRadius: 10,
+  },
+});
