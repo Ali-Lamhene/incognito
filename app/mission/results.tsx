@@ -64,7 +64,7 @@ export default function ResultsScreen() {
                     <View style={styles.headerTop}>
                         <View style={styles.statusDot} />
                         <ThemedText type="code" style={styles.missionLabel}>
-                            {t('results.report_id')} // {session?.code}
+                            {t('results.report_id')}{" // "}{session?.code}
                         </ThemedText>
                     </View>
                     <ThemedText type="futuristic" style={styles.screenTitle}>
@@ -85,9 +85,9 @@ export default function ResultsScreen() {
                     </View>
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
-                        <ThemedText type="code" style={styles.statLabel}>{t('results.threat_level')}</ThemedText>
+                        <ThemedText type="code" style={styles.statLabel}>{t('mission.duration')}</ThemedText>
                         <ThemedText type="futuristic" style={[styles.statValue, { color: '#FF6B6B' }]}>
-                            {session?.threatLevel === 'DOUBLE_ZERO' ? 'MAX' : session?.threatLevel ? t(`mission.options.${session.threatLevel}`) : 'AGENT'}
+                            {session?.duration || '—'}
                         </ThemedText>
                     </View>
                 </Animated.View>

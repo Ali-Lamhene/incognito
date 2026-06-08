@@ -8,9 +8,7 @@ type MissionSession = {
     code: string;
     role: 'HOST' | 'AGENT';
     createdAt: number;
-    threatLevel?: string;
     duration?: string;
-    protocol?: string;
     startedAt?: number;
     pausedAt?: number;
     events?: Record<string, MissionEvent>;
@@ -61,8 +59,8 @@ type SessionContextType = {
     isInitialized: boolean;
     agents: Agent[];
     events: MissionEvent[];
-    status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
-    createSession: (code: string, threatLevel: string, duration: string, protocol: string) => Promise<void>;
+        status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
+    createSession: (code: string, duration: string) => Promise<void>;
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
     startMission: () => Promise<void>;
@@ -139,9 +137,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 // Sync Session Metadata
                 setSession(prev => prev ? {
                     ...prev,
-                    threatLevel: data.threatLevel || prev.threatLevel,
                     duration: data.duration || prev.duration,
-                    protocol: data.protocol || prev.protocol,
                     startedAt: data.startedAt || prev.startedAt,
                     pausedAt: data.pausedAt || null,
                 } : null);
@@ -178,20 +174,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
-    const createSession = async (code: string, threatLevel: string, duration: string, protocol: string) => {
+    const createSession = async (code: string, duration: string) => {
         const newSession: MissionSession = {
             code,
             role: 'HOST',
             createdAt: Date.now(),
-            threatLevel,
-            duration,
-            protocol
+            duration
         };
 
         await set(ref(db, `missions/${code}`), {
-            threatLevel,
             duration,
-            protocol,
             createdAt: serverTimestamp(),
             status: 'LOBBY',
             hostId: 'TBD'
