@@ -39,20 +39,6 @@ export type Agent = {
     completed?: boolean;
     completedAt?: number;
     score?: number;
-    incident?: {
-        type: 'IMPOSSIBLE' | 'UNMASK_PROMPT' | 'UNMASK_VOTE';
-        reportedAt: number;
-        unmaskerId?: string;
-        unmaskerName?: string;
-        votes?: Record<string, 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO'>;
-        rouletteWinnerId?: string;
-    };
-    pendingValidation?: {
-        challengeId?: string;
-        challengeText?: string;
-        startedAt: number;
-        isBluff: boolean;
-    };
 };
 
 type SessionContextType = {
@@ -60,24 +46,15 @@ type SessionContextType = {
     isInitialized: boolean;
     agents: Agent[];
     events: MissionEvent[];
-        status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
+    status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
     createSession: (code: string, duration: string) => Promise<void>;
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
     startMission: () => Promise<void>;
     finishMission: () => Promise<void>;
     checkSessionExists: (code: string) => Promise<boolean>;
-    completeChallenge: (agentId: string) => Promise<void>;
-    triggerBluff: (agentId: string) => Promise<void>;
-    finalizeChallengePoints: (agentId: string) => Promise<void>;
-    reportImpossibleChallenge: (agentId: string) => Promise<void>;
-    voteIncident: (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO') => Promise<void>;
-    resolveImpossibleChallenge: (agentId: string, wasActuallyImpossible: boolean) => Promise<void>;
     unmaskAgent: (targetId: string, validatorId: string) => Promise<boolean>;
-    respondToUnmask: (targetId: string, isCorrect: boolean) => Promise<void>;
-    resolveUnmaskVote: (targetId: string, wasActuallyCorrect: boolean) => Promise<void>;
     pushEvent: (event: Omit<MissionEvent, 'id' | 'timestamp'>) => Promise<void>;
-    triggerRouletteTirage: (targetId: string, unmaskerId: string) => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -286,304 +263,26 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await AsyncStorage.removeItem('incognito_session');
     };
 
-    const completeChallenge = async (agentId: string) => {
-        if (!session?.code) return;
-
-        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
-        const missionData = missionSnapshot.val();
-        const agentData = missionData.agents?.[agentId];
-
-        if (!agentData || !agentData.challenge) return;
-
-        const usedChallengeIds = Object.values(missionData.agents || {})
-            .map((a: any) => a.challenge?.id)
-            .filter(id => !!id);
-
-        const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
-        const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
-
-        const updates: any = {};
-        updates[`missions/${session.code}/agents/${agentId}/challenge`] = nextChallenge;
-        updates[`missions/${session.code}/agents/${agentId}/pendingValidation`] = {
-            challengeId: agentData.challenge.id,
-            challengeText: agentData.challenge.text,
-            startedAt: Date.now(),
-            isBluff: false
-        };
-
-        await update(ref(db), updates);
-
-        await pushEvent({
-            type: 'SUSPECT',
-            agentId,
-            agentName: agentData.name
-        });
-    };
-
-    const triggerBluff = async (agentId: string) => {
-        if (!session?.code) return;
-
-        const snapshot = await get(ref(db, `missions/${session.code}/agents/${agentId}`));
-        const agentData = snapshot.val();
-
-        await update(ref(db, `missions/${session.code}/agents/${agentId}/pendingValidation`), {
-            startedAt: Date.now(),
-            isBluff: true
-        });
-
-        await pushEvent({
-            type: 'SUSPECT',
-            agentId,
-            agentName: agentData?.name || 'Inconnu'
-        });
-    };
-
-    const finalizeChallengePoints = async (agentId: string) => {
-        if (!session?.code) return;
-
-        const agentRef = ref(db, `missions/${session.code}/agents/${agentId}`);
-        const snapshot = await get(agentRef);
-        const agentData = snapshot.val();
-
-        if (agentData?.pendingValidation) {
-            const currentScore = agentData.score || 0;
-            const updates: any = {};
-
-            if (!agentData.pendingValidation.isBluff) {
-                updates['score'] = increment(10);
-                await pushEvent({
-                    type: 'SUCCESS',
-                    agentId,
-                    agentName: agentData.name,
-                    missionText: agentData.pendingValidation.challengeText,
-                    points: 10
-                });
-            }
-
-            updates['pendingValidation'] = null;
-            await update(agentRef, updates);
-        }
-    };
-
-    const reportImpossibleChallenge = async (agentId: string) => {
-        if (!session?.code) return;
-        await update(ref(db, `missions/${session.code}`), {
-            [`agents/${agentId}/incident`]: {
-                type: 'IMPOSSIBLE',
-                reportedAt: Date.now(),
-                votes: {}
-            },
-            pausedAt: serverTimestamp()
-        });
-    };
-
-    const voteIncident = async (agentId: string, voterId: string, vote: 'FEASIBLE' | 'IMPOSSIBLE' | 'YES' | 'NO') => {
-        if (!session?.code) return;
-        await update(ref(db, `missions/${session.code}/agents/${agentId}/incident/votes`), {
-            [voterId]: vote
-        });
-    };
-
-    const resolveImpossibleChallenge = async (agentId: string, wasActuallyImpossible: boolean) => {
-        if (!session?.code) return;
-
-        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
-        const missionData = missionSnapshot.val();
-
-        const usedChallengeIds = Object.values(missionData.agents || {})
-            .map((a: any) => a.challenge?.id)
-            .filter(id => !!id);
-
-        const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
-        const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
-
-        const updates: any = {};
-        updates[`missions/${session.code}/agents/${agentId}/challenge`] = nextChallenge;
-        updates[`missions/${session.code}/agents/${agentId}/incident`] = null;
-
-        if (!wasActuallyImpossible) {
-            updates[`missions/${session.code}/agents/${agentId}/score`] = increment(-10);
-        }
-
-        // Reprise du minuteur
-        const pausedAt = missionData.pausedAt;
-        const currentStartedAt = missionData.startedAt;
-        if (pausedAt && currentStartedAt) {
-            const pauseDuration = Date.now() - pausedAt;
-            updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
-            updates[`missions/${session.code}/pausedAt`] = null;
-        }
-
-        await update(ref(db), updates);
-    };
-
     const unmaskAgent = async (targetId: string, validatorId: string): Promise<boolean> => {
         if (!session?.code) return false;
-
-        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
-        const missionData = missionSnapshot.val();
-
-        const target = missionData.agents?.[targetId];
-        const validator = missionData.agents?.[validatorId];
-
+        const target = agents.find(a => a.id === targetId);
+        const validator = agents.find(a => a.id === validatorId);
         if (!target || !validator) return false;
 
-        // On place la cible en état de PROMPT
-        await update(ref(db, `missions/${session.code}`), {
-            [`agents/${targetId}/incident`]: {
-                type: 'UNMASK_PROMPT',
-                unmaskerId: validatorId,
-                unmaskerName: validator.name,
-                reportedAt: Date.now()
-            },
-            pausedAt: serverTimestamp() // On met en pause le minuteur
-        });
-
-        // Event initial
         await pushEvent({
             type: 'SUSPECT',
             agentId: validatorId,
-            agentName: `${validator.name} tente de démasquer ${target.name} !`
+            agentName: validator.name,
+            targetName: target.name
         });
-
         return true;
-    };
-
-    const respondToUnmask = async (targetId: string, isCorrect: boolean) => {
-        if (!session?.code) return;
-
-        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
-        const missionData = missionSnapshot.val();
-        const target = missionData.agents?.[targetId];
-        const unmaskerId = target.incident?.unmaskerId;
-        const unmasker = missionData.agents?.[unmaskerId];
-
-        if (isCorrect) {
-            // L'agent avoue
-            const updates: any = {};
-            const targetScore = target.score || 0;
-            const unmaskerScore = unmasker?.score || 0;
-
-            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
-            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
-            updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
-
-            // Nouvelle mission pour celui qui a été démasqué
-            const usedChallengeIds = Object.values(missionData.agents || {})
-                .map((a: any) => a.challenge?.id)
-                .filter(id => !!id);
-            const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
-            const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
-            updates[`missions/${session.code}/agents/${targetId}/challenge`] = nextChallenge;
-
-            // Reprise du minuteur
-            const currentStartedAt = missionData.startedAt;
-            const pausedAt = missionData.pausedAt;
-            if (pausedAt && currentStartedAt) {
-                const pauseDuration = Date.now() - pausedAt;
-                updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
-                updates[`missions/${session.code}/pausedAt`] = null;
-            }
-
-            await update(ref(db), updates);
-
-            await pushEvent({
-                type: 'UNMASKED',
-                agentId: targetId,
-                agentName: target.name,
-                targetName: unmasker?.name || 'Unmasker',
-                missionText: target.challenge?.text,
-                points: 10
-            });
-        } else {
-            // L'agent nie - on passe au vote mais on GARDE les infos de l'unmasker
-            await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
-                type: 'UNMASK_VOTE',
-                votes: {}
-            });
-        }
-    };
-
-    const triggerRouletteTirage = async (targetId: string, unmaskerId: string) => {
-        if (!session?.code) return;
-        const winnerId = Math.random() > 0.5 ? unmaskerId : targetId;
-        await update(ref(db, `missions/${session.code}/agents/${targetId}/incident`), {
-            rouletteWinnerId: winnerId
-        });
-    };
-
-    const resolveUnmaskVote = async (targetId: string, wasActuallyCorrect: boolean) => {
-        if (!session?.code) return;
-
-        const missionSnapshot = await get(ref(db, `missions/${session.code}`));
-        const missionData = missionSnapshot.val();
-        const target = missionData.agents?.[targetId];
-        const unmaskerId = target?.incident?.unmaskerId;
-
-        if (!unmaskerId) return; // Sécurité : l'incident a déjà été nettoyé ou n'existe pas
-
-        const unmasker = missionData.agents?.[unmaskerId];
-
-        const updates: any = {};
-        const targetScore = target.score || 0;
-        const unmaskerScore = unmasker?.score || 0;
-
-        if (wasActuallyCorrect) {
-            // Le vote a donné raison à l'accusateur
-            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(-10);
-            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(10);
-
-            // Nouvelle mission pour celui qui a été démasqué
-            const usedChallengeIds = Object.values(missionData.agents || {})
-                .map((a: any) => a.challenge?.id)
-                .filter(id => !!id);
-            const availableChallenges = CHALLENGES.filter(c => !usedChallengeIds.includes(c.id));
-            const nextChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)] || CHALLENGES[0];
-            updates[`missions/${session.code}/agents/${targetId}/challenge`] = nextChallenge;
-
-            await pushEvent({
-                type: 'UNMASKED',
-                agentId: targetId,
-                agentName: target.name,
-                targetName: unmasker?.name || 'Unmasker',
-                missionText: target.challenge?.text,
-                points: 10
-            });
-        } else {
-            // Le vote a donné raison à l'accusé
-            updates[`missions/${session.code}/agents/${targetId}/score`] = increment(10); // Bonus pour avoir été faussement accusé
-            updates[`missions/${session.code}/agents/${unmaskerId}/score`] = increment(-10); // Malus pour fausse accusation
-
-            await pushEvent({
-                type: 'FAILED_UNMASK',
-                agentId: unmaskerId,
-                agentName: unmasker?.name || 'Unmasker',
-                targetName: target.name,
-                points: -10
-            });
-        }
-
-        updates[`missions/${session.code}/agents/${targetId}/incident`] = null;
-
-        // Reprise du minuteur
-        const currentStartedAt = missionData.startedAt;
-        const pausedAt = missionData.pausedAt;
-        if (pausedAt && currentStartedAt) {
-            const pauseDuration = Date.now() - pausedAt;
-            updates[`missions/${session.code}/startedAt`] = currentStartedAt + pauseDuration;
-            updates[`missions/${session.code}/pausedAt`] = null;
-        }
-
-        await update(ref(db), updates);
     };
 
     return (
         <SessionContext.Provider value={{
             session, isInitialized, agents, events, status,
             createSession, joinSession, clearSession,
-            startMission, finishMission, checkSessionExists, completeChallenge, triggerBluff, finalizeChallengePoints,
-            reportImpossibleChallenge, voteIncident, resolveImpossibleChallenge, unmaskAgent,
-            respondToUnmask, resolveUnmaskVote, pushEvent, triggerRouletteTirage
+            startMission, finishMission, checkSessionExists, unmaskAgent, pushEvent
         }}>
             {children}
         </SessionContext.Provider>

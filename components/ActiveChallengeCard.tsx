@@ -20,9 +20,6 @@ interface ActiveChallengeCardProps {
   status: string;
   now: number;
   isCompleted: boolean;
-  handleComplete: () => void;
-  handleBluff: () => void;
-  setShowImpossibleModal: (show: boolean) => void;
 }
 
 export function ActiveChallengeCard({
@@ -37,9 +34,6 @@ export function ActiveChallengeCard({
   status,
   now,
   isCompleted,
-  handleComplete,
-  handleBluff,
-  setShowImpossibleModal,
 }: ActiveChallengeCardProps) {
   const { t } = useTranslation();
 
@@ -75,13 +69,11 @@ export function ActiveChallengeCard({
             name={
               isCompleted
                 ? "shield-checkmark"
-                : me?.incident
-                  ? "alert-circle"
-                  : "finger-print"
+                : "finger-print"
             }
             size={18}
             color={
-              isCompleted ? "#4CAF50" : me?.incident ? "#FF6B6B" : "#FFF"
+              isCompleted ? "#4CAF50" : "#FFF"
             }
           />
           <ThemedText
@@ -89,52 +81,28 @@ export function ActiveChallengeCard({
             style={[
               styles.cardTitle,
               isCompleted && { color: "#4CAF50" },
-              me?.incident && { color: "#FF6B6B" },
             ]}
           >
             {isCompleted
               ? `#${me?.name?.toUpperCase()}`
-              : me?.incident
-                ? t("mission.identity_suspended")
-                : t("mission.identification_required")}
+              : t("mission.identification_required")}
           </ThemedText>
         </View>
 
         <Pressable
           onPress={() =>
-            !isCompleted && !me?.incident && setIsRevealed(!isRevealed)
+            !isCompleted && setIsRevealed(!isRevealed)
           }
           style={({ pressed }) => [
             styles.challengeBox,
             !isRevealed &&
             !isCompleted &&
-            !me?.incident &&
             styles.challengeBoxHidden,
             isCompleted && styles.challengeBoxCompleted,
-            me?.incident && styles.challengeBoxIncident,
-            pressed && !isCompleted && !me?.incident && { opacity: 0.7 },
+            pressed && !isCompleted && { opacity: 0.7 },
           ]}
         >
-          {me?.incident ? (
-            <Animated.View
-              key="incident"
-              entering={FadeIn.duration(400)}
-              exiting={FadeOut.duration(400)}
-              style={styles.hiddenContent}
-            >
-              <Ionicons name="hammer-outline" size={32} color="#FF6B6B" />
-              <View>
-                <ThemedText
-                  style={[styles.revealText, { color: "#FF6B6B" }]}
-                >
-                  {t("mission.judgement_in_progress")}
-                </ThemedText>
-                <ThemedText style={styles.revealSubtext}>
-                  {t("mission.judgement_msg")}
-                </ThemedText>
-              </View>
-            </Animated.View>
-          ) : !isRevealed && !isCompleted ? (
+          {!isRevealed && !isCompleted ? (
             <Animated.View
               key="hidden"
               entering={FadeIn.duration(400)}
@@ -206,102 +174,6 @@ export function ActiveChallengeCard({
             </Animated.View>
           )}
         </Pressable>
-
-        {!me?.pendingValidation && !me?.completed && !me?.incident && (
-          <View style={{ gap: 15 }}>
-            <TouchableOpacity
-              onPress={handleComplete}
-              activeOpacity={0.7}
-              style={styles.tacticalCompleteBtn}
-            >
-              <View style={styles.btnContentRow}>
-                <Ionicons name="finger-print" size={20} color="#4CAF50" />
-                <ThemedText
-                  type="futuristic"
-                  style={styles.tacticalCompleteText}
-                >
-                  {t("mission.complete_objective")}
-                </ThemedText>
-              </View>
-              <View style={styles.btnCornerTL} />
-              <View style={styles.btnCornerBR} />
-            </TouchableOpacity>
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <TouchableOpacity
-                onPress={handleBluff}
-                style={[styles.bluffBtn, { flex: 1 }]}
-              >
-                <Ionicons name="timer-outline" size={14} color="#FFD93D" />
-                <ThemedText
-                  type="code"
-                  style={styles.bluffBtnText}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {t("mission.btn_bluff")}
-                </ThemedText>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setShowImpossibleModal(true)}
-                style={[styles.impossibleBtn, { flex: 1.4 }]}
-              >
-                <Ionicons
-                  name="flash-off"
-                  size={11}
-                  color="rgba(255,107,107,0.6)"
-                />
-                <ThemedText
-                  type="code"
-                  style={styles.impossibleBtnText}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {t("mission.impossible_objective")}
-                </ThemedText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {me?.pendingValidation && (
-          <View style={styles.pendingBadge}>
-            <Ionicons
-              name="timer-outline"
-              size={16}
-              color="#FFD93D"
-              style={{ marginRight: 8 }}
-            />
-            <View>
-              <ThemedText type="code" style={styles.pendingBadgeText}>
-                {t("mission.verification_in_progress").replace(
-                  "{{time}}",
-                  Math.max(
-                    0,
-                    Math.floor(
-                      (60000 - (now - me.pendingValidation.startedAt)) /
-                      1000,
-                    ),
-                  ).toString(),
-                )}
-              </ThemedText>
-              <ThemedText style={styles.pendingBadgeSub}>
-                {t("mission.transfer_hq_msg")}
-              </ThemedText>
-            </View>
-          </View>
-        )}
-
-        {me?.incident && (
-          <View style={styles.incidentStatus}>
-            <ThemedText type="code" style={styles.incidentStatusText}>
-              {t("mission.current_score").replace(
-                "{{score}}",
-                (me.score || 1).toString(),
-              )}
-            </ThemedText>
-          </View>
-        )}
 
         {/* Tactical corners */}
         <View style={styles.cornerL_TL} />

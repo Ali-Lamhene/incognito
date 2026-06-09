@@ -48,14 +48,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.05)",
   },
-  agentRowCompleted: {
-    borderColor: "rgba(76, 175, 80, 0.2)",
-    backgroundColor: "rgba(76, 175, 80, 0.02)",
-  },
-  agentRowIncident: {
-    borderColor: "rgba(255, 107, 107, 0.3)",
-    backgroundColor: "rgba(255, 107, 107, 0.05)",
-  },
   agentInfo: {
     flex: 1,
     flexDirection: "row",
@@ -72,14 +64,6 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  avatarCompleted: {
-    borderColor: "#4CAF50",
-    backgroundColor: "rgba(76, 175, 80, 0.1)",
-  },
-  avatarIncident: {
-    borderColor: "#FF6B6B",
-    backgroundColor: "rgba(255, 107, 107, 0.1)",
   },
   agentName: {
     fontSize: 14,
@@ -105,17 +89,6 @@ export const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.8)",
     fontWeight: "bold",
   },
-  criticalStatus: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  alertPulse: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#FFD93D",
-  },
   unmaskBtn: {
     paddingVertical: 8,
     paddingHorizontal: 15,
@@ -123,15 +96,6 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,107,107,0.3)",
     backgroundColor: "rgba(255,107,107,0.05)",
-  },
-  unmaskBtnDisabled: {
-    borderColor: "rgba(255,255,255,0.05)",
-    opacity: 0.5,
-  },
-  unmaskBtnActive: {
-    backgroundColor: "rgba(255, 217, 61, 0.15)",
-    borderColor: "#FFD93D",
-    borderWidth: 2,
   },
   unmaskText: {
     fontSize: 9,
@@ -141,13 +105,5 @@ export const styles = StyleSheet.create({
     textShadowColor: "rgba(255, 107, 107, 0.4)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
-  },
-  unmaskTextDisabled: {
-    color: "rgba(255,255,255,0.3)",
-  },
-  unmaskTextActive: {
-    color: "#FFD93D",
-    textShadowColor: "rgba(255, 217, 61, 0.5)",
-    textShadowRadius: 10,
   },
 });

@@ -16,9 +16,7 @@ import { MissionStartSplashScreen } from "../../components/MissionStartSplashScr
 import { ThemedText } from "../../components/ThemedText";
 import { ActiveHeader } from "../../components/ActiveHeader";
 import { ActiveChallengeCard } from "../../components/ActiveChallengeCard";
-import { ActiveIncidentBanner } from "../../components/ActiveIncidentBanner";
 import { ActiveAgentsList } from "../../components/ActiveAgentsList";
-import { ActiveRouletteOverlay } from "../../components/ActiveRouletteOverlay";
 import { ActiveEventFeed } from "../../components/ActiveEventFeed";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useActiveMission } from "../../hooks/useActiveMission";
@@ -43,23 +41,10 @@ export default function ActiveMissionScreen() {
     isLowTime,
     animatedScanStyle,
     visibleEvents,
-    isRouletteActive,
-    rouletteWinner,
-    agentInIncident,
-    incidentType,
-    incidentVotes,
-    myVote,
-    countPossible,
-    countFeasible,
-    countYes,
-    countNo,
-    maxVoters,
     isRevealed,
     setIsRevealed,
     showAbortModal,
     setShowAbortModal,
-    showImpossibleModal,
-    setShowImpossibleModal,
     showUnmaskModal,
     setShowUnmaskModal,
     showStartSplash,
@@ -67,16 +52,9 @@ export default function ActiveMissionScreen() {
     showCompleteSplash,
     formatTime,
     actions: {
-      handleComplete,
-      handleBluff,
       handleAbort,
-      handleImpossible,
-      handleVote,
       handleUnmask,
       handleConfirmUnmask,
-      handleRespondToUnmask,
-      handleResolveUnmaskVote,
-      resolveImpossibleChallenge,
     }
   } = useActiveMission();
 
@@ -139,27 +117,6 @@ export default function ActiveMissionScreen() {
           agentName={me?.name}
         />
 
-        {agentInIncident && (
-          <ActiveIncidentBanner
-            agentInIncident={agentInIncident}
-            incidentType={incidentType}
-            incidentVotes={incidentVotes}
-            agents={agents}
-            profile={profile}
-            countPossible={countPossible}
-            countFeasible={countFeasible}
-            countYes={countYes}
-            countNo={countNo}
-            myVote={myVote}
-            isRouletteActive={isRouletteActive}
-            maxVoters={maxVoters}
-            handleVote={handleVote}
-            handleRespondToUnmask={handleRespondToUnmask}
-            resolveImpossibleChallenge={resolveImpossibleChallenge}
-            handleResolveUnmaskVote={handleResolveUnmaskVote}
-          />
-        )}
-
         <ActiveChallengeCard
           me={me}
           timeLeft={timeLeft}
@@ -172,57 +129,33 @@ export default function ActiveMissionScreen() {
           status={status}
           now={now}
           isCompleted={!!isCompleted}
-          handleComplete={handleComplete}
-          handleBluff={handleBluff}
-          setShowImpossibleModal={setShowImpossibleModal}
         />
 
         <ActiveAgentsList
           agents={agents}
           profile={profile}
-          agentInIncident={agentInIncident}
           now={now}
           handleUnmask={handleUnmask}
         />
 
         {/* Leave Button at the bottom */}
         <TouchableOpacity
-          onPress={() => !agentInIncident && setShowAbortModal(true)}
-          disabled={!!agentInIncident}
-          style={[
-            styles.leaveGameButton,
-            !!agentInIncident && styles.leaveGameButtonDisabled,
-          ]}
+          onPress={() => setShowAbortModal(true)}
+          style={styles.leaveGameButton}
         >
           <Ionicons
             name="log-out-outline"
             size={18}
-            color={
-              agentInIncident
-                ? "rgba(255,255,255,0.1)"
-                : "rgba(255,107,107,0.6)"
-            }
+            color="rgba(255,107,107,0.6)"
           />
           <ThemedText
             type="code"
-            style={[
-              styles.leaveGameText,
-              !!agentInIncident && styles.leaveGameTextDisabled,
-            ]}
+            style={styles.leaveGameText}
           >
-            {agentInIncident
-              ? t("mission.voting_in_progress")
-              : t("mission.leave_lobby")}
+            {t("mission.leave_lobby")}
           </ThemedText>
         </TouchableOpacity>
       </ScrollView>
-
-      <ActiveRouletteOverlay
-        isRouletteActive={isRouletteActive}
-        agentInIncident={agentInIncident}
-        rouletteWinner={rouletteWinner}
-        agents={agents}
-      />
 
       <ActiveEventFeed
         events={events}
@@ -234,9 +167,6 @@ export default function ActiveMissionScreen() {
         showAbortModal={showAbortModal}
         setShowAbortModal={setShowAbortModal}
         handleAbort={handleAbort}
-        showImpossibleModal={showImpossibleModal}
-        setShowImpossibleModal={setShowImpossibleModal}
-        handleImpossible={handleImpossible}
         showUnmaskModal={showUnmaskModal}
         setShowUnmaskModal={setShowUnmaskModal}
         handleConfirmUnmask={handleConfirmUnmask}
