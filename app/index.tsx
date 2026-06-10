@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -73,8 +74,14 @@ export default function AgentHomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <ProfileSetupModal
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom}]}>
+      <Image
+        source={require('../assets/UI/incognito_logo.png')}
+        style={styles.logoImage}
+        contentFit="cover"
+      />
+
+      {/* <ProfileSetupModal
         visible={showProfileSetup}
         onComplete={handleProfileComplete}
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
@@ -83,10 +90,10 @@ export default function AgentHomeScreen() {
       <RulesModal
         visible={showRules}
         onClose={() => setShowRules(false)}
-      />
+      /> */}
 
       {/* BACKGROUND: Blurred Secret Agent Desk & Telemetry Scanline */}
-      <AgentHomeBackground />
+      {/* <AgentHomeBackground />
 
       <View style={styles.tabletCenteredContainer}>
         <View style={[
@@ -97,20 +104,20 @@ export default function AgentHomeScreen() {
             paddingLeft: 15,
             paddingRight: 15,
           }
-        ]}>
+        ]}> */}
           {/* HEADER: Technical Telemetry */}
-          <AgentHeader
+          {/* <AgentHeader
             profile={profile}
             onProfilePress={() => setShowProfileSetup(true)}
             onSettingsPress={() => router.push('/settings')}
             onRulesPress={() => setShowRules(true)}
-          />
+          /> */}
 
           {/* CENTRAL: Augmented Reality Dossier */}
-          <DossierFrame session={session} />
+          {/* <DossierFrame session={session} /> */}
 
           {/* BOTTOM: Mission Deployment */}
-          <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
+          {/* <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
             <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
               <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
                 {session ? `${t('home.active_protocol')}: ${session.code}` : t('home.deployment_protocol')}
@@ -148,12 +155,12 @@ export default function AgentHomeScreen() {
                 />
               </>
             )}
-          </Animated.View>
+          </Animated.View> */}
 
           {/* DATA OVERLAY: Side Stream */}
-          <SideDataStream />
-        </View>
-      </View>
+          {/* <SideDataStream /> */}
+        {/* </View> */}
+      {/* </View> */}
     </View>
   );
 }
@@ -162,6 +169,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  logoImage: {
+    width: '85%',
+    height: 105,
+    alignSelf: 'center',
+    marginTop: 20,
   },
   tabletCenteredContainer: {
     flex: 1,
