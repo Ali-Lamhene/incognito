@@ -6,7 +6,6 @@ import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentSplashScreen } from '../../components/AgentSplashScreen';
 import { ProfileSetupModal } from '../../components/ProfileSetupModal';
-import { RulesModal } from '../../components/RulesModal';
 import { ThemedText } from '../../components/ThemedText';
 import { useAppState } from '../../store/appState';
 import { useProfileStore } from '../../store/profileStore';
@@ -25,7 +24,6 @@ export default function AgentHomeScreen() {
   const { t } = useTranslation();
 
   const [showSplash, setShowSplash] = useState(!hasLaunched);
-  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     if (!showSplash && !isFirstSetupDone) {
@@ -109,11 +107,6 @@ export default function AgentHomeScreen() {
         visible={showProfileModal}
         onComplete={handleProfileComplete}
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
-      />
-      
-      <RulesModal
-        visible={showRules}
-        onClose={() => setShowRules(false)}
       />
     </View>
   );
