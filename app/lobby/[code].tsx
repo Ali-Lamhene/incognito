@@ -8,7 +8,7 @@ import { LobbyBackground } from '../../components/LobbyBackground';
 import { LobbyHeader } from '../../components/LobbyHeader';
 import { LobbyModals } from '../../components/LobbyModals';
 import { LobbyQRFrame } from '../../components/LobbyQRFrame';
-import { MainButton } from '../../components/MainButton';
+import { Button } from '../../components/ui/Button';
 import { ThemedText } from '../../components/ThemedText';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useLobby } from '../../hooks/useLobby';
@@ -80,11 +80,12 @@ export default function LobbyScreen() {
                     {/* Footer Action */}
                     {isHost && (
                         <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
-                            <MainButton
+                            <Button
                                 title={agents.length < 2 ? t('lobby.waiting_agents') : t('lobby.btn_deploy')}
                                 onPress={handleDeploy}
                                 disabled={agents.length < 2}
                                 style={styles.startButton}
+                                variant="primary"
                             />
                             {agents.length < 2 && (
                                 <ThemedText type="code" style={styles.aloneHint}>

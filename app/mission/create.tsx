@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentHomeBackground } from '../../components/AgentHomeBackground';
 import { AgentScreenHeader } from '../../components/AgentScreenHeader';
 import { DurationSelector } from '../../components/DurationSelector';
-import { MainButton } from '../../components/MainButton';
+import { Button } from '../../components/ui/Button';
 import { ThemedText } from '../../components/ThemedText';
 
 import { useTranslation } from '../../hooks/useTranslation';
@@ -59,11 +59,12 @@ export default function CreateMissionScreen() {
                             </ThemedText>
                         </View>
 
-                        <MainButton
+                        <Button
                              title={t('mission.btn_init')}
                              onPress={handleCreate}
                              disabled={isCustomInvalid}
                              style={styles.createButton}
+                             variant="primary"
                         />
                     </Animated.View>
                 </View>

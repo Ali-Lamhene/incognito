@@ -3,7 +3,7 @@ import React from 'react';
 import { Modal, ScrollView, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
-import { MainButton } from './MainButton';
+import { Button } from './ui/Button';
 import { ThemedText } from './ThemedText';
 
 interface RulesModalProps {
@@ -84,11 +84,12 @@ export function RulesModal({ visible, onClose }: RulesModalProps) {
                                 </ThemedText>
                             </ScrollView>
 
-                            <MainButton
+                            <Button
                                 title={t('common.ok')}
                                 onPress={onClose}
                                 style={[styles.button, { backgroundColor: '#FFF' }]}
                                 textStyle={{ color: '#000', fontSize: 12 }}
+                                variant="primary"
                             />
 
                             {/* Decoration */}

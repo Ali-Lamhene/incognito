@@ -4,7 +4,7 @@ import { Modal, ScrollView, StyleSheet, Switch, TextInput, TouchableOpacity, Tou
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
 import { useSettingsStore } from '../store/settingsStore';
-import { MainButton } from './MainButton';
+import { Button } from './ui/Button';
 import { ThemedText } from './ThemedText';
 
 interface ProfileSetupModalProps {
@@ -149,11 +149,12 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                             </View>
                         </ScrollView>
 
-                        <MainButton
+                        <Button
                             title={initialData ? t('common.confirm') : t('profile.btn_create')}
                             onPress={handleConfirm}
                             style={[styles.button, { backgroundColor: '#FFF' }]}
                             textStyle={{ color: '#000', fontSize: 12 }}
+                            variant="primary"
                         />
 
                         {/* Decoration */}

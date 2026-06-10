@@ -5,12 +5,12 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentSplashScreen } from '../components/AgentSplashScreen';
-import { MainButton } from '../components/MainButton';
 import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { RulesModal } from '../components/RulesModal';
 import { ThemedText } from '../components/ThemedText';
 import { useAppState } from '../store/appState';
 import { useProfileStore } from '../store/profileStore';
+import { Button } from '../components/ui/Button';
 
 import { useSession } from '../context/SessionContext';
 import { useTranslation } from '../hooks/useTranslation';
@@ -78,8 +78,44 @@ export default function AgentHomeScreen() {
       <Image
         source={require('../assets/UI/incognito_logo.png')}
         style={styles.logoImage}
-        contentFit="cover"
+        contentFit="contain"
       />
+
+      <View style={styles.buttonContainer}>
+        {session ? (
+          <>
+            <Button
+              title="Retourner au salon"
+              variant="primary"
+              icon="arrow-forward-circle"
+              onPress={() => router.push(`/lobby/${session.code}`)}
+            />
+            <Button
+              title="Abandonner la mission"
+              variant="secondary"
+              icon="exit-outline"
+              onPress={async () => {
+                await clearSession(profile?.id);
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <Button
+              title="Créer une partie"
+              variant="primary"
+              icon="person-add"
+              onPress={() => router.push('/mission/create')}
+            />
+            <Button
+              title="Rejoindre une partie"
+              variant="secondary"
+              icon="people"
+              onPress={() => router.push('/mission/join')}
+            />
+          </>
+        )}
+      </View>
 
       {/* <ProfileSetupModal
         visible={showProfileSetup}
@@ -116,46 +152,10 @@ export default function AgentHomeScreen() {
           {/* CENTRAL: Augmented Reality Dossier */}
           {/* <DossierFrame session={session} /> */}
 
-          {/* BOTTOM: Mission Deployment */}
-          {/* <Animated.View entering={FadeInUp.delay(1600).duration(800)} style={styles.actionSection}>
-            <View style={[styles.deployBadge, session && { borderColor: 'rgba(255, 255, 255, 0.3)' }]}>
-              <ThemedText type="code" style={[styles.deployLabel, session && { color: 'rgba(255, 255, 255, 0.5)' }]}>
-                {session ? `${t('home.active_protocol')}: ${session.code}` : t('home.deployment_protocol')}
-              </ThemedText>
-            </View>
 
-            {session ? (
-              <>
-                <MainButton
-                  title={t('home.return_to_lobby')}
-                  onPress={() => router.push(`/lobby/${session.code}`)}
-                  style={[styles.primaryAction, { borderColor: 'rgba(255, 255, 255, 0.5)' }]}
-                />
-                <MainButton
-                  title={t('home.abort_mission')}
-                  variant="outline"
-                  onPress={async () => {
-                    await clearSession(profile?.id);
-                  }}
-                  style={[styles.secondaryAction, { marginTop: 10, borderColor: 'rgba(255, 107, 107, 0.3)' }]}
-                />
-              </>
-            ) : (
-              <>
-                <MainButton
-                  title={t('home.create_mission_title')}
-                  onPress={() => router.push('/mission/create')}
-                  style={styles.primaryAction}
-                />
-                <MainButton
-                  title={t('home.join_mission_subtitle')}
-                  variant="outline"
-                  onPress={() => router.push('/mission/join')}
-                  style={[styles.secondaryAction, { marginTop: 10 }]}
-                />
-              </>
-            )}
-          </Animated.View> */}
+          {/* BOTTOM: Mission Deployment */}
+          {/* Active buttons are now defined responsively below the logo */}
+
 
           {/* DATA OVERLAY: Side Stream */}
           {/* <SideDataStream /> */}
@@ -172,9 +172,17 @@ const styles = StyleSheet.create({
   },
   logoImage: {
     width: '85%',
-    height: 105,
+    maxWidth: 400,
+    aspectRatio: 860 / 264,
     alignSelf: 'center',
-    marginTop: 20,
+    marginTop: 40,
+  },
+  buttonContainer: {
+    marginTop: 'auto',
+    width: '85%',
+    maxWidth: 400,
+    alignSelf: 'center',
+    marginBottom: 40,
   },
   tabletCenteredContainer: {
     flex: 1,
@@ -189,32 +197,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 35,
     justifyContent: 'space-between',
     paddingVertical: 20,
-  },
-  actionSection: {
-    gap: 2,
-    marginBottom: 20,
-  },
-  deployBadge: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 2,
-    marginBottom: 8,
-  },
-  deployLabel: {
-    fontSize: 8,
-    opacity: 0.4,
-    letterSpacing: 2,
-  },
-  primaryAction: {
-    backgroundColor: '#FFF',
-    height: 35,
-    marginBottom: 30,
-  },
-  secondaryAction: {
-    height: 35,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    marginBottom: 30,
   },
 });

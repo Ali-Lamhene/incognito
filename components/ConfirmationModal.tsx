@@ -1,6 +1,6 @@
 import { Modal, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
-import { MainButton } from './MainButton';
+import { Button } from './ui/Button';
 import { ThemedText } from './ThemedText';
 
 interface ConfirmationModalProps {
@@ -61,14 +61,14 @@ export function ConfirmationModal({
                             </ThemedText>
 
                             <View style={styles.actions}>
-                                <MainButton
+                                <Button
                                     title={cancelLabel}
                                     onPress={onCancel}
                                     variant="outline"
                                     style={styles.button}
                                     textStyle={{ fontSize: 12 }}
                                 />
-                                <MainButton
+                                <Button
                                     title={confirmLabel}
                                     onPress={onConfirm}
                                     style={[
@@ -82,6 +82,7 @@ export function ConfirmationModal({
                                         } : undefined
                                     ]}
                                     textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 1, fontWeight: 'bold' } : { fontSize: 12 }}
+                                    variant={variant === 'danger' ? 'demasquer' : 'primary'}
                                 />
                             </View>
 

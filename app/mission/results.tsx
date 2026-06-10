@@ -5,7 +5,7 @@ import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import Animated, { FadeInDown, FadeInLeft, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MainButton } from "../../components/MainButton";
+import { Button } from "../../components/ui/Button";
 import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -180,11 +180,12 @@ export default function ResultsScreen() {
 
                 {/* Footer Action */}
                 <Animated.View entering={FadeInUp.delay(1200).duration(600)} style={styles.footer}>
-                    <MainButton
+                    <Button
                         title={t('results.return_to_hq')}
                         onPress={() => setShowExitModal(true)}
                         style={styles.homeButton}
                         textStyle={{ fontSize: 11, letterSpacing: 1 }}
+                        variant="primary"
                     />
                 </Animated.View>
             </ScrollView>
