@@ -136,7 +136,7 @@ export function Button({
         {icon && (
           <Ionicons
             name={icon}
-            size={18}
+            size={32}
             color={disabled ? 'rgba(242, 232, 207, 0.3)' : variantStyle.iconColor}
             style={styles.icon}
           />
@@ -158,7 +158,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    height: 58,
+    height: 78,
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: 'BebasNeue-Bold',
+    fontSize: 26,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
