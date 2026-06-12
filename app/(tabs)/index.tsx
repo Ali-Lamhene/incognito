@@ -14,6 +14,7 @@ import { Button } from '../../components/ui/Button';
 import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import SoundService from '../../services/SoundService';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function AgentHomeScreen() {
   const router = useRouter();
@@ -60,12 +61,28 @@ export default function AgentHomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: 120 + insets.bottom}]}>
-      <Image
-        source={require('../../assets/UI/incognito_logo.png')}
-        style={styles.logoImage}
-        contentFit="contain"
-      />
+    <View style={[styles.container, { paddingTop: insets.top + 15, paddingBottom: 105 + insets.bottom }]}>
+      <View style={styles.imageContainer}>
+        <Image
+          source={require('../../assets/UI/home_hero.png')}
+          style={styles.heroImage}
+          contentFit="cover"
+          contentPosition={{ top: '28%', left: '50%' }}
+        />
+        <LinearGradient
+          colors={['#000', 'rgba(0,0,0,0.4)', 'transparent']}
+          style={styles.topGradientOverlay}
+        />
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.8)', '#000']}
+          style={styles.gradientOverlay}
+        />
+        <Image
+          source={require('../../assets/UI/incognito_logo.png')}
+          style={styles.logoImage}
+          contentFit="contain"
+        />
+      </View>
 
       <View style={styles.buttonContainer}>
         {session ? (
@@ -117,18 +134,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  imageContainer: {
+    width: '100%',
+    flex: 1,
+    maxHeight: 420,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+  },
+  topGradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 100,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 150,
+  },
   logoImage: {
+    position: 'absolute',
+    top: 25,
     width: '85%',
-    maxWidth: 400,
+    maxWidth: 380,
     aspectRatio: 860 / 264,
     alignSelf: 'center',
-    marginTop: 40,
   },
   buttonContainer: {
     marginTop: 'auto',
     width: '85%',
     maxWidth: 400,
     alignSelf: 'center',
-    marginBottom: 40,
   },
 });

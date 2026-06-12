@@ -67,7 +67,7 @@
         "btn_deploy_simple": "DÉPLOYER"
     },
     "mission": {
-        "create_title": "CONFIGURATION MISSION",
+        "create_title": "CONFIGURATION",
         "abort_mission": "ABANDONNER MISSION",
         "threat_level": "NIVEAU DE MENACE",
         "duration": "FENÊTRE OPÉRATIONNELLE",

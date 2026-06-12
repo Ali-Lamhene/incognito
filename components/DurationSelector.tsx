@@ -25,7 +25,7 @@ export function DurationSelector({
 
     return (
         <View style={styles.selectorContainer}>
-            <ThemedText type="code" style={styles.selectorLabel}>{t('mission.duration')}</ThemedText>
+            <ThemedText style={styles.selectorLabel}>{t('mission.duration')}</ThemedText>
             <View style={styles.optionsRow}>
                 {DURATIONS.map((opt) => {
                     const isSelected = duration === opt;
@@ -39,7 +39,6 @@ export function DurationSelector({
                                 ]}
                             >
                                 <ThemedText
-                                    type="code"
                                     style={[
                                         styles.optionText,
                                         isSelected && styles.optionTextSelected
@@ -47,7 +46,6 @@ export function DurationSelector({
                                 >
                                     {t(`mission.options.${opt}`)}
                                 </ThemedText>
-                                {isSelected && <View style={styles.selectedCorner} />}
                             </TouchableOpacity>
 
                             {opt === 'CUSTOM' && isSelected && (
@@ -62,10 +60,10 @@ export function DurationSelector({
                                             placeholderTextColor="rgba(255,255,255,0.3)"
                                             maxLength={3}
                                         />
-                                        <ThemedText type="code" style={styles.customInputUnit}>MIN</ThemedText>
+                                        <ThemedText style={styles.customInputUnit}>MIN</ThemedText>
                                     </Animated.View>
                                     {isCustomInvalid && (
-                                        <ThemedText type="code" style={styles.durationErrorText}>
+                                        <ThemedText style={styles.durationErrorText}>
                                             {t('mission.duration_error')}
                                         </ThemedText>
                                     )}
@@ -81,81 +79,75 @@ export function DurationSelector({
 
 const styles = StyleSheet.create({
     selectorContainer: {
-        gap: 12,
+        gap: 15,
+        width: '100%',
     },
     selectorLabel: {
-        color: '#FFF',
-        fontSize: 10,
-        opacity: 0.5,
+        color: 'rgba(242, 232, 207, 0.6)',
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
         letterSpacing: 1.5,
-        marginBottom: 5,
+        textTransform: 'uppercase',
     },
     optionsRow: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 10,
+        gap: 12,
     },
     optionButton: {
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(242, 232, 207, 0.15)',
         paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 2,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        position: 'relative',
-        overflow: 'hidden',
+        paddingHorizontal: 20,
+        borderRadius: 6,
+        backgroundColor: '#161616',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minWidth: 80,
     },
     optionButtonSelected: {
-        borderColor: '#FFF',
-        backgroundColor: '#FFF',
+        borderColor: '#D62B28',
+        backgroundColor: '#D62B28',
     },
     optionText: {
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.6)',
-        letterSpacing: 1,
-        fontWeight: '600',
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 22,
+        color: 'rgba(242, 232, 207, 0.8)',
+        letterSpacing: 1.2,
     },
     optionTextSelected: {
-        color: '#000',
-        fontWeight: 'bold',
-    },
-    selectedCorner: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: 6,
-        height: 6,
-        backgroundColor: '#000',
-        transform: [{ rotate: '45deg' }, { translateX: 3 }, { translateY: -3 }]
+        color: '#FFF',
     },
     customInputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.4)',
+        borderBottomWidth: 1.5,
+        borderBottomColor: 'rgba(242, 232, 207, 0.4)',
         paddingHorizontal: 5,
         marginLeft: 5,
     },
     customInput: {
         color: '#FFF',
-        fontFamily: 'monospace',
-        fontSize: 14,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 20,
         width: 40,
         textAlign: 'center',
         paddingVertical: 0,
     },
     customInputUnit: {
-        fontSize: 8,
-        color: '#FFF',
-        opacity: 0.5,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 14,
+        color: '#F2E8CF',
+        opacity: 0.6,
         marginLeft: 4,
     },
     durationErrorText: {
-        fontSize: 7,
-        color: '#FF6B6B',
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 12,
+        color: '#D62B28',
         marginTop: 4,
         position: 'absolute',
-        bottom: -12,
-        width: 100,
+        bottom: -16,
+        width: 150,
     },
 });

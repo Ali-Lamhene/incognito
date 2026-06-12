@@ -1,13 +1,12 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AgentHomeBackground } from '../../components/AgentHomeBackground';
-import { AgentScreenHeader } from '../../components/AgentScreenHeader';
+import { PageHeader } from '../../components/ui/PageHeader';
 import { DurationSelector } from '../../components/DurationSelector';
 import { Button } from '../../components/ui/Button';
 import { ThemedText } from '../../components/ThemedText';
-
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCreateMission } from '../../hooks/useCreateMission';
 
@@ -25,50 +24,74 @@ export default function CreateMissionScreen() {
     } = useCreateMission();
 
     return (
-        <View style={styles.container}>
-            <AgentHomeBackground />
+        <View style={{ flex: 1 }}>
 
-            <View style={styles.tabletCenteredContainer}>
-                <View style={[
-                    styles.content,
-                    { paddingTop: insets.top + 20, paddingBottom: 20 + insets.bottom }
-                ]}>
+            {/* Background */}
+            <LinearGradient
+                colors={[
+                    '#050505',
+                    '#101010',
+                    '#0D0D0D',
+                    '#050505',
+                ]}
+                locations={[0, 0.25, 0.7, 1]}
+                style={StyleSheet.absoluteFill}
+            />
 
-                    {/* Header */}
-                    <AgentScreenHeader
-                        title={t('mission.create_title')}
-                        backLabel={t('mission.abort_mission')}
-                    />
+            {/* Central glow */}
+            <View style={styles.centerGlow} />
 
-                    {/* Parameters Form */}
-                    <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                        <DurationSelector
-                            duration={duration}
-                            setDuration={setDuration}
-                            customDuration={customDuration}
-                            setCustomDuration={setCustomDuration}
-                            isCustomInvalid={isCustomInvalid}
-                        />
-                    </Animated.View>
+            {/* Vertical texture */}
+            <View style={styles.textureOverlay} />
 
-                    {/* Footer Action */}
-                    <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.footer}>
-                        <View style={styles.summaryBox}>
-                            <ThemedText type="code" style={styles.summaryText}>
-                                {t('mission.config_summary')}: {duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`)}
-                            </ThemedText>
-                        </View>
+            <View style={[styles.container, { paddingTop: insets.top }]}>
+                <PageHeader
+                    title={t('mission.create_title')}
+                />
 
-                        <Button
-                             title={t('mission.btn_init')}
-                             onPress={handleCreate}
-                             disabled={isCustomInvalid}
-                             style={styles.createButton}
-                             variant="primary"
-                        />
-                    </Animated.View>
+                <View style={styles.subtitleContainer}>
+                    <Text style={styles.subtitleText}>
+                        Configurez votre mission
+                    </Text>
+                    <View style={styles.separator} />
+                </View>
+
+                <View style={styles.tabletCenteredContainer}>
+                    <View
+                        style={[
+                            styles.content,
+                            { paddingBottom: 20 + insets.bottom }
+                        ]}
+                    >
+                        <Animated.View
+                            style={styles.formContainer}
+                            entering={FadeInUp.delay(300).duration(600)}
+                        >
+                            <DurationSelector
+                                duration={duration}
+                                setDuration={setDuration}
+                                customDuration={customDuration}
+                                setCustomDuration={setCustomDuration}
+                                isCustomInvalid={isCustomInvalid}
+                            />
+                        </Animated.View>
+
+                        <Animated.View
+                            entering={FadeInUp.delay(500).duration(600)}
+                            style={styles.footer}
+                        >
+                            <Button
+                                title={t('mission.btn_init')}
+                                onPress={handleCreate}
+                                disabled={isCustomInvalid}
+                                style={styles.createButton}
+                                variant="primary"
+                            />
+                        </Animated.View>
+                    </View>
                 </View>
             </View>
+
         </View>
     );
 }
@@ -76,7 +99,50 @@ export default function CreateMissionScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: 'transparent',
+    },
+
+    centerGlow: {
+        position: 'absolute',
+        top: '20%',
+        left: '-15%',
+        right: '-15%',
+        height: 500,
+
+        backgroundColor: 'rgba(255,255,255,0.025)',
+
+        borderRadius: 500,
+
+        transform: [{ scaleX: 1.6 }],
+    },
+
+    textureOverlay: {
+        ...StyleSheet.absoluteFillObject,
+
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+
+        borderLeftColor: 'rgba(255,255,255,0.015)',
+        borderRightColor: 'rgba(255,255,255,0.015)',
+    },
+    subtitleContainer: {
+        alignItems: 'center',
+        marginTop: 20,
+        width: '100%',
+    },
+    subtitleText: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 20,
+        color: '#F2E8CF',
+        opacity: 0.8,
+        textAlign: 'center',
+        marginBottom: 15,
+        letterSpacing: 1,
+    },
+    separator: {
+        height: 1.5,
+        backgroundColor: 'rgba(242, 232, 207, 0.12)',
+        width: '100%',
     },
     tabletCenteredContainer: {
         flex: 1,
@@ -86,12 +152,11 @@ const styles = StyleSheet.create({
     content: {
         width: '100%',
         maxWidth: 1100,
-        maxHeight: 800,
         flex: 1,
         paddingHorizontal: 25,
         justifyContent: 'space-between',
+        marginTop: 20,
     },
-
     formContainer: {
         gap: 30,
         marginTop: 20,
@@ -103,8 +168,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     summaryText: {
-        fontSize: 10,
-        opacity: 0.4,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
+        color: 'rgba(242, 232, 207, 0.6)',
+        letterSpacing: 1,
     },
     createButton: {
         width: '100%',

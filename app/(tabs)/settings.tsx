@@ -100,13 +100,13 @@ export default function SettingsScreen() {
                                 onPress={() => setLanguage('fr')}
                                 style={[styles.langOption, language === 'fr' && styles.langActive]}
                             >
-                                <Text style={{ fontFamily: 'Montserrat-SemiBold', color: language === 'fr' ? '#000' : '#FFF', fontSize: 11 }}>FR</Text>
+                                <Text style={{ fontFamily: 'BebasNeue-Bold', color: language === 'fr' ? '#000' : '#FFF', fontSize: 14 }}>FR</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={() => setLanguage('en')}
                                 style={[styles.langOption, language === 'en' && styles.langActive]}
                             >
-                                <Text style={{ fontFamily: 'Montserrat-SemiBold', color: language === 'en' ? '#000' : '#FFF', fontSize: 11 }}>EN</Text>
+                                <Text style={{ fontFamily: 'BebasNeue-Bold', color: language === 'en' ? '#000' : '#FFF', fontSize: 14 }}>EN</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     sectionTitle: {
-        fontFamily: 'Montserrat-SemiBold',
-        fontSize: 14,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
         color: 'rgba(242, 232, 207, 0.6)',
         letterSpacing: 1.5,
         textTransform: 'uppercase',
@@ -191,14 +191,14 @@ const styles = StyleSheet.create({
         gap: 15,
     },
     profileName: {
-        fontFamily: 'Montserrat-SemiBold',
-        fontSize: 18,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 22,
         color: '#FFF',
         letterSpacing: 1.5,
     },
     profileId: {
-        fontFamily: 'Montserrat-Regular',
-        fontSize: 11,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 14,
         color: 'rgba(255, 255, 255, 0.4)',
         marginTop: 2,
     },
@@ -216,8 +216,8 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     settingText: {
-        fontFamily: 'Montserrat-Regular',
-        fontSize: 15,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
         color: '#FFF',
     },
     infoRow: {
@@ -226,13 +226,13 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
     },
     infoLabel: {
-        fontFamily: 'Montserrat-Regular',
-        fontSize: 14,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
         color: 'rgba(255, 255, 255, 0.5)',
     },
     infoValue: {
-        fontFamily: 'Montserrat-SemiBold',
-        fontSize: 14,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
         color: '#FFF',
     },
     langToggle: {
