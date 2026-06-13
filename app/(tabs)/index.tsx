@@ -15,6 +15,7 @@ import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
 import SoundService from '../../services/SoundService';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Theme } from '../../constants/Theme';
 
 export default function AgentHomeScreen() {
   const router = useRouter();
@@ -70,11 +71,11 @@ export default function AgentHomeScreen() {
           contentPosition={{ top: '28%', left: '50%' }}
         />
         <LinearGradient
-          colors={['#000', 'rgba(0,0,0,0.4)', 'transparent']}
+          colors={[Theme.colors.background, 'rgba(13, 13, 13, 0.4)', 'transparent']}
           style={styles.topGradientOverlay}
         />
         <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)', '#000']}
+          colors={['transparent', 'rgba(13, 13, 13, 0.8)', Theme.colors.background]}
           style={styles.gradientOverlay}
         />
         <Image
@@ -132,7 +133,7 @@ export default function AgentHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: Theme.colors.background,
   },
   imageContainer: {
     width: '100%',

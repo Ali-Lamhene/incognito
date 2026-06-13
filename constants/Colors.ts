@@ -1,20 +1,23 @@
+import { Theme } from './Theme';
+
 export const Colors = {
     light: {
-        text: '#020617',
-        background: '#F8FAFC',
-        primary: '#0D9488', // Teal
-        secondary: '#64748B',
-        accent: '#0EA5E9',
-        border: '#E2E8F0',
+        text: Theme.colors.text.dark,
+        background: Theme.colors.paper,
+        primary: Theme.colors.red,
+        secondary: Theme.colors.text.muted,
+        accent: Theme.colors.accentGold,
+        border: Theme.colors.border,
     },
     dark: {
-        text: '#F8FAFC',
-        background: '#000000', // Absolute Black
-        primary: '#FFF', // Neutral White
-        secondary: '#1E293B',
-        accent: '#F43F5E', // Red alert accent
-        surface: '#0F172A',
-        border: '#334155',
-        success: '#10B981',
+        text: Theme.colors.text.light,
+        background: Theme.colors.background,
+        primary: Theme.colors.red,
+        secondary: Theme.colors.border,
+        accent: Theme.colors.accentGold,
+        surface: Theme.colors.surface,
+        border: Theme.colors.border,
+        success: Theme.colors.status.online,
     },
 };
+

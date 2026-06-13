@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, ViewStyle, TextStyle, View, StyleProp } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { Theme } from '../../constants/Theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiaire' | 'demasquer' | 'annuler' | 'outline';
 
@@ -36,26 +37,26 @@ export function Button({
       case 'primary': // BOUTON PRINCIPAL (Red/Dark Red)
         return {
           button: {
-            backgroundColor: '#8B1E1E',
-            borderColor: '#D62B28',
+            backgroundColor: Theme.colors.red,
+            borderColor: Theme.colors.red,
             borderWidth: 1,
           },
           text: {
-            color: '#F2E8CF',
+            color: Theme.colors.text.light,
           },
-          iconColor: '#F2E8CF',
+          iconColor: Theme.colors.text.light,
         };
       case 'secondary': // BOUTON SECONDAIRE (Dark Grey)
         return {
           button: {
-            backgroundColor: '#2A2A2A',
-            borderColor: '#4A4A4A',
+            backgroundColor: Theme.colors.border,
+            borderColor: Theme.colors.text.muted,
             borderWidth: 1,
           },
           text: {
-            color: '#F2E8CF',
+            color: Theme.colors.text.light,
           },
-          iconColor: '#F2E8CF',
+          iconColor: Theme.colors.text.light,
         };
       case 'tertiaire': // BOUTON TERTIAIRE (Transparent / Subtle Grey outline)
         return {
@@ -69,17 +70,17 @@ export function Button({
           },
           iconColor: 'rgba(242, 232, 207, 0.7)',
         };
-      case 'demasquer': // DÉMASQUER (Bright Red)
+      case 'demasquer': // DÉMASQUER (Bordeaux/Dark Red)
         return {
           button: {
-            backgroundColor: '#D62B28',
-            borderColor: '#E84442',
+            backgroundColor: Theme.colors.red,
+            borderColor: Theme.colors.red,
             borderWidth: 1,
           },
           text: {
-            color: '#FFFFFF',
+            color: Theme.colors.text.light,
           },
-          iconColor: '#FFFFFF',
+          iconColor: Theme.colors.text.light,
         };
       case 'annuler': // ANNULER (Dark black/grey, low emphasis)
         return {
@@ -89,31 +90,31 @@ export function Button({
             borderWidth: 1,
           },
           text: {
-            color: '#888888',
+            color: Theme.colors.text.muted,
           },
-          iconColor: '#888888',
+          iconColor: Theme.colors.text.muted,
         };
       case 'outline': // OUTLINE
         return {
           button: {
             backgroundColor: 'transparent',
-            borderColor: '#F2E8CF',
+            borderColor: Theme.colors.paper,
             borderWidth: 1.5,
           },
           text: {
-            color: '#F2E8CF',
+            color: Theme.colors.text.light,
           },
-          iconColor: '#F2E8CF',
+          iconColor: Theme.colors.text.light,
         };
       default:
         return {
           button: {
-            backgroundColor: '#8B1E1E',
+            backgroundColor: Theme.colors.red,
           },
           text: {
-            color: '#F2E8CF',
+            color: Theme.colors.text.light,
           },
-          iconColor: '#F2E8CF',
+          iconColor: Theme.colors.text.light,
         };
     }
   };
