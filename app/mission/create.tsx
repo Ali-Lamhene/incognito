@@ -182,12 +182,22 @@ const styles = StyleSheet.create({
 
 import React from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AgentHomeBackground } from '../../components/AgentHomeBackground';
+import { PageHeader } from '../../components/ui/PageHeader';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function CreateMissionScreen() {
+    const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
+
     return (
         <View style={{ flex: 1 }}>
             <AgentHomeBackground />
+            
+            <View style={{ paddingTop: insets.top }}>
+                <PageHeader title="créer une mission" />
+            </View>
         </View>
     );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Theme } from '../../constants/Theme';
 
 interface PageHeaderProps {
   title: string;
@@ -32,7 +33,7 @@ export function PageHeader({
     <View style={styles.headerContainer}>
       {showBack ? (
         <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={26} color="#F2E8CF" />
+          <Ionicons name="arrow-back" size={26} color={Theme.colors.text.light} />
         </TouchableOpacity>
       ) : (
         <View style={styles.placeholder} />
@@ -53,13 +54,11 @@ export function PageHeader({
 
 const styles = StyleSheet.create({
   headerContainer: {
-    height: 80,
+    height: 70,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#000',
-    borderBottomWidth: 1.5,
-    borderBottomColor: 'rgba(242, 232, 207, 0.08)',
+    backgroundColor: 'transparent',
     paddingHorizontal: 15,
     width: '100%',
   },
@@ -76,9 +75,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontFamily: 'BebasNeue-Bold',
-    fontSize: 28,
-    color: '#D62B28',
-    letterSpacing: 2,
+    fontSize: 24,
+    color: Theme.colors.red,
     textTransform: 'uppercase',
     textAlign: 'center',
   },
