@@ -1,59 +1,36 @@
 import { Image } from 'expo-image';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming
-} from 'react-native-reanimated';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Theme } from '../constants/Theme';
 
-const { height } = Dimensions.get('window');
+
 
 export function AgentHomeBackground() {
-  const scanlineY = useSharedValue(-height);
-
-  useEffect(() => {
-    // Global scanline animation
-    scanlineY.value = withRepeat(
-      withTiming(height, { duration: 4000, easing: Easing.linear }),
-      -1,
-      false
-    );
-  }, [scanlineY]);
-
-  const scanlineStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: scanlineY.value }],
-  }));
-
   return (
     <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
+      {/* Background Image: City silhouettes (highly visible in the center) */}
       <Image
-        source={require('../assets/images/agent_silhouette_rain.jpg')}
+        source={require('../assets/UI/texture_city.png')}
         style={styles.backgroundImage}
         contentFit="cover"
       />
-      <View style={styles.backgroundOverlay} />
+      
+      {/* Vertical Vignette: Stronger dark overlay at top/bottom, clear center */}
+      <LinearGradient
+        colors={[Theme.colors.background, 'transparent', 'transparent', Theme.colors.background]}
+        locations={[0, 0.25, 0.75, 1]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      {/* HUD Grid */}
-      <View style={styles.hudGrid}>
-        {[...Array(6)].map((_, i) => (
-          <View key={`h-${i}`} style={[styles.gridLineH, { top: `${(i + 1) * 15}%` }]} />
-        ))}
-        {[...Array(6)].map((_, i) => (
-          <View key={`v-${i}`} style={[styles.gridLineV, { left: `${(i + 1) * 15}%` }]} />
-        ))}
-      </View>
-
-      {/* Moving Scanline */}
-      <Animated.View style={[styles.atmosphereScanline, scanlineStyle]} />
-
-      <Image
-        source={require('../assets/images/tactical_texture.jpg')}
-        style={styles.tacticalOverlay}
-        contentFit="cover"
+      {/* Horizontal Vignette: Stronger dark overlay at left/right edges, clear center */}
+      <LinearGradient
+        colors={[Theme.colors.background, 'transparent', 'transparent', Theme.colors.background]}
+        start={{ x: 0, y: 0.5 }}
+        end={{ x: 1, y: 0.5 }}
+        locations={[0, 0.15, 0.85, 1]}
+        style={StyleSheet.absoluteFill}
       />
     </Animated.View>
   );
@@ -62,45 +39,11 @@ export function AgentHomeBackground() {
 const styles = StyleSheet.create({
   backgroundContainer: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: Theme.colors.background,
   },
   backgroundImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.5,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(5, 5, 8, 0.75)',
-  },
-  tacticalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.15,
-  },
-  hudGrid: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.015,
-  },
-  gridLineH: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: '#FFF',
-  },
-  gridLineV: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1,
-    backgroundColor: '#FFF',
-  },
-  atmosphereScanline: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 100,
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    opacity: 0.65, // La ville au centre est plus visible
   },
 });

@@ -45,7 +45,7 @@ export default function RootLayout() {
     <View style={{ flex: 1, backgroundColor: '#000' }}>
       <SafeAreaProvider>
         <SessionProvider>
-          <StatusBar style="light" backgroundColor="#000000" translucent={false} />
+          <StatusBar style="light" backgroundColor="transparent" translucent={true} />
           <Stack
             screenOptions={{
               headerShown: false,

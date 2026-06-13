@@ -1,3 +1,4 @@
+/*
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -26,7 +27,7 @@ export default function CreateMissionScreen() {
     return (
         <View style={{ flex: 1 }}>
 
-            {/* Background */}
+            {/ * Background * /}
             <LinearGradient
                 colors={[
                     '#050505',
@@ -38,10 +39,10 @@ export default function CreateMissionScreen() {
                 style={StyleSheet.absoluteFill}
             />
 
-            {/* Central glow */}
+            {/ * Central glow * /}
             <View style={styles.centerGlow} />
 
-            {/* Vertical texture */}
+            {/ * Vertical texture * /}
             <View style={styles.textureOverlay} />
 
             <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -177,3 +178,17 @@ const styles = StyleSheet.create({
         width: '100%',
     },
 });
+*/
+
+import React from 'react';
+import { View } from 'react-native';
+import { AgentHomeBackground } from '../../components/AgentHomeBackground';
+
+export default function CreateMissionScreen() {
+    return (
+        <View style={{ flex: 1 }}>
+            <AgentHomeBackground />
+        </View>
+    );
+}
+
