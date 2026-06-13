@@ -4,13 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Theme } from '../../constants/Theme';
 
+import { TargetIcon } from './TargetIcon';
+
 export type ButtonVariant = 'primary' | 'secondary' | 'tertiaire' | 'demasquer' | 'annuler' | 'outline';
 
 interface ButtonProps {
   onPress: () => void;
   title: string;
   variant?: ButtonVariant;
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: keyof typeof Ionicons.glyphMap | 'custom-target';
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -135,12 +137,20 @@ export function Button({
     >
       <View style={styles.contentContainer}>
         {icon && (
-          <Ionicons
-            name={icon}
-            size={32}
-            color={disabled ? 'rgba(242, 232, 207, 0.3)' : variantStyle.iconColor}
-            style={styles.icon}
-          />
+          icon === 'custom-target' ? (
+            <TargetIcon
+              size={22}
+              color={disabled ? 'rgba(242, 232, 207, 0.3)' : variantStyle.iconColor}
+              style={styles.icon}
+            />
+          ) : (
+            <Ionicons
+              name={icon as any}
+              size={22}
+              color={disabled ? 'rgba(242, 232, 207, 0.3)' : variantStyle.iconColor}
+              style={styles.icon}
+            />
+          )
         )}
         <Text
           style={[
@@ -177,7 +187,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'BebasNeue-Bold',
-    fontSize: 26,
+    fontSize: 20,
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },

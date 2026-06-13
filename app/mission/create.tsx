@@ -187,15 +187,18 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AgentHomeBackground } from '../../components/AgentHomeBackground';
 import { PageHeader } from '../../components/ui/PageHeader';
+import { Button } from '../../components/ui/Button';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useCreateMission } from '../../hooks/useCreateMission';
 import { Theme } from '../../constants/Theme';
 
 export default function CreateMissionScreen() {
     const insets = useSafeAreaInsets();
     const { t } = useTranslation();
+    const { handleCreate, isCustomInvalid } = useCreateMission();
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
             <AgentHomeBackground />
             
             <View style={{ paddingTop: insets.top }}>
@@ -228,11 +231,26 @@ export default function CreateMissionScreen() {
                     Choisissez la durée de votre mission
                 </Text>
             </View>
+
+            {/* Bottom Button */}
+            <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+                <Button
+                    title="lancer la mission"
+                    onPress={handleCreate}
+                    disabled={isCustomInvalid}
+                    variant="primary"
+                    icon="custom-target"
+                />
+            </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
     separatorContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -255,6 +273,10 @@ const styles = StyleSheet.create({
         opacity: 0.75,
         textAlign: 'center',
         marginTop: 5,
+    },
+    footer: {
+        paddingHorizontal: 25,
+        width: '100%',
     },
 });
 
