@@ -29,7 +29,7 @@ export default function CreateMissionScreen() {
 
     return (
         <View style={styles.container}>
-            <AgentHomeBackground totalBlack />
+            {/* <AgentHomeBackground totalBlack /> */}
             
             <ScrollView 
                 style={styles.scrollContainer}

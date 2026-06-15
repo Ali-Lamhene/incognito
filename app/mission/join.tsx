@@ -49,6 +49,7 @@ export default function JoinMissionScreen() {
                         </View>
                         <View style={styles.cardTextContainer}>
                             <Text style={styles.cardTitle}>SCANNER UN QR CODE</Text>
+                            <View style={styles.redUnderline} />
                             <Text style={styles.cardSubtitle}>Utiliser l'appareil photo pour scanner le QR code de la mission.</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={24} color={Theme.colors.red} />
