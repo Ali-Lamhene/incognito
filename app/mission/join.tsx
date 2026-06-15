@@ -1,19 +1,15 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import { StyleSheet, View, Text, TouchableOpacity, TextInput, Image, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AgentHomeBackground } from '../../components/AgentHomeBackground';
-import { AgentScreenHeader } from '../../components/AgentScreenHeader';
-import { JoinCodeInput } from '../../components/JoinCodeInput';
-import { ScanOptionCard } from '../../components/ScanOptionCard';
-import { ThemedText } from '../../components/ThemedText';
-import { useTranslation } from '../../hooks/useTranslation';
+import { Ionicons, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+
+import { PageHeader } from '../../components/ui/PageHeader';
 import { useJoinMission } from '../../hooks/useJoinMission';
+import { Theme } from '../../constants/Theme';
 
 export default function JoinMissionScreen() {
     const insets = useSafeAreaInsets();
-    const { t } = useTranslation();
-
     const {
         manualCode,
         onChangeCode,
@@ -23,42 +19,96 @@ export default function JoinMissionScreen() {
     } = useJoinMission();
 
     return (
-        <View style={styles.container}>
-            <AgentHomeBackground />
+        <KeyboardAvoidingView 
+            style={styles.container}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+            <ScrollView 
+                style={styles.scrollContainer}
+                contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 10) }]}
+                showsVerticalScrollIndicator={false}
+            >
+                <PageHeader 
+                    title="REJOINDRE UNE MISSION" 
+                    showSeparator 
+                />
 
-            <View style={styles.tabletCenteredContainer}>
-                <View style={[
-                    styles.content,
-                    { paddingTop: insets.top + 20, paddingBottom: 20 + insets.bottom }
-                ]}>
+                <View style={styles.heroContainer}>
+                    <Image 
+                        source={require('../../assets/UI/join_hero.png')} 
+                        style={styles.heroImage} 
+                        resizeMode="contain"
+                    />
+                </View>
 
-                    {/* Header */}
-                    <AgentScreenHeader title={t('home.join_mission_subtitle')} />
-
-                    {/* Form Container */}
-                    <Animated.View style={styles.formContainer} entering={FadeInUp.delay(300).duration(600)}>
-                        <JoinCodeInput
-                            value={manualCode}
-                            onChangeText={onChangeCode}
-                            onSubmit={handleJoin}
-                            error={error}
-                        />
-
-                        <View style={styles.dividerContainer}>
-                            <View style={styles.dividerLine} />
-                            <ThemedText type="code" style={styles.dividerText}>{t('common.or')}</ThemedText>
-                            <View style={styles.dividerLine} />
+                <View style={styles.contentWrapper}>
+                    {/* Scan Card */}
+                    <TouchableOpacity style={styles.cardRow} onPress={handleScan} activeOpacity={0.7}>
+                        <View style={styles.cardIconContainer}>
+                            <MaterialCommunityIcons name="qrcode-scan" size={40} color={Theme.colors.red} />
                         </View>
+                        <View style={styles.cardTextContainer}>
+                            <Text style={styles.cardTitle}>SCANNER UN QR CODE</Text>
+                            <Text style={styles.cardSubtitle}>Utiliser l'appareil photo pour scanner le QR code de la mission.</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={24} color={Theme.colors.red} />
+                    </TouchableOpacity>
 
-                        <ScanOptionCard onPress={handleScan} />
-                    </Animated.View>
+                    {/* Divider */}
+                    <View style={styles.dividerContainer}>
+                        <LinearGradient
+                            colors={['transparent', 'rgba(255, 255, 255, 0.2)']}
+                            start={{ x: 0, y: 0.5 }}
+                            end={{ x: 1, y: 0.5 }}
+                            style={styles.dividerLine}
+                        />
+                        <Text style={styles.dividerText}>OU</Text>
+                        <LinearGradient
+                            colors={['rgba(255, 255, 255, 0.2)', 'transparent']}
+                            start={{ x: 0, y: 0.5 }}
+                            end={{ x: 1, y: 0.5 }}
+                            style={styles.dividerLine}
+                        />
+                    </View>
 
-                    <View style={styles.footer}>
-                        <ThemedText type="code" style={styles.footerTag}>SECURE_PROTOCOL_v4.2</ThemedText>
+                    {/* Manual Code Card */}
+                    <View style={styles.cardColumn}>
+                        <View style={styles.manualTextContainer}>
+                            <Text style={styles.cardTitle}>ENTRER LE CODE DE LA MISSION</Text>
+                            <View style={styles.redUnderline} />
+                            <Text style={styles.cardSubtitle}>Saisir manuellement le code d'accès à la mission.</Text>
+                        </View>
+                        
+                        <View style={[styles.inputContainer, error && styles.inputError]}>
+                            <Ionicons name="lock-closed-outline" size={18} color={Theme.colors.red} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Code de la mission"
+                                placeholderTextColor="rgba(255, 255, 255, 0.3)"
+                                value={manualCode}
+                                onChangeText={onChangeCode}
+                                autoCapitalize="characters"
+                                autoCorrect={false}
+                            />
+                        </View>
+                        
+                        {error && (
+                            <Text style={styles.errorText}>Code invalide</Text>
+                        )}
+
+                        <TouchableOpacity 
+                            style={[styles.joinButton, !manualCode.trim() && styles.joinButtonDisabled]} 
+                            onPress={handleJoin}
+                            disabled={!manualCode.trim()}
+                            activeOpacity={0.8}
+                        >
+                            <FontAwesome5 name="user-secret" size={16} color={!manualCode.trim() ? "rgba(255, 255, 255, 0.4)" : "#FFF"} style={styles.btnIcon} />
+                            <Text style={[styles.joinButtonText, !manualCode.trim() && styles.joinButtonTextDisabled]}>REJOINDRE LA MISSION</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            </View>
-        </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -67,43 +117,145 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#000',
     },
-    tabletCenteredContainer: {
+    scrollContainer: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+    },
+    heroContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 180, // Further reduced to ensure everything fits on smaller phones
+        marginTop: 0,
+        marginBottom: 5,
+    },
+    heroImage: {
+        width: '100%',
+        height: '100%',
+    },
+    contentWrapper: {
+        paddingHorizontal: 20,
+        gap: 10,
+        paddingBottom: 10,
+    },
+    cardRow: {
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        padding: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    cardColumn: {
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        padding: 15,
+    },
+    cardIconContainer: {
+        marginRight: 15,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    content: {
-        width: '100%',
-        maxWidth: 1100,
-        maxHeight: 800,
+    cardTextContainer: {
         flex: 1,
-        paddingHorizontal: 25,
-        justifyContent: 'space-between',
+        paddingRight: 10,
     },
-
-    formContainer: {
-        gap: 40,
+    manualTextContainer: {
+        marginBottom: 15,
+    },
+    cardTitle: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 20,
+        color: '#D1D1D1',
+        letterSpacing: 1,
+        marginBottom: 4,
+    },
+    redUnderline: {
+        width: 30,
+        height: 2,
+        backgroundColor: Theme.colors.red,
+        marginBottom: 8,
+    },
+    cardSubtitle: {
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.6)',
+        lineHeight: 18,
     },
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
-        opacity: 0.3,
+        paddingHorizontal: 30,
+        marginVertical: 5,
     },
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: 'rgba(255,255,255,0.15)',
     },
     dividerText: {
-        fontSize: 10,
+        fontFamily: 'BebasNeue-Bold',
+        color: 'rgba(255, 255, 255, 0.4)',
+        fontSize: 18,
+        marginHorizontal: 15,
+        letterSpacing: 1,
     },
-    footer: {
+    inputContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#000',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        paddingHorizontal: 15,
+        height: 45,
+        marginBottom: 10,
     },
-    footerTag: {
-        fontSize: 8,
-        opacity: 0.3,
-        letterSpacing: 2,
-    }
+    inputError: {
+        borderColor: Theme.colors.red,
+    },
+    inputIcon: {
+        marginRight: 10,
+    },
+    input: {
+        flex: 1,
+        color: '#FFF',
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 14,
+    },
+    errorText: {
+        color: Theme.colors.red,
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 12,
+        marginTop: -5,
+        marginBottom: 10,
+    },
+    joinButton: {
+        backgroundColor: Theme.colors.red,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 45,
+        borderRadius: 6,
+    },
+    joinButtonDisabled: {
+        backgroundColor: '#1A1A1A',
+        borderColor: '#2A2A2A',
+        borderWidth: 1,
+    },
+    btnIcon: {
+        marginRight: 10,
+    },
+    joinButtonText: {
+        fontFamily: 'BebasNeue-Bold',
+        color: '#FFF',
+        fontSize: 18,
+        letterSpacing: 1,
+    },
+    joinButtonTextDisabled: {
+        color: 'rgba(255, 255, 255, 0.4)',
+    },
 });
