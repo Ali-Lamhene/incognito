@@ -1,10 +1,8 @@
 import React from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { ThemedText } from './ThemedText';
-import { useTranslation } from '../hooks/useTranslation';
-
-const DURATIONS = ['15_MIN', '30_MIN', '45_MIN', 'CUSTOM'];
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import Animated, { FadeInDown, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
+import { Theme } from '../constants/Theme';
 
 interface DurationSelectorProps {
     duration: string;
@@ -19,135 +17,293 @@ export function DurationSelector({
     setDuration,
     customDuration,
     setCustomDuration,
-    isCustomInvalid
 }: DurationSelectorProps) {
-    const { t } = useTranslation();
+    
+    const isCustom = duration === 'CUSTOM';
+    let totalMins = parseInt(customDuration, 10) || 60;
+    const hours = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
+
+    const canSubHours = hours > 0;
+    const canAddHours = totalMins < 24 * 60;
+    const canSubMins = totalMins > 15;
+    const canAddMins = totalMins < 24 * 60;
+
+    const handleAddMins = (amount: number) => {
+        let newMins = totalMins + amount;
+        if (newMins < 15) newMins = 15;
+        if (newMins > 24 * 60) newMins = 24 * 60;
+        setCustomDuration(String(newMins));
+        setDuration('CUSTOM');
+    };
+
+    const toggleCustom = (value: boolean) => {
+        if (value) {
+            setDuration('CUSTOM');
+        } else {
+            setDuration('30_MIN');
+        }
+    };
+
+    const toggleThumbStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateX: withTiming(isCustom ? 20 : 0, { duration: 150 }) }]
+        };
+    });
 
     return (
-        <View style={styles.selectorContainer}>
-            <ThemedText style={styles.selectorLabel}>{t('mission.duration')}</ThemedText>
-            <View style={styles.optionsRow}>
-                {DURATIONS.map((opt) => {
+        <View style={styles.container}>
+            <View style={styles.headerRow}>
+                <Ionicons name="stopwatch-outline" size={18} color={Theme.colors.red} />
+                <Text style={styles.headerText}>DURÉE DE LA MISSION</Text>
+            </View>
+
+            {/* Presets Row */}
+            <View style={styles.presetsRow}>
+                {['15_MIN', '30_MIN', '45_MIN'].map((opt, index) => {
                     const isSelected = duration === opt;
+                    const val = opt.split('_')[0];
+                    
                     return (
-                        <View key={opt} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <React.Fragment key={opt}>
+                            {index > 0 && <View style={styles.connector} />}
                             <TouchableOpacity
+                                activeOpacity={0.7}
                                 onPress={() => setDuration(opt)}
                                 style={[
-                                    styles.optionButton,
-                                    isSelected && styles.optionButtonSelected
+                                    styles.presetBox,
+                                    isSelected && styles.presetBoxActive
                                 ]}
                             >
-                                <ThemedText
-                                    style={[
-                                        styles.optionText,
-                                        isSelected && styles.optionTextSelected
-                                    ]}
-                                >
-                                    {t(`mission.options.${opt}`)}
-                                </ThemedText>
+                                <View style={[StyleSheet.absoluteFill, { backgroundColor: Theme.colors.background, opacity: 0.7, borderRadius: 6 }]} />
+                                <Text style={[styles.presetValue, isSelected && styles.presetValueActive]}>
+                                    {val} <Text style={[styles.presetUnit, isSelected && styles.presetValueActive]}>MIN</Text>
+                                </Text>
+                                {isSelected && <View style={styles.activeTriangle} />}
                             </TouchableOpacity>
-
-                            {opt === 'CUSTOM' && isSelected && (
-                                <View>
-                                    <Animated.View entering={FadeInDown} style={styles.customInputContainer}>
-                                        <TextInput
-                                            style={styles.customInput}
-                                            value={customDuration}
-                                            onChangeText={setCustomDuration}
-                                            keyboardType="numeric"
-                                            placeholder="60"
-                                            placeholderTextColor="rgba(255,255,255,0.3)"
-                                            maxLength={3}
-                                        />
-                                        <ThemedText style={styles.customInputUnit}>MIN</ThemedText>
-                                    </Animated.View>
-                                    {isCustomInvalid && (
-                                        <ThemedText style={styles.durationErrorText}>
-                                            {t('mission.duration_error')}
-                                        </ThemedText>
-                                    )}
-                                </View>
-                            )}
-                        </View>
+                        </React.Fragment>
                     );
                 })}
+            </View>
+
+            {/* Custom Duration Card */}
+            <View style={[styles.customCard, isCustom && styles.customCardActive]}>
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: Theme.colors.background, opacity: 0.8, borderRadius: 8 }]} />
+                
+                <View style={styles.customHeader}>
+                    <Text style={styles.customTitle}>DURÉE PERSONNALISÉE</Text>
+                    <TouchableOpacity 
+                        activeOpacity={0.8}
+                        onPress={() => toggleCustom(!isCustom)}
+                        style={[styles.customToggle, isCustom && styles.customToggleActive]}
+                    >
+                        <Animated.View style={[
+                            styles.customToggleThumb, 
+                            { backgroundColor: isCustom ? Theme.colors.text.light : Theme.colors.text.muted },
+                            toggleThumbStyle
+                        ]} />
+                    </TouchableOpacity>
+                </View>
+
+                <Animated.View style={[styles.customBody, { opacity: isCustom ? 1 : 0.5 }]} pointerEvents={isCustom ? 'auto' : 'none'}>
+                    <View style={styles.counterSection}>
+                        <View style={styles.counterCol}>
+                            <TouchableOpacity onPress={() => handleAddMins(60)} hitSlop={10} disabled={!canAddHours}>
+                                <Ionicons name="chevron-up" color={canAddHours ? Theme.colors.red : Theme.colors.text.muted} size={20} />
+                            </TouchableOpacity>
+                            <View style={styles.numberBox}>
+                                <Text style={styles.counterValue}>{String(hours).padStart(2, '0')}</Text>
+                            </View>
+                            <Text style={styles.counterLabel}>HEURES</Text>
+                            <TouchableOpacity onPress={() => handleAddMins(-60)} hitSlop={10} disabled={!canSubHours}>
+                                <Ionicons name="chevron-down" color={canSubHours ? Theme.colors.red : Theme.colors.text.muted} size={20} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.colon}>:</Text>
+
+                        <View style={styles.counterCol}>
+                            <TouchableOpacity onPress={() => handleAddMins(5)} hitSlop={10} disabled={!canAddMins}>
+                                <Ionicons name="chevron-up" color={canAddMins ? Theme.colors.red : Theme.colors.text.muted} size={20} />
+                            </TouchableOpacity>
+                            <View style={styles.numberBox}>
+                                <Text style={styles.counterValue}>{String(mins).padStart(2, '0')}</Text>
+                            </View>
+                            <Text style={styles.counterLabel}>MINUTES</Text>
+                            <TouchableOpacity onPress={() => handleAddMins(-5)} hitSlop={10} disabled={!canSubMins}>
+                                <Ionicons name="chevron-down" color={canSubMins ? Theme.colors.red : Theme.colors.text.muted} size={20} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Animated.View>
             </View>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    selectorContainer: {
-        gap: 15,
+    container: {
         width: '100%',
+        gap: 15,
     },
-    selectorLabel: {
-        color: 'rgba(242, 232, 207, 0.6)',
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingLeft: 4,
+    },
+    headerText: {
         fontFamily: 'BebasNeue-Bold',
         fontSize: 18,
-        letterSpacing: 1.5,
-        textTransform: 'uppercase',
+        color: Theme.colors.text.light,
+        letterSpacing: 1,
     },
-    optionsRow: {
+    presetsRow: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
     },
-    optionButton: {
-        borderWidth: 1.5,
-        borderColor: 'rgba(242, 232, 207, 0.15)',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
+    presetBox: {
+        flex: 1,
+        height: 50,
+        borderWidth: 1,
+        borderColor: Theme.colors.border,
         borderRadius: 6,
-        backgroundColor: '#161616',
         justifyContent: 'center',
         alignItems: 'center',
-        minWidth: 80,
+        position: 'relative',
     },
-    optionButtonSelected: {
-        borderColor: '#D62B28',
-        backgroundColor: '#D62B28',
+    presetBoxActive: {
+        borderColor: Theme.colors.red,
     },
-    optionText: {
+    presetValue: {
         fontFamily: 'BebasNeue-Bold',
         fontSize: 22,
-        color: 'rgba(242, 232, 207, 0.8)',
-        letterSpacing: 1.2,
+        color: Theme.colors.text.light,
+        opacity: 0.7,
     },
-    optionTextSelected: {
-        color: '#FFF',
+    presetValueActive: {
+        color: Theme.colors.red,
+        opacity: 1,
     },
-    customInputContainer: {
+    presetUnit: {
+        fontSize: 14,
+    },
+    connector: {
+        width: 10,
+        height: 2,
+        backgroundColor: Theme.colors.border,
+    },
+    activeTriangle: {
+        position: 'absolute',
+        bottom: -6,
+        width: 0,
+        height: 0,
+        borderLeftWidth: 6,
+        borderRightWidth: 6,
+        borderBottomWidth: 6,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: Theme.colors.red,
+    },
+    customCard: {
+        borderWidth: 1,
+        borderColor: Theme.colors.border,
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        marginTop: 5,
+    },
+    customCardActive: {
+        borderColor: Theme.colors.red,
+    },
+    customHeader: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottomWidth: 1.5,
-        borderBottomColor: 'rgba(242, 232, 207, 0.4)',
-        paddingHorizontal: 5,
-        marginLeft: 5,
+        marginBottom: 2,
     },
-    customInput: {
-        color: '#FFF',
-        fontFamily: 'BebasNeue-Bold',
-        fontSize: 20,
-        width: 40,
-        textAlign: 'center',
-        paddingVertical: 0,
-    },
-    customInputUnit: {
+    customTitle: {
         fontFamily: 'BebasNeue-Bold',
         fontSize: 14,
-        color: '#F2E8CF',
-        opacity: 0.6,
-        marginLeft: 4,
+        color: Theme.colors.red,
+        letterSpacing: 1,
     },
-    durationErrorText: {
+    customToggle: {
+        width: 44,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: Theme.colors.surface,
+        borderWidth: 1.5,
+        borderColor: Theme.colors.border,
+        padding: 2,
+        justifyContent: 'center',
+    },
+    customToggleActive: {
+        borderColor: Theme.colors.red,
+        backgroundColor: Theme.colors.red,
+    },
+    customToggleThumb: {
+        width: 17,
+        height: 17,
+        borderRadius: 8.5,
+    },
+    customBody: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    counterSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 15,
+    },
+    counterCol: {
+        alignItems: 'center',
+        gap: 0,
+    },
+    numberBox: {
+        backgroundColor: Theme.colors.surface,
+        borderWidth: 1,
+        borderColor: Theme.colors.border,
+        borderRadius: 6,
+        width: 65,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 1,
+    },
+    counterValue: {
         fontFamily: 'BebasNeue-Bold',
-        fontSize: 12,
-        color: '#D62B28',
-        marginTop: 4,
-        position: 'absolute',
-        bottom: -16,
-        width: 150,
+        fontSize: 24,
+        color: Theme.colors.text.light,
+    },
+    counterLabel: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 10,
+        color: Theme.colors.text.light,
+        opacity: 0.6,
+    },
+    colon: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 22,
+        color: Theme.colors.text.light,
+        opacity: 0.5,
+        marginBottom: 10, // Center with the number boxes
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        marginTop: 5,
+    },
+    infoText: {
+        fontFamily: 'Montserrat-SemiBold',
+        fontSize: 8,
+        color: Theme.colors.text.light,
+        opacity: 0.5,
+        letterSpacing: 0.5,
     },
 });

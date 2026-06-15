@@ -1,6 +1,7 @@
 export const Theme = {
   colors: {
     background: '#0D0D0D',       // Fond principal noir
+    backgroundLighter: '#1A1A1A',// Fond légèrement plus clair
     totalBlack: '#000000',       // Noir total
     surface: '#121212',          // Fond de carte / panel sombre
     border: '#2A2A2A',           // Bordure grise fine

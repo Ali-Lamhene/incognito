@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AgentHomeBackground } from '../../components/AgentHomeBackground';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
+import { DurationSelector } from '../../components/DurationSelector';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCreateMission } from '../../hooks/useCreateMission';
 import { Theme } from '../../constants/Theme';
@@ -13,7 +14,14 @@ import { Theme } from '../../constants/Theme';
 export default function CreateMissionScreen() {
     const insets = useSafeAreaInsets();
     const { t } = useTranslation();
-    const { handleCreate, isCustomInvalid } = useCreateMission();
+    const { 
+        duration, 
+        setDuration, 
+        customDuration, 
+        setCustomDuration, 
+        handleCreate, 
+        isCustomInvalid 
+    } = useCreateMission();
 
     return (
         <View style={styles.container}>
@@ -46,8 +54,18 @@ export default function CreateMissionScreen() {
 
                 {/* Subtitle */}
                 <Text style={styles.subtitleText}>
-                    Choisissez la durée de votre mission
+                    Configurez les paramètres de mission
                 </Text>
+            </View>
+
+            <View style={styles.selectorWrapper}>
+                <DurationSelector 
+                    duration={duration}
+                    setDuration={setDuration}
+                    customDuration={customDuration}
+                    setCustomDuration={setCustomDuration}
+                    isCustomInvalid={isCustomInvalid}
+                />
             </View>
 
             {/* Bottom Button */}
@@ -73,7 +91,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        marginVertical: 10,
+        marginTop: -10,
+        marginBottom: 8,
         paddingHorizontal: 40,
         width: '100%',
     },
@@ -90,7 +109,13 @@ const styles = StyleSheet.create({
         color: Theme.colors.text.light,
         opacity: 0.75,
         textAlign: 'center',
-        marginTop: 5,
+        marginTop: 2,
+    },
+    selectorWrapper: {
+        flex: 1,
+        width: '100%',
+        paddingHorizontal: 25,
+        marginTop: 25,
     },
     footer: {
         paddingHorizontal: 25,

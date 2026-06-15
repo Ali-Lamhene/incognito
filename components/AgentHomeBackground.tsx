@@ -26,7 +26,7 @@ export function AgentHomeBackground({ totalBlack = false }: AgentHomeBackgroundP
       {/* Vertical Vignette: Stronger dark overlay at top/bottom, clear center */}
       <LinearGradient
         colors={[bgColor, 'transparent', 'transparent', bgColor]}
-        locations={[0, 0.25, 0.75, 1]}
+        locations={[0, 0.35, 0.65, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -35,7 +35,7 @@ export function AgentHomeBackground({ totalBlack = false }: AgentHomeBackgroundP
         colors={[bgColor, 'transparent', 'transparent', bgColor]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
-        locations={[0, 0.15, 0.85, 1]}
+        locations={[0, 0.25, 0.75, 1]}
         style={StyleSheet.absoluteFill}
       />
     </Animated.View>
@@ -49,6 +49,6 @@ const styles = StyleSheet.create({
   backgroundImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.65, // La ville au centre est plus visible
+    opacity: 0.4, // Réduit pour rendre la ville moins visible
   },
 });
