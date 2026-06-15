@@ -100,7 +100,7 @@ export function TerrainSelector({ terrain, setTerrain }: TerrainSelectorProps) {
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        gap: 15,
+        gap: 8,
     },
     headerRow: {
         flexDirection: 'row',

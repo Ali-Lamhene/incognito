@@ -10,8 +10,8 @@ export function useCreateMission() {
     const { t } = useTranslation();
 
     // States
-    const [duration, setDuration] = useState('15_MIN');
-    const [customDuration, setCustomDuration] = useState('60');
+    const [duration, setDuration] = useState('CUSTOM');
+    const [customDuration, setCustomDuration] = useState('20');
     const [terrain, setTerrain] = useState(1);
 
     // Validation

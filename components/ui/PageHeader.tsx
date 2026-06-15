@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Theme } from '../../constants/Theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface PageHeaderProps {
   title: string;
@@ -10,6 +11,7 @@ interface PageHeaderProps {
   onBack?: () => void;
   showBack?: boolean;
   rightComponent?: React.ReactNode;
+  showSeparator?: boolean;
 }
 
 export function PageHeader({
@@ -18,6 +20,7 @@ export function PageHeader({
   onBack,
   showBack = true,
   rightComponent,
+  showSeparator = false,
 }: PageHeaderProps) {
   const router = useRouter();
 
@@ -30,29 +33,58 @@ export function PageHeader({
   };
 
   return (
-    <View style={styles.headerContainer}>
-      {showBack ? (
-        <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={26} color={Theme.colors.text.light} />
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.placeholder} />
-      )}
+    <View style={styles.wrapper}>
+      <View style={styles.headerContainer}>
+        {showBack ? (
+          <TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
+            <Ionicons name="arrow-back" size={26} color={Theme.colors.text.light} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.placeholder} />
+        )}
 
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>{title}</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText}>{title}</Text>
+          {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
+        </View>
+
+        {rightComponent ? (
+          <View style={styles.rightContainer}>{rightComponent}</View>
+        ) : (
+          <View style={styles.placeholder} />
+        )}
       </View>
 
-      {rightComponent ? (
-        <View style={styles.rightContainer}>{rightComponent}</View>
-      ) : (
-        <View style={styles.placeholder} />
+      {showSeparator && (
+        <View style={styles.separatorContainer}>
+          <LinearGradient
+            colors={['transparent', 'rgba(242, 232, 207, 0.25)']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.separatorLine}
+          />
+          <FontAwesome5
+            name="user-secret"
+            size={18}
+            color="rgba(242, 232, 207, 0.45)"
+            style={styles.separatorIcon}
+          />
+          <LinearGradient
+            colors={['rgba(242, 232, 207, 0.25)', 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.separatorLine}
+          />
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+  },
   headerContainer: {
     height: 70,
     flexDirection: 'row',
@@ -96,5 +128,21 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 44,
     height: 44,
+  },
+  separatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -10,
+    marginBottom: 8,
+    paddingHorizontal: 70,
+    width: '100%',
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+  },
+  separatorIcon: {
+    marginHorizontal: 5,
   },
 });
