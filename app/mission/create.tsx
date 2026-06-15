@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,6 +7,8 @@ import { AgentHomeBackground } from '../../components/AgentHomeBackground';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { DurationSelector } from '../../components/DurationSelector';
+import { TerrainSelector } from '../../components/TerrainSelector';
+import { AgentAdvice } from '../../components/AgentAdvice';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useCreateMission } from '../../hooks/useCreateMission';
 import { Theme } from '../../constants/Theme';
@@ -14,11 +16,13 @@ import { Theme } from '../../constants/Theme';
 export default function CreateMissionScreen() {
     const insets = useSafeAreaInsets();
     const { t } = useTranslation();
-    const { 
+    const {
         duration, 
         setDuration, 
         customDuration, 
         setCustomDuration, 
+        terrain,
+        setTerrain,
         handleCreate, 
         isCustomInvalid 
     } = useCreateMission();
@@ -27,7 +31,11 @@ export default function CreateMissionScreen() {
         <View style={styles.container}>
             <AgentHomeBackground totalBlack />
             
-            <View style={{ paddingTop: insets.top }}>
+            <ScrollView 
+                style={styles.scrollContainer}
+                contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: 140 }]}
+                showsVerticalScrollIndicator={false}
+            >
                 <PageHeader title="créer une mission" />
                 
                 {/* Custom separator with fingerprint and faded side lines */}
@@ -56,27 +64,49 @@ export default function CreateMissionScreen() {
                 <Text style={styles.subtitleText}>
                     Configurez les paramètres de mission
                 </Text>
-            </View>
 
-            <View style={styles.selectorWrapper}>
-                <DurationSelector 
-                    duration={duration}
-                    setDuration={setDuration}
-                    customDuration={customDuration}
-                    setCustomDuration={setCustomDuration}
-                    isCustomInvalid={isCustomInvalid}
-                />
-            </View>
+                <View style={styles.selectorWrapper}>
+                    <DurationSelector 
+                        duration={duration}
+                        setDuration={setDuration}
+                        customDuration={customDuration}
+                        setCustomDuration={setCustomDuration}
+                        isCustomInvalid={isCustomInvalid}
+                    />
 
-            {/* Bottom Button */}
-            <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
-                <Button
-                    title="lancer la mission"
-                    onPress={handleCreate}
-                    disabled={isCustomInvalid}
-                    variant="primary"
-                    icon="custom-target"
+                    <LinearGradient
+                        colors={['transparent', 'rgba(242, 232, 207, 0.25)', 'transparent']}
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        style={styles.simpleSeparator}
+                    />
+
+                    <TerrainSelector
+                        terrain={terrain}
+                        setTerrain={setTerrain}
+                    />
+
+                    <AgentAdvice />
+                </View>
+            </ScrollView>
+
+            {/* Bottom Premium Fixed Button */}
+            <View style={[styles.fixedFooter, { paddingBottom: Math.max(insets.bottom + 10, 30) }]}>
+                <LinearGradient 
+                    colors={['transparent', 'rgba(0,0,0,0.8)', '#000000']} 
+                    locations={[0, 0.4, 1]}
+                    style={StyleSheet.absoluteFill}
+                    pointerEvents="none"
                 />
+                <View style={styles.footerButtonContainer}>
+                    <Button
+                        title="lancer la mission"
+                        onPress={handleCreate}
+                        disabled={isCustomInvalid}
+                        variant="primary"
+                        icon="custom-target"
+                    />
+                </View>
             </View>
         </View>
     );
@@ -114,12 +144,30 @@ const styles = StyleSheet.create({
     selectorWrapper: {
         flex: 1,
         width: '100%',
-        paddingHorizontal: 25,
+        paddingHorizontal: 12,
         marginTop: 25,
+        gap: 20, // Reduced space between components
     },
-    footer: {
-        paddingHorizontal: 25,
+    simpleSeparator: {
         width: '100%',
+        height: 1,
+    },
+    fixedFooter: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingTop: 40, // Space for the gradient fade-in
+    },
+    footerButtonContainer: {
+        paddingHorizontal: 25,
+    },
+    scrollContainer: {
+        flex: 1,
+        width: '100%',
+    },
+    scrollContent: {
+        flexGrow: 1,
     },
 });
 

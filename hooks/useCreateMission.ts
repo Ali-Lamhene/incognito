@@ -12,6 +12,7 @@ export function useCreateMission() {
     // States
     const [duration, setDuration] = useState('15_MIN');
     const [customDuration, setCustomDuration] = useState('60');
+    const [terrain, setTerrain] = useState(1);
 
     // Validation
     const parsedCustomDuration = parseInt(customDuration, 10);
@@ -34,6 +35,8 @@ export function useCreateMission() {
         setDuration,
         customDuration,
         setCustomDuration,
+        terrain,
+        setTerrain,
         isCustomInvalid,
         handleCreate
     };
