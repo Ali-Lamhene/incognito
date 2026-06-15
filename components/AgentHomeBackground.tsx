@@ -7,9 +7,15 @@ import { Theme } from '../constants/Theme';
 
 
 
-export function AgentHomeBackground() {
+export interface AgentHomeBackgroundProps {
+  totalBlack?: boolean;
+}
+
+export function AgentHomeBackground({ totalBlack = false }: AgentHomeBackgroundProps) {
+  const bgColor = totalBlack ? Theme.colors.totalBlack : Theme.colors.background;
+
   return (
-    <Animated.View entering={FadeIn.duration(1500)} style={styles.backgroundContainer}>
+    <Animated.View entering={FadeIn.duration(1500)} style={[styles.backgroundContainer, { backgroundColor: bgColor }]}>
       {/* Background Image: City silhouettes (highly visible in the center) */}
       <Image
         source={require('../assets/UI/texture_city.png')}
@@ -19,14 +25,14 @@ export function AgentHomeBackground() {
       
       {/* Vertical Vignette: Stronger dark overlay at top/bottom, clear center */}
       <LinearGradient
-        colors={[Theme.colors.background, 'transparent', 'transparent', Theme.colors.background]}
+        colors={[bgColor, 'transparent', 'transparent', bgColor]}
         locations={[0, 0.25, 0.75, 1]}
         style={StyleSheet.absoluteFill}
       />
 
       {/* Horizontal Vignette: Stronger dark overlay at left/right edges, clear center */}
       <LinearGradient
-        colors={[Theme.colors.background, 'transparent', 'transparent', Theme.colors.background]}
+        colors={[bgColor, 'transparent', 'transparent', bgColor]}
         start={{ x: 0, y: 0.5 }}
         end={{ x: 1, y: 0.5 }}
         locations={[0, 0.15, 0.85, 1]}
@@ -39,7 +45,6 @@ export function AgentHomeBackground() {
 const styles = StyleSheet.create({
   backgroundContainer: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: Theme.colors.background,
   },
   backgroundImage: {
     width: '100%',
