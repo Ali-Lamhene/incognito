@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     },
     card: {
         flex: 1,
-        height: 180,
+        height: 160,
         borderRadius: 8,
         overflow: 'hidden',
         borderWidth: 1,

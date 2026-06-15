@@ -33,7 +33,7 @@ export default function CreateMissionScreen() {
             
             <ScrollView 
                 style={styles.scrollContainer}
-                contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: 140 }]}
+                contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 20) }]}
                 showsVerticalScrollIndicator={false}
             >
                 <PageHeader title="créer une mission" />
@@ -60,11 +60,6 @@ export default function CreateMissionScreen() {
                     />
                 </View>
 
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>
-                    Configurez les paramètres de mission
-                </Text>
-
                 <View style={styles.selectorWrapper}>
                     <DurationSelector 
                         duration={duration}
@@ -87,27 +82,16 @@ export default function CreateMissionScreen() {
                     />
 
                     <AgentAdvice />
+
+                        <Button
+                            title="lancer la mission"
+                            onPress={handleCreate}
+                            disabled={isCustomInvalid}
+                            variant="primary"
+                            icon="custom-target"
+                        />
                 </View>
             </ScrollView>
-
-            {/* Bottom Premium Fixed Button */}
-            <View style={[styles.fixedFooter, { paddingBottom: Math.max(insets.bottom + 10, 30) }]}>
-                <LinearGradient 
-                    colors={['transparent', 'rgba(0,0,0,0.8)', '#000000']} 
-                    locations={[0, 0.4, 1]}
-                    style={StyleSheet.absoluteFill}
-                    pointerEvents="none"
-                />
-                <View style={styles.footerButtonContainer}>
-                    <Button
-                        title="lancer la mission"
-                        onPress={handleCreate}
-                        disabled={isCustomInvalid}
-                        variant="primary"
-                        icon="custom-target"
-                    />
-                </View>
-            </View>
         </View>
     );
 }
@@ -123,7 +107,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: -10,
         marginBottom: 8,
-        paddingHorizontal: 40,
+        paddingHorizontal: 70,
         width: '100%',
     },
     separatorLine: {
@@ -145,22 +129,12 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         paddingHorizontal: 12,
-        marginTop: 25,
-        gap: 20, // Reduced space between components
+        marginTop: 5,
+        gap: 15, // Reduced space between components
     },
     simpleSeparator: {
         width: '100%',
         height: 1,
-    },
-    fixedFooter: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        paddingTop: 40, // Space for the gradient fade-in
-    },
-    footerButtonContainer: {
-        paddingHorizontal: 25,
     },
     scrollContainer: {
         flex: 1,

@@ -19,7 +19,12 @@ export function DurationSelector({
     setCustomDuration,
 }: DurationSelectorProps) {
     
-    const isCustom = duration === 'CUSTOM';
+    React.useEffect(() => {
+        if (duration !== 'CUSTOM') {
+            setDuration('CUSTOM');
+        }
+    }, []);
+
     let totalMins = parseInt(customDuration, 10) || 60;
     const hours = Math.floor(totalMins / 60);
     const mins = totalMins % 60;
@@ -34,22 +39,7 @@ export function DurationSelector({
         if (newMins < 15) newMins = 15;
         if (newMins > 24 * 60) newMins = 24 * 60;
         setCustomDuration(String(newMins));
-        setDuration('CUSTOM');
     };
-
-    const toggleCustom = (value: boolean) => {
-        if (value) {
-            setDuration('CUSTOM');
-        } else {
-            setDuration('30_MIN');
-        }
-    };
-
-    const toggleThumbStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ translateX: withTiming(isCustom ? 20 : 0, { duration: 150 }) }]
-        };
-    });
 
     return (
         <View style={styles.container}>
@@ -58,54 +48,11 @@ export function DurationSelector({
                 <Text style={styles.headerText}>DURÉE DE LA MISSION</Text>
             </View>
 
-            {/* Presets Row */}
-            <View style={styles.presetsRow}>
-                {['15_MIN', '30_MIN', '45_MIN'].map((opt, index) => {
-                    const isSelected = duration === opt;
-                    const val = opt.split('_')[0];
-                    
-                    return (
-                        <React.Fragment key={opt}>
-                            {index > 0 && <View style={styles.connector} />}
-                            <TouchableOpacity
-                                activeOpacity={0.7}
-                                onPress={() => setDuration(opt)}
-                                style={[
-                                    styles.presetBox,
-                                    isSelected && styles.presetBoxActive
-                                ]}
-                            >
-                                <View style={[StyleSheet.absoluteFill, { backgroundColor: Theme.colors.background, opacity: 0.7, borderRadius: 6 }]} />
-                                <Text style={[styles.presetValue, isSelected && styles.presetValueActive]}>
-                                    {val} <Text style={[styles.presetUnit, isSelected && styles.presetValueActive]}>MIN</Text>
-                                </Text>
-                                {isSelected && <View style={styles.activeTriangle} />}
-                            </TouchableOpacity>
-                        </React.Fragment>
-                    );
-                })}
-            </View>
-
             {/* Custom Duration Card */}
-            <View style={[styles.customCard, isCustom && styles.customCardActive]}>
+            <View style={[styles.customCard, styles.customCardActive]}>
                 <View style={[StyleSheet.absoluteFill, { backgroundColor: Theme.colors.background, opacity: 0.8, borderRadius: 8 }]} />
-                
-                <View style={styles.customHeader}>
-                    <Text style={styles.customTitle}>DURÉE PERSONNALISÉE</Text>
-                    <TouchableOpacity 
-                        activeOpacity={0.8}
-                        onPress={() => toggleCustom(!isCustom)}
-                        style={[styles.customToggle, isCustom && styles.customToggleActive]}
-                    >
-                        <Animated.View style={[
-                            styles.customToggleThumb, 
-                            { backgroundColor: isCustom ? Theme.colors.text.light : Theme.colors.text.muted },
-                            toggleThumbStyle
-                        ]} />
-                    </TouchableOpacity>
-                </View>
 
-                <Animated.View style={[styles.customBody, { opacity: isCustom ? 1 : 0.5 }]} pointerEvents={isCustom ? 'auto' : 'none'}>
+                <View style={styles.customBody}>
                     <View style={styles.counterSection}>
                         <View style={styles.counterCol}>
                             <TouchableOpacity onPress={() => handleAddMins(60)} hitSlop={10} disabled={!canAddHours}>
@@ -135,7 +82,7 @@ export function DurationSelector({
                             </TouchableOpacity>
                         </View>
                     </View>
-                </Animated.View>
+                </View>
             </View>
         </View>
     );
