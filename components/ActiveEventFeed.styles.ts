@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(76, 175, 80, 0.3)",
   },
   eventToast_UNMASKED: {
-    borderColor: "rgba(255, 107, 107, 0.3)",
+    borderColor: "rgba(139, 30, 30, 0.3)",
   },
   eventToast_BLUFF_SUCCESS: {
     borderColor: "rgba(255, 217, 61, 0.3)",

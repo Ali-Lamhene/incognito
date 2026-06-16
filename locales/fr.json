@@ -67,6 +67,11 @@
         "btn_deploy_simple": "DÉPLOYER"
     },
     "mission": {
+        "mission": "MISSION",
+        "agent": "AGENT",
+        "level": "NIVEAU 02",
+        "status": "STATUT",
+        "in_mission": "EN MISSION",
         "create_title": "CONFIGURATION",
         "abort_mission": "ABANDONNER MISSION",
         "threat_level": "NIVEAU DE MENACE",
@@ -137,7 +142,7 @@
         "judgement_in_progress": "JUGE EN COURS",
         "judgement_msg": "L'assemblée décide de votre sort...",
         "decryption_required": "DÉCRYPTAGE REQUIS",
-        "tap_to_scan": "Taper pour scanner l'empreinte",
+        "tap_to_scan": "APPUYER LONGUEMENT\nPOUR RÉVÉLER LA MISSION",
         "no_objective": "Aucun objectif assigné.",
         "searching_profile": "Recherche de votre profil...",
         "contact_hq": "Contactez le quartier général (l'hôte).",

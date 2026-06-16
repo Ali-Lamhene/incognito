@@ -71,11 +71,11 @@ export default function AgentHomeScreen() {
           contentPosition={{ top: '28%', left: '50%' }}
         />
         <LinearGradient
-          colors={[Theme.colors.background, 'rgba(13, 13, 13, 0.4)', 'transparent']}
+          colors={[Theme.colors.totalBlack, 'transparent']}
           style={styles.topGradientOverlay}
         />
         <LinearGradient
-          colors={['transparent', 'rgba(13, 13, 13, 0.8)', Theme.colors.background]}
+          colors={['transparent', Theme.colors.totalBlack]}
           style={styles.gradientOverlay}
         />
         <Image
@@ -133,7 +133,7 @@ export default function AgentHomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Theme.colors.background,
+    backgroundColor: Theme.colors.totalBlack,
   },
   imageContainer: {
     width: '100%',

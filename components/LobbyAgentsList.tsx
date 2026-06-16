@@ -82,7 +82,7 @@ export function LobbyAgentsList({ agents }: LobbyAgentsListProps) {
                                 <View style={[styles.avatar, { borderColor: isHost ? Theme.colors.red : '#444', backgroundColor: avatarBg }]}>
                                     <FontAwesome5 name="user-secret" size={16} color="#FFF" />
                                 </View>
-                                <Text style={styles.agentName}>{agent.name || agent.codename}</Text>
+                                <Text style={styles.agentName}>{agent.name}</Text>
                                 {isHost && (
                                     <View style={styles.hostBadge}>
                                         <Text style={styles.hostBadgeText}>HÔTE</Text>

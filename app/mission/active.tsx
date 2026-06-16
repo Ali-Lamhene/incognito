@@ -7,7 +7,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  ImageBackground,
 } from "react-native";
+import { Theme } from "../../constants/Theme";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActiveModals } from "../../components/ActiveModals";
@@ -64,7 +66,7 @@ export default function ActiveMissionScreen() {
         <Stack.Screen
           options={{
             animation: 'fade',
-            contentStyle: { backgroundColor: '#000' }
+            contentStyle: { backgroundColor: Theme.colors.totalBlack }
           }}
         />
         <MissionStartSplashScreen onComplete={() => setShowStartSplash(false)} />
@@ -78,7 +80,7 @@ export default function ActiveMissionScreen() {
         <Stack.Screen
           options={{
             animation: 'fade',
-            contentStyle: { backgroundColor: '#000' }
+            contentStyle: { backgroundColor: Theme.colors.totalBlack }
           }}
         />
         <MissionCompleteSplashScreen onComplete={() => router.replace("/mission/results")} />
@@ -91,54 +93,47 @@ export default function ActiveMissionScreen() {
       <Stack.Screen
         options={{
           animation: 'fade',
-          contentStyle: { backgroundColor: '#000' }
+          contentStyle: { backgroundColor: Theme.colors.totalBlack }
         }}
       />
-      {/* Background */}
-      <View style={styles.backgroundContainer}>
-        <Image
-          source={require("../../assets/images/suspect_photo_bg.jpg")}
-          style={styles.backgroundImage}
-          contentFit="cover"
-        />
-        <View style={styles.overlay} />
-      </View>
-
       <ScrollView
         style={{ flex: 1, marginBottom: insets.bottom }}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: insets.top + 20, paddingBottom: 0 },
-        ]}
+        contentContainerStyle={{ paddingBottom: 0 }}
       >
-        <ActiveHeader
-          code={session?.code}
-          credits={me?.score || 0}
-          agentName={me?.name}
-        />
+        <ImageBackground
+          source={require("../../assets/UI/texture_city_dark.png")}
+          style={[styles.topHalfContainer, { paddingTop: insets.top + 20 }]}
+          imageStyle={{ opacity: 0.32, top: 0, height: '100%' }}
+        >
+          <View style={styles.content}>
+            <ActiveHeader
+              code={session?.code}
+              agentName={me?.name}
+            />
 
-        <ActiveChallengeCard
-          me={me}
-          timeLeft={timeLeft}
-          isLowTime={isLowTime}
-          formatTime={formatTime}
-          animatedScanStyle={animatedScanStyle}
-          isRevealed={isRevealed}
-          setIsRevealed={setIsRevealed}
-          myChallenge={myChallenge}
-          status={status}
-          now={now}
-          isCompleted={!!isCompleted}
-        />
+            <ActiveChallengeCard
+              me={me}
+              timeLeft={timeLeft}
+              isLowTime={isLowTime}
+              formatTime={formatTime}
+              animatedScanStyle={animatedScanStyle}
+              isRevealed={isRevealed}
+              setIsRevealed={setIsRevealed}
+              myChallenge={myChallenge}
+              status={status}
+              now={now}
+              isCompleted={!!isCompleted}
+            />
+          </View>
+        </ImageBackground>
 
-        <ActiveAgentsList
+        {/* <ActiveAgentsList
           agents={agents}
           profile={profile}
           now={now}
           handleUnmask={handleUnmask}
         />
 
-        {/* Leave Button at the bottom */}
         <TouchableOpacity
           onPress={() => setShowAbortModal(true)}
           style={styles.leaveGameButton}
@@ -146,7 +141,7 @@ export default function ActiveMissionScreen() {
           <Ionicons
             name="log-out-outline"
             size={18}
-            color="rgba(255,107,107,0.6)"
+            color="rgba(139, 30, 30, 0.6)"
           />
           <ThemedText
             type="code"
@@ -155,7 +150,6 @@ export default function ActiveMissionScreen() {
             {t("mission.leave_lobby")}
           </ThemedText>
         </TouchableOpacity>
-      </ScrollView>
 
       <ActiveEventFeed
         events={events}
@@ -170,8 +164,8 @@ export default function ActiveMissionScreen() {
         showUnmaskModal={showUnmaskModal}
         setShowUnmaskModal={setShowUnmaskModal}
         handleConfirmUnmask={handleConfirmUnmask}
-      />
-
+      /> */}
+      </ScrollView>
     </View>
   );
 }
@@ -179,23 +173,14 @@ export default function ActiveMissionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: Theme.colors.totalBlack,
   },
-  backgroundContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#000",
-  },
-  backgroundImage: {
+  topHalfContainer: {
     width: "100%",
-    height: "100%",
-    opacity: 0.2,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    paddingBottom: 20,
   },
   content: {
-    paddingHorizontal: 25,
+    paddingHorizontal: 16,
     width: "100%",
     maxWidth: 1100,
     marginHorizontal: "auto",
@@ -209,8 +194,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 40,
     borderWidth: 1,
-    borderColor: "rgba(255,107,107,0.3)",
-    backgroundColor: "rgba(255,107,107,0.05)",
+    borderColor: "rgba(139, 30, 30, 0.3)",
+    backgroundColor: "rgba(139, 30, 30, 0.05)",
     borderRadius: 8,
   },
   leaveGameButtonDisabled: {
@@ -219,10 +204,10 @@ const styles = StyleSheet.create({
   },
   leaveGameText: {
     fontSize: 10,
-    color: "#FF6B6B",
+    color: Theme.colors.red,
     letterSpacing: 2,
     fontWeight: "bold",
-    textShadowColor: "rgba(255, 107, 107, 0.4)",
+    textShadowColor: "rgba(139, 30, 30, 0.4)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },

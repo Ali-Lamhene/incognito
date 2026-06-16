@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Pressable, ScrollView, Text, ImageBackground, Image } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
-import { ThemedText } from './ThemedText';
+import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from '../hooks/useTranslation';
 import { Agent } from '../context/SessionContext';
 import { styles } from './ActiveChallengeCard.styles';
+import { Theme } from '../constants/Theme';
 
 interface ActiveChallengeCardProps {
   me?: Agent;
@@ -40,108 +39,89 @@ export function ActiveChallengeCard({
   return (
     <Animated.View
       entering={FadeInUp.delay(200).duration(800)}
-      style={styles.cardContainer}
+      style={styles.container}
     >
-      <View style={styles.terminalHeader}>
-        <View style={styles.terminalDot} />
-        <ThemedText type="code" style={styles.terminalTitle}>
-          {t("mission.terminal_v2")}
-        </ThemedText>
-
-        <View style={[styles.timerBadgeTerminal, isLowTime && styles.timerBadgeTerminalLow]}>
-          <Ionicons
-            name="time-outline"
-            size={10}
-            color={isLowTime ? "#FF6B6B" : "rgba(255,255,255,0.5)"}
-          />
-          <ThemedText type="code" style={[styles.timerValueTerminal, isLowTime && { color: "#FF6B6B" }]}>
-            {formatTime(timeLeft)}
-          </ThemedText>
+      {/* Timer Section above the folder */}
+      <View style={styles.timerContainer}>
+        <Text style={styles.timerLabel}>
+          TEMPS RESTANT
+        </Text>
+        <Text style={[styles.timerValue, isLowTime && styles.timerValueLow]}>
+          {formatTime(timeLeft)}
+        </Text>
+        <View style={styles.timerDividerContainer}>
+          <View style={styles.timerDividerLine} />
+          <View style={styles.timerDividerDot} />
+          <View style={styles.timerDividerLine} />
         </View>
       </View>
 
-      <BlurView intensity={30} style={styles.blurCard}>
-        {/* Decorative scan line */}
-        <Animated.View style={[styles.scanLine, animatedScanStyle]} />
-
-        <View style={styles.cardHeader}>
-          <Ionicons
-            name={
-              isCompleted
-                ? "shield-checkmark"
-                : "finger-print"
-            }
-            size={18}
-            color={
-              isCompleted ? "#4CAF50" : "#FFF"
-            }
-          />
-          <ThemedText
-            type="code"
-            style={[
-              styles.cardTitle,
-              isCompleted && { color: "#4CAF50" },
-            ]}
-          >
-            {isCompleted
-              ? `#${me?.name?.toUpperCase()}`
-              : t("mission.identification_required")}
-          </ThemedText>
-        </View>
-
+      {/* Folder Card */}
+      <ImageBackground
+        source={require('../assets/UI/folder_2.png')}
+        style={styles.folderBackground}
+        imageStyle={styles.folderImage}
+      >
         <Pressable
-          onPress={() =>
-            !isCompleted && setIsRevealed(!isRevealed)
-          }
+          onPress={() => !isCompleted && setIsRevealed(!isRevealed)}
           style={({ pressed }) => [
-            styles.challengeBox,
-            !isRevealed &&
-            !isCompleted &&
-            styles.challengeBoxHidden,
-            isCompleted && styles.challengeBoxCompleted,
-            pressed && !isCompleted && { opacity: 0.7 },
+            styles.pressableArea,
+            pressed && !isCompleted && { opacity: 0.8 },
           ]}
         >
+          {/* Top Secret Stamp */}
+          <View style={styles.stampContainer}>
+            <Text style={styles.stampText}>TOP SECRET</Text>
+          </View>
+
+          {/* Agency Logo Background */}
+          <View style={styles.agencyLogoContainer} pointerEvents="none">
+            <Image
+              source={require('../assets/UI/logo_agency.png')}
+              style={styles.agencyLogo}
+              resizeMode="contain"
+            />
+          </View>
+
           {!isRevealed && !isCompleted ? (
             <Animated.View
               key="hidden"
               entering={FadeIn.duration(400)}
               exiting={FadeOut.duration(400)}
-              style={styles.hiddenContent}
+              style={styles.contentCenter}
             >
-              <View style={styles.lockIconContainer}>
-                <Ionicons
-                  name="lock-closed"
-                  size={32}
-                  color="rgba(255,255,255,0.6)"
-                />
+              <MaterialCommunityIcons
+                name="shield-lock"
+                size={34}
+                color="#222"
+                style={styles.lockIcon}
+              />
+              <Text style={styles.revealTitle}>
+                {t("mission.decryption_required")}
+              </Text>
+              <View style={styles.starRow}>
+                <View style={styles.starLine} />
+                <Text style={styles.smallStar}>★</Text>
+                <View style={styles.starLine} />
               </View>
-              <View>
-                <ThemedText style={styles.revealText}>
-                  {t("mission.decryption_required")}
-                </ThemedText>
-                <ThemedText style={styles.revealSubtext}>
-                  {t("mission.tap_to_scan")}
-                </ThemedText>
-              </View>
+              <Text style={styles.revealSubtext}>
+                {t("mission.tap_to_scan")}
+              </Text>
+              
             </Animated.View>
           ) : (
             <Animated.View
               key="revealed"
               entering={FadeIn.duration(400)}
               exiting={FadeOut.duration(400)}
-              style={styles.challengeContent}
+              style={styles.contentCenter}
             >
-              <View style={styles.quoteMarkTL} />
               <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={{
-                  justifyContent: "center",
-                  minHeight: "100%",
-                }}
+                style={{ flex: 1, width: '100%' }}
+                contentContainerStyle={styles.revealedScroll}
                 showsVerticalScrollIndicator={false}
               >
-                <ThemedText
+                <Text
                   style={[
                     styles.challengeText,
                     isCompleted && styles.challengeTextCompleted,
@@ -151,36 +131,28 @@ export function ActiveChallengeCard({
                     (me
                       ? t("mission.no_objective")
                       : t("mission.searching_profile"))}
-                </ThemedText>
+                </Text>
+                {isCompleted && (
+                  <View style={[styles.stampContainer, styles.stampContainerCompleted]}>
+                    <Text style={[styles.stampText, styles.stampTextCompleted]}>RÉSOLU</Text>
+                  </View>
+                )}
               </ScrollView>
-              <View style={styles.quoteMarkBR} />
-
-              {!myChallenge?.text && status === "ACTIVE" && (
-                <ThemedText style={styles.errorSubtext}>
-                  {t("mission.contact_hq")}
-                </ThemedText>
-              )}
-
+              
               <View style={styles.hideHint}>
-                <Ionicons
-                  name="eye-off-outline"
-                  size={10}
-                  color="rgba(255,255,255,0.3)"
+                <FontAwesome5
+                  name="eye-slash"
+                  size={12}
+                  color="#222"
                 />
-                <ThemedText type="code" style={styles.hideHintText}>
+                <Text style={styles.hideHintText}>
                   {t("mission.tap_to_secure")}
-                </ThemedText>
+                </Text>
               </View>
             </Animated.View>
           )}
         </Pressable>
-
-        {/* Tactical corners */}
-        <View style={styles.cornerL_TL} />
-        <View style={styles.cornerL_TR} />
-        <View style={styles.cornerL_BL} />
-        <View style={styles.cornerL_BR} />
-      </BlurView>
+      </ImageBackground>
     </Animated.View>
   );
 }

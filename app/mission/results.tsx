@@ -86,7 +86,7 @@ export default function ResultsScreen() {
                     <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                         <ThemedText type="code" style={styles.statLabel}>{t('mission.duration')}</ThemedText>
-                        <ThemedText type="futuristic" style={[styles.statValue, { color: '#FF6B6B' }]}>
+                        <ThemedText type="futuristic" style={[styles.statValue, { color: '#8B1E1E' }]}>
                             {session?.duration || '—'}
                         </ThemedText>
                     </View>
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#4CAF50',
     },
     statusNegative: {
-        backgroundColor: '#FF6B6B',
+        backgroundColor: '#8B1E1E',
     },
     statusLabelSmall: {
         fontSize: 8,

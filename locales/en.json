@@ -65,6 +65,11 @@
         "btn_deploy_simple": "DEPLOY"
     },
     "mission": {
+        "mission": "MISSION",
+        "agent": "AGENT",
+        "level": "LEVEL 02",
+        "status": "STATUS",
+        "in_mission": "IN MISSION",
         "create_title": "MISSION CONFIG",
         "abort_mission": "ABORT MISSION",
         "threat_level": "THREAT LEVEL",

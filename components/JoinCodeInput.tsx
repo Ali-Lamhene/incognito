@@ -32,9 +32,9 @@ export function JoinCodeInput({
 
             <View style={[
                 styles.premiumInputContainer,
-                error && { borderColor: '#FF6B6B', backgroundColor: 'rgba(255, 107, 107, 0.05)' }
+                error && { borderColor: '#8B1E1E', backgroundColor: 'rgba(139, 30, 30, 0.05)' }
             ]}>
-                <View style={[styles.inputGlow, error && { backgroundColor: '#FF6B6B' }]} />
+                <View style={[styles.inputGlow, error && { backgroundColor: '#8B1E1E' }]} />
                 <TextInput
                     style={styles.codeInput}
                     placeholder={t('mission.join_code_placeholder')}
@@ -51,7 +51,7 @@ export function JoinCodeInput({
                     style={[
                         styles.connectBtnAction,
                         hasValue ? styles.connectBtnActive : styles.connectBtnDisabled,
-                        error && { backgroundColor: '#FF6B6B' }
+                        error && { backgroundColor: '#8B1E1E' }
                     ]}
                 >
                     <ThemedText type="code" style={styles.connectBtnText}>
@@ -66,7 +66,7 @@ export function JoinCodeInput({
             </View>
             {error && (
                 <Animated.View entering={FadeInDown} style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={12} color="#FF6B6B" />
+                    <Ionicons name="alert-circle" size={12} color="#8B1E1E" />
                     <ThemedText type="code" style={styles.errorText}>
                         {t('mission.mission_not_found')}
                     </ThemedText>
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     errorText: {
-        color: '#FF6B6B',
+        color: '#8B1E1E',
         fontSize: 10,
         letterSpacing: 1,
     },
