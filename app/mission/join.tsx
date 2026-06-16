@@ -43,17 +43,19 @@ export default function JoinMissionScreen() {
 
                 <View style={styles.contentWrapper}>
                     {/* Scan Card */}
-                    <TouchableOpacity style={styles.cardRow} onPress={handleScan} activeOpacity={0.7}>
-                        <View style={styles.cardIconContainer}>
-                            <MaterialCommunityIcons name="qrcode-scan" size={40} color={Theme.colors.red} />
-                        </View>
-                        <View style={styles.cardTextContainer}>
-                            <Text style={styles.cardTitle}>SCANNER UN QR CODE</Text>
-                            <View style={styles.redUnderline} />
-                            <Text style={styles.cardSubtitle}>Utiliser l'appareil photo pour scanner le QR code de la mission.</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={24} color={Theme.colors.red} />
-                    </TouchableOpacity>
+                    <View style={styles.contentBlock}>
+                        <TouchableOpacity style={styles.cardRow} onPress={handleScan} activeOpacity={0.7}>
+                            <View style={styles.cardIconContainer}>
+                                <MaterialCommunityIcons name="qrcode-scan" size={40} color={Theme.colors.red} />
+                            </View>
+                            <View style={styles.cardTextContainer}>
+                                <Text style={styles.cardTitle}>SCANNER UN QR CODE</Text>
+                                <View style={styles.redUnderline} />
+                                <Text style={styles.cardSubtitle}>Utiliser l'appareil photo pour scanner le QR code de la mission.</Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={24} color={Theme.colors.red} />
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Divider */}
                     <View style={styles.dividerContainer}>
@@ -73,7 +75,7 @@ export default function JoinMissionScreen() {
                     </View>
 
                     {/* Manual Code Card */}
-                    <View style={styles.cardColumn}>
+                    <View style={[styles.cardColumn, styles.contentBlock]}>
                         <View style={styles.manualTextContainer}>
                             <Text style={styles.cardTitle}>ENTRER LE CODE DE LA MISSION</Text>
                             <View style={styles.redUnderline} />
@@ -125,11 +127,12 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     heroContainer: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        height: 160, // Reduced from 180 to ensure everything fits on smaller phones
+        minHeight: 120, // Prevents image from becoming too small
         marginTop: 0,
-        marginBottom: 5,
+        marginBottom: 10,
     },
     heroImage: {
         width: '100%',
@@ -137,8 +140,11 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         paddingHorizontal: 20,
-        gap: 8, // Reduced from 10
+        gap: 8,
         paddingBottom: 10,
+    },
+    contentBlock: {
+        marginVertical: 5,
     },
     cardRow: {
         backgroundColor: 'rgba(255, 255, 255, 0.02)',

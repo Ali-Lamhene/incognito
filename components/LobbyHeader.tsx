@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import Animated, { Easing, FadeInDown, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { ThemedText } from './ThemedText';
-import { useTranslation } from '../hooks/useTranslation';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Theme } from '../constants/Theme';
 
 interface LobbyHeaderProps {
     isHost: boolean;
@@ -11,66 +10,34 @@ interface LobbyHeaderProps {
     onAbort: () => void;
 }
 
-const AnimatedWaitingText = ({ text }: { text: string }) => {
-    const step = useSharedValue(0);
-
-    useEffect(() => {
-        step.value = withRepeat(
-            withTiming(4, { duration: 2000, easing: Easing.linear }),
-            -1,
-            false
-        );
-    }, []);
-
-    const d1Style = useAnimatedStyle(() => ({
-        opacity: step.value >= 1 ? 1 : 0
-    }));
-    const d2Style = useAnimatedStyle(() => ({
-        opacity: step.value >= 2 ? 1 : 0
-    }));
-    const d3Style = useAnimatedStyle(() => ({
-        opacity: step.value >= 3 ? 1 : 0
-    }));
-
-    const baseText = text.replace(/\.+$/, '');
-
-    return (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <ThemedText type="code" style={styles.subTitle}>{baseText}</ThemedText>
-            <Animated.View style={d1Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
-            <Animated.View style={d2Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
-            <Animated.View style={d3Style}><ThemedText type="code" style={styles.subTitle}>.</ThemedText></Animated.View>
-        </View>
-    );
-};
-
 export function LobbyHeader({
     isHost,
     onBack,
     onAbort
 }: LobbyHeaderProps) {
-    const { t } = useTranslation();
-
     return (
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
             <View style={styles.headerTop}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
-                    <ThemedText type="code" style={styles.backText}>{'<< ' + t('common.return')}</ThemedText>
+                    <Ionicons name="chevron-back" size={20} color="#D1D1D1" />
+                    <Text style={styles.backText}>RETOUR</Text>
                 </TouchableOpacity>
 
-                {isHost && (
-                    <TouchableOpacity onPress={onAbort} style={styles.destroyButton}>
-                        <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
-                    </TouchableOpacity>
-                )}
-            </View>
-            <View style={{ marginTop: 10 }}>
-                <ThemedText type="subtitle" style={styles.screenTitle}>{t('lobby.title')}</ThemedText>
-                {isHost ? (
-                    <AnimatedWaitingText text={t('lobby.waiting')} />
-                ) : (
-                    <ThemedText type="code" style={styles.subTitle}>{t('lobby.linked_msg')}</ThemedText>
-                )}
+                <View style={styles.centerTitleContainer}>
+                    <Text style={styles.screenTitle}>SALON D'OPÉRATION</Text>
+                    <Text style={styles.subTitle}>EN ATTENTE D'AGENTS</Text>
+                </View>
+
+                {/* Always show the abort button as QUITTER LE SALON based on the mockup.
+                    We use onAbort for both host (destroy) and guest (leave), 
+                    the parent handles the different actions. */}
+                <TouchableOpacity onPress={onAbort} style={styles.destroyButton}>
+                    <MaterialCommunityIcons name="exit-run" size={16} color={Theme.colors.red} style={styles.exitIcon} />
+                    <View>
+                        <Text style={styles.destroyText}>QUITTER</Text>
+                        <Text style={styles.destroyText}>LE SALON</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
         </Animated.View>
     );
@@ -78,37 +45,63 @@ export function LobbyHeader({
 
 const styles = StyleSheet.create({
     header: {
-        gap: 15,
-        marginBottom: 10,
+        marginBottom: 15,
+        paddingTop: 10,
     },
     headerTop: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
     },
     backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 5,
+        width: 90,
     },
     backText: {
-        fontSize: 10,
-        opacity: 0.6,
-        letterSpacing: 2,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 18,
+        color: '#D1D1D1',
+        letterSpacing: 1,
+        marginLeft: 2,
+    },
+    centerTitleContainer: {
+        alignItems: 'center',
+        flex: 1,
     },
     screenTitle: {
+        fontFamily: 'BebasNeue-Bold',
         color: '#FFF',
-        fontSize: 24,
-        letterSpacing: 4,
-        fontWeight: 'bold',
+        fontSize: 28,
+        letterSpacing: 2,
+        marginBottom: 2,
     },
     subTitle: {
-        fontSize: 10,
-        opacity: 0.5,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 14,
+        color: Theme.colors.red,
+        letterSpacing: 1,
     },
     destroyButton: {
-        padding: 8,
-        backgroundColor: 'rgba(255, 107, 107, 0.1)',
-        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 8,
+        borderRadius: 4,
         borderWidth: 1,
-        borderColor: 'rgba(255, 107, 107, 0.2)',
+        borderColor: 'rgba(255, 0, 0, 0.4)',
+        width: 90,
+        justifyContent: 'center',
+    },
+    exitIcon: {
+        marginRight: 4,
+    },
+    destroyText: {
+        fontFamily: 'BebasNeue-Bold',
+        color: Theme.colors.red,
+        fontSize: 11,
+        lineHeight: 12,
+        textAlign: 'center',
     },
 });

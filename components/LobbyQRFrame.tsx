@@ -1,80 +1,147 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { ImageBackground, Image } from 'expo-image';
 import QRCode from 'react-native-qrcode-svg';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { ThemedText } from './ThemedText';
-import { useTranslation } from '../hooks/useTranslation';
+import { Ionicons } from '@expo/vector-icons';
+import { Theme } from '../constants/Theme';
 
 interface LobbyQRFrameProps {
     code: string;
     scannerStyle: any;
     onCopy: () => void;
+    children?: React.ReactNode;
 }
 
 export function LobbyQRFrame({
     code,
     scannerStyle,
-    onCopy
+    onCopy,
+    children
 }: LobbyQRFrameProps) {
-    const { t } = useTranslation();
-
     return (
-        <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.codeSection}>
-            <Animated.View style={[styles.qrFrame, scannerStyle]}>
-                <View style={styles.qrContainer}>
-                    <QRCode
-                        value={code || 'ERROR'}
-                        size={180}
-                        color="black"
-                        backgroundColor="white"
-                    />
-                </View>
-                <View style={styles.cornerTL} />
-                <View style={styles.cornerTR} />
-                <View style={styles.cornerBL} />
-                <View style={styles.cornerBR} />
-            </Animated.View>
+        <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.cardContainer}>
+            {/* City Background Texture */}
+            <Image 
+                source={require('../assets/UI/texture_city.png')}
+                style={styles.cardBackground}
+                contentFit="cover"
+            />
+            {/* Dark overlay to fade bottom slightly if needed, or just red overlay */}
+            <View style={styles.cardOverlay} />
 
-            <TouchableOpacity onPress={onCopy} style={styles.codeDisplay}>
-                <ThemedText type="futuristic" style={styles.missionCodeText}>{code}</ThemedText>
-                <ThemedText type="code" style={styles.copyHint}>{t('lobby.copy_hint')}</ThemedText>
-            </TouchableOpacity>
+            {/* Top Code Section */}
+            <View style={styles.codeHeader}>
+                <Text style={styles.codeLabel}>CODE DE MISSION</Text>
+                <TouchableOpacity onPress={onCopy} activeOpacity={0.7} style={styles.codeRow}>
+                    <Ionicons name="star" size={14} color={Theme.colors.red} />
+                    <Text style={styles.missionCodeText}>{code}</Text>
+                    <Ionicons name="star" size={14} color={Theme.colors.red} />
+                </TouchableOpacity>
+            </View>
+
+            {/* QR Code */}
+            <View style={styles.qrWrapper}>
+                <ImageBackground 
+                    source={require('../assets/UI/paper.png')}
+                    style={styles.qrFrame}
+                    imageStyle={styles.qrImageStyle}
+                >
+                    <View style={styles.qrContainer}>
+                        <QRCode
+                            value={code || 'ERROR'}
+                            size={180}
+                            color="#000"
+                            backgroundColor="transparent"
+                        />
+                    </View>
+
+                    {/* Corners */}
+                    <View style={styles.cornerTL} />
+                    <View style={styles.cornerTR} />
+                    <View style={styles.cornerBL} />
+                    <View style={styles.cornerBR} />
+                </ImageBackground>
+            </View>
+
+            <View style={styles.hintContainer}>
+                <Ionicons name="qr-code-outline" size={16} color="#A0A0A0" />
+                <Text style={styles.copyHint}>Scannez pour rejoindre la mission</Text>
+            </View>
+
+            {children}
         </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
-    codeSection: {
-        alignItems: 'center',
-        gap: 20,
-    },
-    qrFrame: {
-        padding: 15,
+    cardContainer: {
+        backgroundColor: 'rgba(20, 5, 5, 0.4)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.3)',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        position: 'relative',
-    },
-    qrContainer: {
-        padding: 10,
-        backgroundColor: '#FFF',
-    },
-    cornerTL: { position: 'absolute', top: -1, left: -1, width: 10, height: 10, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
-    cornerTR: { position: 'absolute', top: -1, right: -1, width: 10, height: 10, borderTopWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
-    cornerBL: { position: 'absolute', bottom: -1, left: -1, width: 10, height: 10, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
-    cornerBR: { position: 'absolute', bottom: -1, right: -1, width: 10, height: 10, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
-    codeDisplay: {
+        borderColor: 'rgba(255, 0, 0, 0.3)',
+        borderRadius: 8,
+        padding: 15,
+        gap: 10,
         alignItems: 'center',
+        overflow: 'hidden', // Add this so background doesn't bleed out
+    },
+    cardBackground: {
+        ...StyleSheet.absoluteFillObject,
+        opacity: 0.9,
+    },
+    cardOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(20, 5, 5, 0.5)',
+    },
+    codeHeader: {
+        alignItems: 'center',
+    },
+    codeLabel: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 12,
+        color: Theme.colors.red,
+        letterSpacing: 1,
+    },
+    codeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
     },
     missionCodeText: {
-        fontSize: 28,
-        color: '#FFF',
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 36,
+        color: '#E0E0E0',
         letterSpacing: 3,
-        textAlign: 'center',
+    },
+    qrWrapper: {
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    qrFrame: {
+        padding: 25,
+        position: 'relative',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    qrImageStyle: {
+        borderRadius: 8,
+    },
+    qrContainer: {
+        backgroundColor: 'transparent',
+    },
+    cornerTL: { position: 'absolute', top: 5, left: 5, width: 15, height: 15, borderTopWidth: 3, borderLeftWidth: 3, borderColor: '#5C2D2D' },
+    cornerTR: { position: 'absolute', top: 5, right: 5, width: 15, height: 15, borderTopWidth: 3, borderRightWidth: 3, borderColor: '#5C2D2D' },
+    cornerBL: { position: 'absolute', bottom: 5, left: 5, width: 15, height: 15, borderBottomWidth: 3, borderLeftWidth: 3, borderColor: '#5C2D2D' },
+    cornerBR: { position: 'absolute', bottom: 5, right: 5, width: 15, height: 15, borderBottomWidth: 3, borderRightWidth: 3, borderColor: '#5C2D2D' },
+    hintContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 0,
     },
     copyHint: {
-        fontSize: 8,
-        opacity: 0.4,
-        marginTop: 5,
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 10,
+        color: '#A0A0A0',
     },
 });

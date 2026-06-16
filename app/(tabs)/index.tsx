@@ -57,9 +57,9 @@ export default function AgentHomeScreen() {
     setShowProfileModal(false);
   };
 
-  if (showSplash) {
-    return <AgentSplashScreen onComplete={handleSplashFinish} />;
-  }
+  // if (showSplash) {
+  //   return <AgentSplashScreen onComplete={handleSplashFinish} />;
+  // }
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 15, paddingBottom: 105 + insets.bottom }]}>
@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     flex: 1,
-    maxHeight: 420,
     position: 'relative',
     overflow: 'hidden',
   },

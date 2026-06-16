@@ -28,8 +28,7 @@ export default function CreateMissionScreen() {
     } = useCreateMission();
 
     return (
-        <View style={styles.container}>
-            {/* <AgentHomeBackground totalBlack /> */}
+        <View style={[styles.container, { backgroundColor: Theme.colors.background }]}>
             
             <ScrollView 
                 style={styles.scrollContainer}
@@ -39,23 +38,28 @@ export default function CreateMissionScreen() {
                 <PageHeader title="créer une mission" showSeparator />
 
                 <View style={styles.selectorWrapper}>
-                    <DurationSelector 
-                        duration={duration}
-                        setDuration={setDuration}
-                        customDuration={customDuration}
-                        setCustomDuration={setCustomDuration}
-                        isCustomInvalid={isCustomInvalid}
-                    />
+                    <View style={styles.contentBlock}>
+                        <DurationSelector 
+                            duration={duration}
+                            setDuration={setDuration}
+                            customDuration={customDuration}
+                            setCustomDuration={setCustomDuration}
+                            isCustomInvalid={isCustomInvalid}
+                        />
+                    </View>
 
-         
+                    <View style={styles.contentBlock}>
+                        <TerrainSelector
+                            terrain={terrain}
+                            setTerrain={setTerrain}
+                        />
+                    </View>
 
-                    <TerrainSelector
-                        terrain={terrain}
-                        setTerrain={setTerrain}
-                    />
+                    <View style={styles.contentBlock}>
+                        <AgentAdvice />
+                    </View>
 
-                    <AgentAdvice />
-
+                    <View style={styles.buttonBlock}>
                         <Button
                             title="lancer la mission"
                             onPress={handleCreate}
@@ -63,6 +67,7 @@ export default function CreateMissionScreen() {
                             variant="primary"
                             icon="custom-target"
                         />
+                    </View>
                 </View>
             </ScrollView>
         </View>
@@ -85,9 +90,16 @@ const styles = StyleSheet.create({
     selectorWrapper: {
         flex: 1,
         width: '100%',
-        paddingHorizontal: 12,
-        marginTop: 5,
-        gap: 20, // Reduced space between components
+        paddingHorizontal: 15,
+        marginTop: 10,
+        justifyContent: 'space-between', 
+    },
+    contentBlock: {
+        marginVertical: 10,
+    },
+    buttonBlock: {
+        marginTop: 'auto',
+        paddingTop: 15,
     },
     simpleSeparator: {
         width: '100%',

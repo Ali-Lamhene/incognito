@@ -6,16 +6,12 @@ export function LobbyBackground() {
     return (
         <View style={styles.backgroundContainer}>
             <Image
-                source={require('../assets/images/surveillance_desk_monochrome.jpg')}
+                source={require('../assets/UI/texture_city.png')}
                 style={styles.backgroundImage}
                 contentFit="cover"
             />
+            {/* Dark overlay to ensure text readability if needed */}
             <View style={styles.backgroundOverlay} />
-            <Image
-                source={require('../assets/images/tactical_texture.jpg')}
-                style={styles.tacticalOverlay}
-                contentFit="cover"
-            />
         </View>
     );
 }
@@ -23,18 +19,15 @@ export function LobbyBackground() {
 const styles = StyleSheet.create({
     backgroundContainer: {
         ...StyleSheet.absoluteFillObject,
+        backgroundColor: '#000',
     },
     backgroundImage: {
         width: '100%',
         height: '100%',
-        opacity: 0.4,
+        opacity: 0.8,
     },
     backgroundOverlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(5, 5, 8, 0.85)',
-    },
-    tacticalOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        opacity: 0.15,
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
     },
 });

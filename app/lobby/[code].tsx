@@ -1,17 +1,18 @@
 import { Stack } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LobbyAgentsList } from '../../components/LobbyAgentsList';
-import { LobbyBackground } from '../../components/LobbyBackground';
-import { LobbyHeader } from '../../components/LobbyHeader';
+// Removed LobbyBackground
+import { PageHeader } from '../../components/ui/PageHeader';
 import { LobbyModals } from '../../components/LobbyModals';
 import { LobbyQRFrame } from '../../components/LobbyQRFrame';
 import { Button } from '../../components/ui/Button';
-import { ThemedText } from '../../components/ThemedText';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useLobby } from '../../hooks/useLobby';
+import { Ionicons } from '@expo/vector-icons';
+import { Theme } from '../../constants/Theme';
 
 export default function LobbyScreen() {
     const insets = useSafeAreaInsets();
@@ -49,7 +50,6 @@ export default function LobbyScreen() {
                     contentStyle: { backgroundColor: '#000' }
                 }}
             />
-            <LobbyBackground />
 
             <View style={styles.tabletCenteredContainer}>
                 <ScrollView
@@ -64,10 +64,10 @@ export default function LobbyScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Header */}
-                    <LobbyHeader
-                        isHost={isHost}
+                    <PageHeader
+                        title={t('lobby.title')}
                         onBack={handleBack}
-                        onAbort={handleAbort}
+                        showSeparator={true}
                     />
 
                     {/* Central Code & QR */}
@@ -75,25 +75,38 @@ export default function LobbyScreen() {
                         code={code}
                         scannerStyle={animatedScannerStyle}
                         onCopy={copyToClipboard}
-                    />
-
-                    {/* Footer Action */}
-                    {isHost && (
+                    >
+                        {/* Footer Action */}
                         <Animated.View entering={FadeInUp.delay(600).duration(600)} style={styles.footer}>
-                            <Button
-                                title={agents.length < 2 ? t('lobby.waiting_agents') : t('lobby.btn_deploy')}
-                                onPress={handleDeploy}
-                                disabled={agents.length < 2}
-                                style={styles.startButton}
-                                variant="primary"
-                            />
-                            {agents.length < 2 && (
-                                <ThemedText type="code" style={styles.aloneHint}>
-                                    {t('lobby.recruitment_required')}
-                                </ThemedText>
+                            {isHost && (
+                                <>
+                                    <Button
+                                        title={agents.length < 2 ? "DÉPLOYER" : "DÉPLOYER"}
+                                        onPress={handleDeploy}
+                                        disabled={agents.length < 2}
+                                        style={styles.startButton}
+                                        variant="primary"
+                                        icon="custom-target"
+                                    />
+                                    {agents.length < 2 && (
+                                        <View style={styles.aloneHintContainer}>
+                                            <Ionicons name="warning-outline" size={24} color={Theme.colors.red} />
+                                            <View style={styles.aloneHintTextContainer}>
+                                                <Text style={styles.aloneHintTitle}>EN ATTENTE D'AGENTS</Text>
+                                                <Text style={styles.aloneHintSubtitle}>Vous devez être au minimum 2 agents pour lancer la mission.</Text>
+                                            </View>
+                                        </View>
+                                    )}
+                                </>
                             )}
+                            
+                            {/* Leave button for everyone (or just host, but handleAbort covers both) */}
+                            <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
+                                <Ionicons name="exit-outline" size={14} color="rgba(255, 255, 255, 0.5)" />
+                                <Text style={styles.destroyText}>Quitter le salon</Text>
+                            </TouchableOpacity>
                         </Animated.View>
-                    )}
+                    </LobbyQRFrame>
 
                     {/* Agents List */}
                     <LobbyAgentsList agents={agents} />
@@ -138,17 +151,55 @@ const styles = StyleSheet.create({
         gap: 15,
         paddingBottom: 40,
     },
+    destroyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        paddingVertical: 4,
+        marginTop: 2,
+    },
+    destroyText: {
+        fontFamily: 'Montserrat-Regular',
+        color: 'rgba(255, 255, 255, 0.5)',
+        fontSize: 12,
+        textDecorationLine: 'underline',
+    },
     startButton: {
         width: '100%',
+        backgroundColor: Theme.colors.red,
+        borderRadius: 8,
     },
     footer: {
-        gap: 15,
+        width: '100%',
+        gap: 10,
+        marginTop: 0,
     },
-    aloneHint: {
-        fontSize: 8,
-        color: '#FF6B6B',
-        textAlign: 'center',
-        opacity: 0.8,
+    aloneHintContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+        padding: 10,
+        gap: 12,
+    },
+    aloneHintTextContainer: {
+        flex: 1,
+    },
+    aloneHintTitle: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 14,
+        color: Theme.colors.red,
         letterSpacing: 1,
+        marginBottom: 0,
+    },
+    aloneHintSubtitle: {
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 10,
+        color: '#FFF',
+        opacity: 0.8,
+        lineHeight: 14,
     }
 });
