@@ -41,7 +41,7 @@ export default function AgentHomeScreen() {
   }, [showSplash, hasLaunched, setHasLaunched]);
 
   const handleSplashFinish = () => {
-    setShowSplash(false);
+    // setShowSplash(false);
     setHasLaunched();
     if (!isFirstSetupDone) {
       setShowProfileModal(true);

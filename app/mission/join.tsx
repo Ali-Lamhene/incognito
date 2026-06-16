@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     heroContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        height: 180, // Further reduced to ensure everything fits on smaller phones
+        height: 160, // Reduced from 180 to ensure everything fits on smaller phones
         marginTop: 0,
         marginBottom: 5,
     },
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     },
     contentWrapper: {
         paddingHorizontal: 20,
-        gap: 10,
+        gap: 8, // Reduced from 10
         paddingBottom: 10,
     },
     cardRow: {
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.08)',
-        padding: 15,
+        padding: 12, // Reduced from 15
         flexDirection: 'row',
         alignItems: 'center',
     },
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.08)',
-        padding: 15,
+        padding: 12, // Reduced from 15
     },
     cardIconContainer: {
         marginRight: 15,
@@ -166,20 +166,20 @@ const styles = StyleSheet.create({
         paddingRight: 10,
     },
     manualTextContainer: {
-        marginBottom: 15,
+        marginBottom: 10, // Reduced from 15
     },
     cardTitle: {
         fontFamily: 'BebasNeue-Bold',
-        fontSize: 20,
+        fontSize: 19, // Reduced slightly from 20
         color: '#D1D1D1',
         letterSpacing: 1,
-        marginBottom: 4,
+        marginBottom: 2, // Reduced from 4
     },
     redUnderline: {
         width: 30,
         height: 2,
         backgroundColor: Theme.colors.red,
-        marginBottom: 8,
+        marginBottom: 6, // Reduced from 8
     },
     cardSubtitle: {
         fontFamily: 'Montserrat-Regular',
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 30,
-        marginVertical: 5,
+        marginVertical: 0, // Reduced from 5
     },
     dividerLine: {
         flex: 1,
@@ -212,8 +212,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.1)',
         paddingHorizontal: 15,
-        height: 45,
-        marginBottom: 10,
+        height: 42, // Reduced from 45
+        marginBottom: 8, // Reduced from 10
     },
     inputError: {
         borderColor: Theme.colors.red,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        height: 45,
+        height: 42, // Reduced from 45
         borderRadius: 6,
     },
     joinButtonDisabled: {
