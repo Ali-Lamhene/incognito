@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Pressable, ScrollView, Text, ImageBackground, Image } from 'react-native';
 import Animated, { FadeIn, FadeInUp, FadeOut } from 'react-native-reanimated';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from '../hooks/useTranslation';
 import { Agent } from '../context/SessionContext';
 import { styles } from './ActiveChallengeCard.styles';
@@ -46,13 +47,31 @@ export function ActiveChallengeCard({
         <Text style={styles.timerLabel}>
           TEMPS RESTANT
         </Text>
-        <Text style={[styles.timerValue, isLowTime && styles.timerValueLow]}>
-          {formatTime(timeLeft)}
-        </Text>
+        <View style={styles.timerValueRow}>
+          <LinearGradient
+            colors={['transparent', Theme.colors.red]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.timerGradient}
+          />
+          <Text style={[styles.timerValue, isLowTime && styles.timerValueLow]}>
+            {formatTime(timeLeft)}
+          </Text>
+          <LinearGradient
+            colors={[Theme.colors.red, 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.timerGradient}
+          />
+        </View>
         <View style={styles.timerDividerContainer}>
-          <View style={styles.timerDividerLine} />
+          <LinearGradient
+            colors={['transparent', 'rgba(255, 255, 255, 0.4)', 'transparent']}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={styles.timerDividerLine}
+          />
           <View style={styles.timerDividerDot} />
-          <View style={styles.timerDividerLine} />
         </View>
       </View>
 

@@ -3,7 +3,7 @@ import { Theme } from '../constants/Theme';
 
 export const styles = StyleSheet.create({
   container: {
-    marginBottom: 40,
+    // marginBottom: 40,
     alignItems: 'center',
     width: '100%',
   },
@@ -23,30 +23,54 @@ export const styles = StyleSheet.create({
     fontSize: 48,
     color: Theme.colors.red,
     // letterSpacing removed for tighter layout
-    includeFontPadding: false,
+    // includeFontPadding: false,
     lineHeight: 38,
+    letterSpacing: 2,
+    fontWeight: 600
   },
   timerValueLow: {
     color: Theme.colors.red,
   },
-  timerDividerContainer: {
+  timerValueRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '60%',
-    marginTop: 6,
-    opacity: 0.5,
+    justifyContent: 'center',
+    width: '70%',
   },
-  timerDividerLine: {
+  timerGradient: {
     flex: 1,
     height: 1,
-    backgroundColor: Theme.colors.red,
+    marginHorizontal: 15,
+  },
+  timerDividerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '30%',
+    height: 20,
+    marginTop: 6,
+  },
+  timerDividerLine: {
+    position: 'absolute',
+    width: '100%',
+    height: 4,
   },
   timerDividerDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Theme.colors.red,
-    marginHorizontal: 8,
+    width: 2,
+    height: 2,
+    borderRadius: 3,
+
+    // 1. Le cœur du point devient presque blanc/rose très clair pour l'effet "brûlant"
+    backgroundColor: '#ffe6e6',
+
+    // 2. Empilement des ombres pour un fondu parfait
+    // - Une ombre très proche et intense (couleur vive)
+    // - Une ombre moyenne
+    // - Une ombre très large et douce (pour l'effet d'irradiation sur la ligne)
+    boxShadow: `
+      0 0 4px 2px rgba(255, 100, 100, 0.8),
+      0 0 10px 5px rgba(255, 50, 50, 0.5),
+      0 0 20px 8px rgba(255, 0, 0, 0.2)
+    `,
   },
   folderBackground: {
     width: '100%',

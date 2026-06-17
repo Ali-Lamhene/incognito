@@ -83,7 +83,7 @@ export default function LobbyScreen() {
                                     <Button
                                         title={agents.length < 2 ? "DÉPLOYER" : "DÉPLOYER"}
                                         onPress={handleDeploy}
-                                        disabled={agents.length < 2}
+                                        disabled={agents.length < 1}
                                         style={styles.startButton}
                                         variant="primary"
                                         icon="custom-target"

@@ -19,7 +19,7 @@ export function ActiveHeader({ code, agentName }: ActiveHeaderProps) {
       style={styles.container}
     >
       {/* Col 1: Mission */}
-      <View style={[styles.column, { flex: 1.8 }]}>
+      <View style={styles.column}>
         <Text style={styles.label}>
           {t("mission.mission")}
         </Text>
@@ -37,7 +37,7 @@ export function ActiveHeader({ code, agentName }: ActiveHeaderProps) {
       <View style={styles.separator} />
 
       {/* Col 2: Agent */}
-      <View style={[styles.column, { flex: 1.1 }]}>
+      <View style={styles.column}>
         <Text style={styles.label}>
           {t("mission.agent")}
         </Text>
@@ -56,7 +56,7 @@ export function ActiveHeader({ code, agentName }: ActiveHeaderProps) {
       <View style={styles.separator} />
 
       {/* Col 3: Statut */}
-      <View style={[styles.column, { flex: 1 }]}>
+      <View style={styles.column}>
         <Text style={styles.label}>
           {t("mission.status")}
         </Text>
@@ -83,9 +83,11 @@ const styles = StyleSheet.create({
     borderColor: Theme.colors.border,
     borderRadius: 8,
     backgroundColor: Theme.colors.surface,
-    paddingVertical: 8,
+    paddingVertical: 11,
+    paddingHorizontal: 8,
     marginBottom: 20,
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   column: {
     alignItems: 'center',
@@ -104,6 +106,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 0,
     fontWeight: 'bold',
+    letterSpacing: 2,
   },
   valueRow: {
     flexDirection: 'row',
@@ -116,19 +119,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Theme.colors.red,
     textAlign: 'center',
+    letterSpacing: 2,
   },
   agentName: {
     fontFamily: Theme.fonts.title,
-    fontSize: 16,
+    fontSize: 18,
     color: Theme.colors.text.light,
+    letterSpacing: 2,
   },
   icon: {
-    marginLeft: 6,
+    marginLeft: 12,
   },
   statusText: {
     fontFamily: Theme.fonts.title,
-    fontSize: 12,
+    fontSize: 14,
     color: Theme.colors.red,
+    letterSpacing: 2,
   },
   statusDot: {
     width: 6,
