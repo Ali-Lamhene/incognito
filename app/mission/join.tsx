@@ -43,7 +43,7 @@ export default function JoinMissionScreen() {
 
                 <View style={styles.contentWrapper}>
                     {/* Scan Card */}
-                    <View style={styles.contentBlock}>
+                    <View>
                         <TouchableOpacity style={styles.cardRow} onPress={handleScan} activeOpacity={0.7}>
                             <View style={styles.cardIconContainer}>
                                 <MaterialCommunityIcons name="qrcode-scan" size={40} color={Theme.colors.red} />
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         minHeight: 120, // Prevents image from becoming too small
         marginTop: 0,
-        marginBottom: 10,
+        // marginBottom: 10,
     },
     heroImage: {
         width: '100%',
