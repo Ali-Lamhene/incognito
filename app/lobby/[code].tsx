@@ -99,12 +99,6 @@ export default function LobbyScreen() {
                                     )}
                                 </>
                             )}
-                            
-                            {/* Leave button for everyone (or just host, but handleAbort covers both) */}
-                            <TouchableOpacity onPress={handleAbort} style={styles.destroyButton}>
-                                <Ionicons name="exit-outline" size={14} color="rgba(255, 255, 255, 0.5)" />
-                                <Text style={styles.destroyText}>Quitter le salon</Text>
-                            </TouchableOpacity>
                         </Animated.View>
                     </LobbyQRFrame>
 

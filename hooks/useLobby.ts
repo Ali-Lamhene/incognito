@@ -86,7 +86,7 @@ export function useLobby() {
         if (!isHost) {
             handleLeave();
         } else {
-            router.push('/');
+            handleAbort();
         }
     };
 
