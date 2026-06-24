@@ -206,7 +206,17 @@
         "detection": "DÉTECTION SUSPECT #82B",
         "mission_start": "LANCEMENT OPÉRATION",
         "mission_complete": "SIGNAL INTERROMPU",
-        "exfiltration": "EXFILTRATION EN COURS..."
+        "exfiltration": "EXFILTRATION EN COURS...",
+        "time_up": "TEMPS ÉCOULÉ",
+        "mission_ended": "LA MISSION EST TERMINÉE",
+        "all_agents": "TOUS LES AGENTS",
+        "are_summoned": "SONT CONVOQUÉS",
+        "to_spy_court": "AU TRIBUNAL DES ESPIONS",
+        "sealed_dossier": "DOSSIER SCELLÉ",
+        "identities_revealed": "LES IDENTITÉS SERONT RÉVÉLÉES.",
+        "prepare_accusations": "PRÉPAREZ VOS ACCUSATIONS.",
+        "all_agents_summoned_court": "TOUS LES AGENTS SONT CONVOQUÉS AU TRIBUNAL DES ESPIONS",
+        "redirecting_in": "Redirection dans {{seconds}}s..."
     },
     "permissions": {
         "camera_msg": "Accès caméra requis pour scanner les fréquences.",

@@ -204,7 +204,17 @@
         "detection": "DETECTING SUSPECT #82B",
         "mission_start": "OPERATION LAUNCH",
         "mission_complete": "SIGNAL TERMINATED",
-        "exfiltration": "EXFILTRATION IN PROGRESS..."
+        "exfiltration": "EXFILTRATION IN PROGRESS...",
+        "time_up": "TIME IS UP",
+        "mission_ended": "THE MISSION IS OVER",
+        "all_agents": "ALL AGENTS",
+        "are_summoned": "ARE SUMMONED",
+        "to_spy_court": "TO THE SPY COURT",
+        "sealed_dossier": "SEALED DOSSIER",
+        "identities_revealed": "IDENTITIES WILL BE REVEALED.",
+        "prepare_accusations": "PREPARE YOUR ACCUSATIONS.",
+        "all_agents_summoned_court": "ALL AGENTS ARE SUMMONED TO THE SPY COURT",
+        "redirecting_in": "Redirecting in {{seconds}}s..."
     },
     "permissions": {
         "camera_msg": "Camera access required to scan frequencies.",

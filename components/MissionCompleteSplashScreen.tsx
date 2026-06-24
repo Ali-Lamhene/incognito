@@ -1,22 +1,25 @@
 import { Image } from 'expo-image';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import Animated, {
     Easing,
-    interpolate,
     runOnJS,
     useAnimatedStyle,
     useSharedValue,
-    withDelay,
     withRepeat,
     withSequence,
     withTiming
 } from 'react-native-reanimated';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
 import SoundService from '../services/SoundService';
-import { ThemedText } from './ThemedText';
+import { Theme } from '../constants/Theme';
 
 const { width, height } = Dimensions.get('window');
+
+// Mission end splash screen duration (5 seconds)
+const COMPLETE_DURATION = 5000; 
 
 interface MissionCompleteSplashScreenProps {
     onComplete: () => void;
@@ -24,147 +27,117 @@ interface MissionCompleteSplashScreenProps {
 
 export function MissionCompleteSplashScreen({ onComplete }: MissionCompleteSplashScreenProps) {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
-    const opacity = useSharedValue(0);
-    const glitchX = useSharedValue(0);
-    const glitchY = useSharedValue(0);
-    const textScale = useSharedValue(1);
-    const noiseOpacity = useSharedValue(0);
-    const overlayOpacity = useSharedValue(0.8);
+    const [countdown, setCountdown] = useState(5);
+
+    // Reanimated Shared Values
+    const bgScale = useSharedValue(1.0);
+    const textPulse = useSharedValue(1.0);
+    const contentOpacity = useSharedValue(0);
+    const containerOpacity = useSharedValue(1);
 
     useEffect(() => {
-        // Play success sound
+        // Play success/game-over sound
         SoundService.playSFX('SUCCESS');
 
-        // Initial entrance
-        opacity.value = withTiming(1, { duration: 500 });
+        // Slowly zoom background image over duration
+        bgScale.value = withTiming(1.08, { duration: COMPLETE_DURATION, easing: Easing.out(Easing.quad) });
 
-        // Glitch loop
-        glitchX.value = withRepeat(
+        // Pulse the "TEMPS ÉCOULÉ" title text
+        textPulse.value = withRepeat(
             withSequence(
-                withTiming(15, { duration: 50 }),
-                withTiming(-15, { duration: 50 }),
-                withTiming(0, { duration: 50 }),
-                withDelay(400, withTiming(0, { duration: 50 }))
-            ),
-            -1,
-            false
-        );
-
-        glitchY.value = withRepeat(
-            withSequence(
-                withDelay(200, withTiming(5, { duration: 50 })),
-                withTiming(-5, { duration: 50 }),
-                withTiming(0, { duration: 50 })
-            ),
-            -1,
-            false
-        );
-
-        // Noise flicker
-        noiseOpacity.value = withRepeat(
-            withSequence(
-                withTiming(0.3, { duration: 100 }),
-                withTiming(0.1, { duration: 100 }),
-                withTiming(0.4, { duration: 50 }),
-                withTiming(0.2, { duration: 150 })
+                withTiming(1.03, { duration: 400, easing: Easing.inOut(Easing.ease) }),
+                withTiming(1, { duration: 400, easing: Easing.inOut(Easing.ease) })
             ),
             -1,
             true
         );
 
-        // Slow zoom on text
-        textScale.value = withTiming(1.2, { duration: 5000, easing: Easing.out(Easing.quad) });
+        // Fade in text contents
+        contentOpacity.value = withTiming(1, { duration: 500 });
 
-        // Completion trigger
+        // Increment countdown every second
+        const countInterval = setInterval(() => {
+            setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        // Exit transition to results screen after 3 seconds
         const timer = setTimeout(() => {
-            overlayOpacity.value = withTiming(1, { duration: 1000 }, () => {
+            containerOpacity.value = withTiming(0, { duration: 500 }, () => {
                 if (onComplete) {
                     runOnJS(onComplete)();
                 }
             });
-        }, 5000);
+        }, COMPLETE_DURATION);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearInterval(countInterval);
+            clearTimeout(timer);
+        };
     }, [onComplete]);
 
-    const glitchStyle = useAnimatedStyle(() => ({
-        transform: [
-            { translateX: glitchX.value },
-            { translateY: glitchY.value },
-            { scale: textScale.value }
-        ],
+    // Animated Styles
+    const bgStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: bgScale.value }]
     }));
 
-    const noiseStyle = useAnimatedStyle(() => ({
-        opacity: noiseOpacity.value,
+    const timeUpStyle = useAnimatedStyle(() => ({
+        transform: [{ scale: textPulse.value }]
+    }));
+
+    const contentStyle = useAnimatedStyle(() => ({
+        opacity: contentOpacity.value
     }));
 
     const containerStyle = useAnimatedStyle(() => ({
-        opacity: opacity.value,
+        opacity: containerOpacity.value
     }));
 
-    const finalOverlayStyle = useAnimatedStyle(() => ({
-        backgroundColor: '#000',
-        opacity: interpolate(overlayOpacity.value, [0.8, 1], [0, 1]),
-    }));
+    // Dynamic countdown redirection string
+    const redirectText = (t('splash.redirecting_in') || 'Redirection dans {{seconds}}s...')
+        .replace('{{seconds}}', countdown.toString());
 
     return (
         <Animated.View style={[styles.container, containerStyle]}>
-            <View style={StyleSheet.absoluteFill}>
+            {/* Background Image */}
+            <Animated.View style={[StyleSheet.absoluteFill, bgStyle]}>
                 <Image
-                    source={require('../assets/images/exfiltration_splash_noir.jpg')}
+                    source={require('../assets/UI/end_game_bg.png')}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     priority="high"
                 />
-            </View>
+            </Animated.View>
 
-            {/* Noise Layer */}
-            <Animated.View style={[styles.noiseContainer, noiseStyle]}>
-                <Image
-                    source={require('../assets/images/tactical_texture.jpg')}
-                    style={StyleSheet.absoluteFill}
-                    contentFit="cover"
+            {/* Empty view for top spacing */}
+            <View />
+
+            {/* Bottom Content Area */}
+            <Animated.View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, 40) }, contentStyle]}>
+                {/* TEMPS ÉCOULÉ (with pulse effect) */}
+                <Animated.Text style={[styles.timeUpTitle, timeUpStyle]}>
+                    {t('splash.time_up') || 'TEMPS ÉCOULÉ'}
+                </Animated.Text>
+
+                {/* Summon Notice */}
+                <Text style={styles.summonsText}>
+                    {t('splash.all_agents_summoned_court') || 'TOUS LES AGENTS SONT CONVOQUÉS AU TRIBUNAL DES ESPIONS'}
+                </Text>
+
+                {/* Countdown display */}
+                <Text style={styles.countdownText}>
+                    {redirectText}
+                </Text>
+
+                {/* Fingerprint Icon */}
+                <MaterialCommunityIcons 
+                    name="fingerprint" 
+                    size={26} 
+                    color={Theme.colors.red} 
+                    style={styles.fingerprint} 
                 />
             </Animated.View>
-
-            <View style={[styles.darkOverlay, { opacity: overlayOpacity.value }]} />
-
-            {/* Glitchy Text Content */}
-            <Animated.View style={[styles.content, glitchStyle]}>
-                <View style={styles.warningBox}>
-                    <View style={styles.warningHeader}>
-                        <View style={styles.alertDot} />
-                        <ThemedText type="code" style={styles.alertLabel}>
-                            {t('splash.mission_complete')}
-                        </ThemedText>
-                    </View>
-
-                    <ThemedText type="futuristic" style={styles.mainTitle}>
-                        {t('splash.mission_complete')}
-                    </ThemedText>
-
-                    <View style={styles.separator} />
-
-                    <ThemedText type="code" style={styles.subText}>
-                        {t('splash.exfiltration')}
-                    </ThemedText>
-                </View>
-
-                {/* Cyber Logs */}
-                <View style={styles.logsContainer}>
-                    <ThemedText type="code" style={styles.logLine}>{`> KILLING_SESSION_STREAM... OK`}</ThemedText>
-                    <ThemedText type="code" style={styles.logLine}>{`> ENCRYPTING_EVIDENCES... 100%`}</ThemedText>
-                    <ThemedText type="code" style={styles.logLine}>{`> DISCONNECTING_HQ... DONE`}</ThemedText>
-                </View>
-            </Animated.View>
-
-            {/* Final transition overlay */}
-            <Animated.View style={[StyleSheet.absoluteFill, finalOverlayStyle, { pointerEvents: 'none' }]} />
-
-            {/* Scanning Laser Line (Glitchy version) */}
-            <Animated.View style={styles.scanningLine} />
         </Animated.View>
     );
 }
@@ -174,91 +147,41 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         backgroundColor: '#000',
         zIndex: 20000,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
     },
-    darkOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-    },
-    noiseContainer: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#FFF',
-    },
-    content: {
-        width: '90%',
-        alignItems: 'center',
-    },
-    warningBox: {
-        padding: 30,
-        borderWidth: 2,
-        borderColor: '#8B1E1E',
-        backgroundColor: 'rgba(139, 30, 30, 0.05)',
-        alignItems: 'center',
+    bottomSection: {
         width: '100%',
-        maxWidth: 500,
-    },
-    warningHeader: {
-        flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        marginBottom: 20,
+        paddingHorizontal: 24,
     },
-    alertDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#8B1E1E',
-    },
-    alertLabel: {
-        fontSize: 10,
-        color: '#8B1E1E',
-        letterSpacing: 2,
-        fontWeight: 'bold',
-    },
-    mainTitle: {
-        fontSize: 28,
-        color: '#FFF',
-        textAlign: 'center',
-        textShadowColor: 'rgba(139, 30, 30, 0.8)',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 15,
-    },
-    separator: {
-        width: '60%',
-        height: 1,
-        backgroundColor: '#8B1E1E',
-        opacity: 0.5,
-        marginVertical: 20,
-    },
-    subText: {
-        fontSize: 12,
-        color: '#FFF',
-        opacity: 0.7,
+    timeUpTitle: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 54,
+        color: Theme.colors.red,
         letterSpacing: 3,
+        textAlign: 'center',
     },
-    logsContainer: {
-        marginTop: 40,
-        alignItems: 'flex-start',
-        width: '100%',
-        maxWidth: 400,
-        opacity: 0.5,
+    summonsText: {
+        fontFamily: 'Montserrat-Medium',
+        fontSize: 12.5,
+        color: '#F2E8CF',
+        letterSpacing: 1.5,
+        textAlign: 'center',
+        lineHeight: 18,
+        marginTop: 6,
+        textTransform: 'uppercase',
     },
-    logLine: {
-        fontSize: 8,
-        color: '#FFF',
-        marginBottom: 5,
-        fontFamily: 'monospace',
+    countdownText: {
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 11,
+        color: 'rgba(242, 232, 207, 0.5)',
+        letterSpacing: 1.2,
+        textAlign: 'center',
+        marginTop: 10,
     },
-    scanningLine: {
-        position: 'absolute',
-        width: '100%',
-        height: 2,
-        backgroundColor: '#8B1E1E',
-        shadowColor: '#8B1E1E',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 1,
-        shadowRadius: 10,
-        opacity: 0.3,
-    }
+    fingerprint: {
+        marginTop: 18,
+        opacity: 0.85,
+    },
 });
