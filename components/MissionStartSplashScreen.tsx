@@ -1,19 +1,22 @@
 import { Image } from 'expo-image';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, View, Text } from 'react-native';
 import Animated, {
     Easing,
     runOnJS,
     useAnimatedStyle,
     useSharedValue,
-    withRepeat,
     withTiming
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
 import SoundService from '../services/SoundService';
-import { ThemedText } from './ThemedText';
+import { Theme } from '@/constants/Theme';
 
 const { width, height } = Dimensions.get('window');
+
+// Configurable splash screen duration
+const SPLASH_DURATION = 2000; // 2000 ms = 2 seconds
 
 interface MissionStartSplashScreenProps {
     onComplete: () => void;
@@ -21,121 +24,87 @@ interface MissionStartSplashScreenProps {
 
 export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScreenProps) {
     const { t } = useTranslation();
+    const insets = useSafeAreaInsets();
 
-    // Core animation values
+    const [percent, setPercent] = useState(0);
+
+    // Reanimated values
     const containerOpacity = useSharedValue(1);
-    const contentOpacity = useSharedValue(0);
-    const imageScale = useSharedValue(1.1);
-    const scanLineY = useSharedValue(-height * 0.5);
     const progress = useSharedValue(0);
 
     useEffect(() => {
         // Play mission start sound
         SoundService.playSFX('MISSION_START');
 
-        // Entrance sequence
-        contentOpacity.value = withTiming(1, { duration: 1200 });
-        imageScale.value = withTiming(1, { duration: 7000, easing: Easing.out(Easing.quad) });
-        progress.value = withTiming(1, { duration: 5500, easing: Easing.inOut(Easing.quad) });
+        // Animate progress bar fill
+        progress.value = withTiming(1, { duration: SPLASH_DURATION, easing: Easing.linear });
 
-        // Scan line movement
-        scanLineY.value = withRepeat(
-            withTiming(height * 0.6, { duration: 2500, easing: Easing.inOut(Easing.sin) }),
-            -1,
-            true
-        );
+        // Increment percentage label smoothly in sync with duration
+        const stepTime = SPLASH_DURATION / 100;
+        const interval = setInterval(() => {
+            setPercent((prev) => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    return 100;
+                }
+                return prev + 1;
+            });
+        }, stepTime);
 
-        // Completion trigger
+        // Fade out and complete
         const timer = setTimeout(() => {
             containerOpacity.value = withTiming(0, { duration: 1000 }, () => {
                 if (onComplete) {
                     runOnJS(onComplete)();
                 }
             });
-        }, 6000);
+        }, SPLASH_DURATION);
 
-        return () => clearTimeout(timer);
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timer);
+        };
     }, [onComplete]);
 
     const animatedContainerStyle = useAnimatedStyle(() => ({
         opacity: containerOpacity.value,
-        backgroundColor: '#000',
-    }));
-
-    const animatedImageStyle = useAnimatedStyle(() => ({
-        opacity: contentOpacity.value * 0.5,
-        transform: [{ scale: imageScale.value }],
-    }));
-
-    const scanLineStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: scanLineY.value }],
-        opacity: contentOpacity.value,
     }));
 
     const progressStyle = useAnimatedStyle(() => ({
         width: `${progress.value * 100}%`,
     }));
 
-    const animatedContentStyle = useAnimatedStyle(() => ({
-        opacity: contentOpacity.value,
-    }));
-
     return (
         <Animated.View style={[styles.container, animatedContainerStyle]} pointerEvents="none">
-            {/* Background Image - Like Home Splash but Mission specific */}
-            <Animated.View style={[StyleSheet.absoluteFill, animatedImageStyle]}>
-                <Image
-                    source={require('../assets/images/surveillance_target_v4.jpg')}
-                    style={StyleSheet.absoluteFill}
-                    contentFit="cover"
-                    priority="high"
-                />
-            </Animated.View>
-
-            {/* Tactical Grid */}
+            {/* Background Image */}
             <Image
-                source={require('../assets/images/tactical_texture.jpg')}
-                style={styles.tacticalOverlay}
+                source={require('../assets/UI/splash_screen_bg.png')}
+                style={StyleSheet.absoluteFill}
                 contentFit="cover"
+                priority="high"
             />
 
-            <View style={styles.darkOverlay} />
+            {/* Bottom Content Group (Logo, Loader & Percentages) */}
+            <View style={[styles.bottomSection, { paddingBottom: Math.max(insets.bottom, 40) + 10 }]}>
+                {/* Full-width INCOGNITO logo positioned at the level of the characters' legs */}
+                <Image
+                    source={require('../assets/UI/incognito_logo.png')}
+                    style={styles.logoText}
+                    contentFit="cover"
+                />
 
-            {/* Scanning Laser */}
-            <Animated.View style={[styles.scanLine, scanLineStyle]} />
+                {/* Mission Status Label */}
+                <Text style={styles.missionLabel}>
+                    {t('splash.mission_start') || 'DÉMARRAGE DE LA MISSION'}
+                </Text>
 
-            {/* Main Content */}
-            <Animated.View style={[styles.content, animatedContentStyle]}>
-                <View style={styles.textContainer}>
-                    <View style={styles.statusHeader}>
-                        <View style={styles.pulseDot} />
-                        <ThemedText type="code" style={styles.loadingLabel}>
-                            {t('splash.mission_start') || 'MISSION_START'}
-                        </ThemedText>
-                    </View>
-
-                    <ThemedText type="futuristic" style={styles.statusTitle}>
-                        {t('mission.splash_active_title')}
-                    </ThemedText>
-
-                    {/* Progress Bar */}
-                    <View style={styles.progressBarBg}>
-                        <Animated.View style={[styles.progressBarFill, progressStyle]} />
-                    </View>
-
-                    <View style={styles.metadata}>
-                        <ThemedText type="code" style={styles.metaText}>SECURE_LINK // ACTIVE</ThemedText>
-                        <ThemedText type="code" style={styles.metaText}>MATCH: 100%</ThemedText>
-                    </View>
+                {/* Gold-accented Progress Bar */}
+                <View style={styles.progressBarBg}>
+                    <Animated.View style={[styles.progressBarFill, progressStyle]} />
                 </View>
-            </Animated.View>
 
-            {/* Decorative corners */}
-            <View style={styles.cornerMarkers}>
-                <View style={[styles.corner, styles.cornerTL]} />
-                <View style={[styles.corner, styles.cornerTR]} />
-                <View style={[styles.corner, styles.cornerBL]} />
-                <View style={[styles.corner, styles.cornerBR]} />
+                {/* Loading Percentage */}
+                <Text style={styles.percentageText}>{percent}%</Text>
             </View>
         </Animated.View>
     );
@@ -146,100 +115,47 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         backgroundColor: '#000',
         zIndex: 10000,
-    },
-    darkOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    },
-    tacticalOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        opacity: 0.1,
-    },
-    content: {
-        flex: 1,
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        paddingBottom: 50,
+        width: '100%'
     },
-    textContainer: {
-        width: '80%',
-        maxWidth: 400,
+    bottomSection: {
+        width: '100%',
         alignItems: 'center',
-        gap: 15,
+        gap: 12,
     },
-    statusHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
+    logoText: {
+        width: '90%',
+        height: 75,
+        marginBottom: 1,
     },
-    pulseDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: '#8B1E1E',
-    },
-    loadingLabel: {
-        fontSize: 10,
-        color: '#FFF',
-        opacity: 0.6,
+    missionLabel: {
+        fontFamily: 'Montserrat-Medium',
+        fontSize: 12,
+        color: '#FFFFFF',
         letterSpacing: 2,
-    },
-    statusTitle: {
-        fontSize: 20,
-        color: '#FFF',
-        letterSpacing: 5,
-        textAlign: 'center',
+        opacity: 0.8,
+        textTransform: 'uppercase',
     },
     progressBarBg: {
-        width: '100%',
-        height: 2,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        marginTop: 10,
+        width: '70%',
+        height: 9,
+        borderColor: 'rgba(197, 155, 78, 0.4)',
+        borderWidth: 1.2,
+        borderRadius: 5,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        padding: 1.5,
         overflow: 'hidden',
     },
     progressBarFill: {
         height: '100%',
-        backgroundColor: '#FFF',
-        shadowColor: '#FFF',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 10,
+        backgroundColor: Theme.colors.red,
+        borderRadius: 2.5,
     },
-    metadata: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 5,
+    percentageText: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 20,
+        color: Theme.colors.red,
+        letterSpacing: 1.5,
     },
-    metaText: {
-        fontSize: 8,
-        opacity: 0.4,
-    },
-    scanLine: {
-        position: 'absolute',
-        top: '20%',
-        width: '100%',
-        height: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-        shadowColor: '#FFF',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
-        zIndex: 5,
-    },
-    cornerMarkers: {
-        ...StyleSheet.absoluteFillObject,
-        padding: 40,
-        pointerEvents: 'none',
-    },
-    corner: {
-        position: 'absolute',
-        width: 30,
-        height: 30,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    cornerTL: { top: 60, left: 40, borderTopWidth: 2, borderLeftWidth: 2 },
-    cornerTR: { top: 60, right: 40, borderTopWidth: 2, borderRightWidth: 2 },
-    cornerBL: { bottom: 60, left: 40, borderBottomWidth: 2, borderLeftWidth: 2 },
-    cornerBR: { bottom: 60, right: 40, borderBottomWidth: 2, borderRightWidth: 2 },
 });
