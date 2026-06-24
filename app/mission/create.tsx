@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,7 +29,30 @@ export default function CreateMissionScreen() {
     } = useCreateMission();
 
     return (
-        <View style={[styles.container, { backgroundColor: Theme.colors.background }]}>
+        <View style={[styles.container, { backgroundColor: '#000' }]}>
+            {/* Ambient City Background with Red Halo */}
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 320, overflow: 'hidden' }}>
+                <Image
+                    source={require('../../assets/UI/texture_city.png')}
+                    style={[StyleSheet.absoluteFillObject, { opacity: 0.4 }]}
+                    contentFit="cover"
+                />
+                <LinearGradient
+                    colors={['transparent', 'rgba(139, 30, 30, 0.25)', 'transparent']}
+                    locations={[0.2, 0.6, 0.9]}
+                    style={StyleSheet.absoluteFillObject}
+                />
+                <LinearGradient
+                    colors={['transparent', '#000000']}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        height: 150,
+                    }}
+                />
+            </View>
             
             <ScrollView 
                 style={styles.scrollContainer}

@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     },
     ruleCard: {
         flexDirection: 'row',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: Theme.colors.backgroundLighter,
         borderWidth: 1,
         borderColor: 'rgba(242, 232, 207, 0.08)',
         borderRadius: 8,

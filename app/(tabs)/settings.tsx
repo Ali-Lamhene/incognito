@@ -1,133 +1,229 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Switch, TouchableOpacity, View, Text } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { Image } from 'expo-image';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import Animated, { 
+    FadeInDown, 
+    FadeInUp, 
+    useSharedValue, 
+    useAnimatedStyle, 
+    withTiming, 
+    interpolateColor 
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedText } from '../../components/ThemedText';
 import { useProfileStore } from '../../store/profileStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useTranslation } from '../../hooks/useTranslation';
+import { Theme } from '../../constants/Theme';
+import { ProfileSetupModal } from '../../components/ProfileSetupModal';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
     const { soundEnabled, musicEnabled, hapticsEnabled, language, toggleSound, toggleMusic, toggleHaptics, setLanguage } = useSettingsStore();
-    const { profile } = useProfileStore();
+    const { profile, updateProfile } = useProfileStore();
     const { t } = useTranslation();
+    const [showProfileModal, setShowProfileModal] = useState(false);
+
+    const handleProfileComplete = (codename: string, avatar: string, color: string) => {
+        updateProfile({ codename, avatar, themeColor: color });
+        setShowProfileModal(false);
+    };
+
+    const renderSectionHeader = (title: string) => (
+        <View style={styles.sectionHeaderContainer}>
+            <View style={styles.sectionHeaderLineShort} />
+            <Text style={styles.sectionTitle}>{title}</Text>
+            <View style={styles.sectionHeaderLineLong} />
+        </View>
+    );
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom - 20}]}>
             {/* Header */}
-            <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
-                <Text style={styles.headerTitle}>{t('settings.title')}</Text>
+            <Animated.View entering={FadeInDown.duration(600)}>
+                <PageHeader
+                    title={t('settings.title')}
+                    showBack={false}
+                    showSeparator={true}
+                />
             </Animated.View>
 
             <Animated.ScrollView
                 entering={FadeInUp.delay(200).duration(600)}
                 style={styles.content}
-                contentContainerStyle={{ gap: 30, paddingBottom: 140 }}
+                contentContainerStyle={{ gap: 15, paddingBottom: 140 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Profile Summary */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('settings.section_profile')}</Text>
-                    <View style={styles.profileCard}>
+                    <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setShowProfileModal(true)}
+                        style={styles.profileCard}
+                    >
                         <View style={styles.profileInfo}>
                             <View style={styles.avatarContainer}>
-                                <Ionicons name={(profile?.avatar as any) || "person"} size={24} color="#FFF" />
+                                <Image
+                                    source={require('../../assets/UI/visual_icon.png')}
+                                    style={styles.avatarImage}
+                                    contentFit="cover"
+                                />
                             </View>
-                            <View>
-                                <Text style={styles.profileName}>{profile?.codename || t('common.unknown')}</Text>
-                                <Text style={styles.profileId}>CODE AGENT : {profile?.id || '---'}</Text>
+                            <View style={styles.profileMeta}>
+                                <Text style={styles.profileName}>{profile?.codename || 'ALPHA'}</Text>
+                                <Text style={styles.profileId}>
+                                    CODE AGENT : {profile?.id ? profile.id.replace('AGENT-', '') : 'X7K9'}
+                                </Text>
                             </View>
                         </View>
-                    </View>
+                        <Ionicons name="chevron-forward" size={20} color="#F2E8CF" style={styles.chevron} />
+                    </TouchableOpacity>
                 </View>
 
                 {/* System Settings */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('settings.section_device')}</Text>
+                    {renderSectionHeader(t('settings.section_device'))}
 
-                    {/* Audio SFX */}
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLabel}>
-                            <Ionicons name="volume-high-outline" size={20} color="#FFF" />
-                            <Text style={styles.settingText}>{t('settings.audio_fx')}</Text>
+                    <View style={styles.cardContainer}>
+                        {/* Audio SFX */}
+                        <View style={styles.settingRow}>
+                            <View style={styles.settingLabel}>
+                                <Ionicons name="volume-high-outline" size={22} color="#F2E8CF" />
+                                <Text style={styles.settingText}>{t('settings.audio_fx')}</Text>
+                            </View>
+                            <CustomSwitch
+                                value={soundEnabled}
+                                onValueChange={toggleSound}
+                            />
                         </View>
-                        <Switch
-                            value={soundEnabled}
-                            onValueChange={toggleSound}
-                            trackColor={{ false: '#333', true: '#8B1E1E' }}
-                            thumbColor={'#FFF'}
-                        />
-                    </View>
 
-                    {/* Ambient Music */}
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLabel}>
-                            <Ionicons name="musical-notes-outline" size={20} color="#FFF" />
-                            <Text style={styles.settingText}>{t('settings.ambient_music') || 'Musique d\'ambiance'}</Text>
+                        {/* Ambient Music */}
+                        <View style={styles.settingRow}>
+                            <View style={styles.settingLabel}>
+                                <Ionicons name="musical-notes-outline" size={22} color="#F2E8CF" />
+                                <Text style={styles.settingText}>{t('settings.ambient_music') || 'Musique d\'ambiance'}</Text>
+                            </View>
+                            <CustomSwitch
+                                value={musicEnabled}
+                                onValueChange={toggleMusic}
+                            />
                         </View>
-                        <Switch
-                            value={musicEnabled}
-                            onValueChange={toggleMusic}
-                            trackColor={{ false: '#333', true: '#8B1E1E' }}
-                            thumbColor={'#FFF'}
-                        />
-                    </View>
 
-                    {/* Haptics */}
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLabel}>
-                            <Ionicons name="pulse" size={20} color="#FFF" />
-                            <Text style={styles.settingText}>{t('settings.haptics') || 'Vibrations (Mode Furtif)'}</Text>
+                        {/* Haptics */}
+                        <View style={styles.settingRow}>
+                            <View style={styles.settingLabel}>
+                                <Ionicons name="pulse" size={22} color="#F2E8CF" />
+                                <Text style={styles.settingText}>{t('settings.haptics') || 'Vibrations (Mode Furtif)'}</Text>
+                            </View>
+                            <CustomSwitch
+                                value={hapticsEnabled}
+                                onValueChange={toggleHaptics}
+                            />
                         </View>
-                        <Switch
-                            value={hapticsEnabled}
-                            onValueChange={toggleHaptics}
-                            trackColor={{ false: '#333', true: '#8B1E1E' }}
-                            thumbColor={'#FFF'}
-                        />
-                    </View>
 
-                    {/* Language */}
-                    <View style={styles.settingRow}>
-                        <View style={styles.settingLabel}>
-                            <Ionicons name="language-outline" size={20} color="#FFF" />
-                            <Text style={styles.settingText}>{t('settings.language')}</Text>
-                        </View>
-                        <View style={styles.langToggle}>
-                            <TouchableOpacity
-                                onPress={() => setLanguage('fr')}
-                                style={[styles.langOption, language === 'fr' && styles.langActive]}
-                            >
-                                <Text style={{ fontFamily: 'BebasNeue-Bold', color: language === 'fr' ? '#000' : '#FFF', fontSize: 14 }}>FR</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => setLanguage('en')}
-                                style={[styles.langOption, language === 'en' && styles.langActive]}
-                            >
-                                <Text style={{ fontFamily: 'BebasNeue-Bold', color: language === 'en' ? '#000' : '#FFF', fontSize: 14 }}>EN</Text>
-                            </TouchableOpacity>
+                        {/* Language */}
+                        <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+                            <View style={styles.settingLabel}>
+                                <Ionicons name="globe-outline" size={22} color="#F2E8CF" />
+                                <Text style={styles.settingText}>{t('settings.language')}</Text>
+                            </View>
+                            <View style={styles.langToggle}>
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => setLanguage('fr')}
+                                    style={[styles.langOption, language === 'fr' && styles.langActive]}
+                                >
+                                    <Text style={[styles.langText, { color: language === 'fr' ? '#000' : '#F2E8CF' }]}>FR</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    activeOpacity={0.7}
+                                    onPress={() => setLanguage('en')}
+                                    style={[styles.langOption, language === 'en' && styles.langActive]}
+                                >
+                                    <Text style={[styles.langText, { color: language === 'en' ? '#000' : '#F2E8CF' }]}>EN</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </View>
 
                 {/* System Info */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{t('settings.section_info')}</Text>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>{t('settings.version')}</Text>
-                        <Text style={styles.infoValue}>v1.0.0 (BETA)</Text>
-                    </View>
-                    <View style={styles.infoRow}>
-                        <Text style={styles.infoLabel}>{t('settings.contact')}</Text>
-                        <Text style={styles.infoValue}>otakumi.factory@gmail.com</Text>
+                    {renderSectionHeader(t('settings.section_info'))}
+
+                    <View style={styles.cardContainer}>
+                        {/* Version */}
+                        <View style={styles.infoRow}>
+                            <View style={styles.infoLeft}>
+                                <Ionicons name="information-circle-outline" size={22} color="#F2E8CF" />
+                                <Text style={styles.infoLabel}>{t('settings.version')}</Text>
+                            </View>
+                            <View style={styles.infoRight}>
+                                <Text style={styles.infoValue}>v1.0.0 (BETA)</Text>
+                            </View>
+                        </View>
+
+                        {/* Contact */}
+                        <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+                            <View style={styles.infoLeft}>
+                                <Ionicons name="mail-outline" size={22} color="#F2E8CF" />
+                                <Text style={styles.infoLabel}>{t('settings.contact')}</Text>
+                            </View>
+                            <View style={styles.infoRight}>
+                                <Text style={styles.infoValue}>otakumi.factory@gmail.com</Text>
+                            </View>
+                        </View>
                     </View>
                 </View>
-
             </Animated.ScrollView>
 
+            <ProfileSetupModal
+                visible={showProfileModal}
+                onComplete={handleProfileComplete}
+                initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
+            />
         </View>
+    );
+}
+
+interface CustomSwitchProps {
+    value: boolean;
+    onValueChange: () => void;
+}
+
+function CustomSwitch({ value, onValueChange }: CustomSwitchProps) {
+    const progress = useSharedValue(value ? 1 : 0);
+
+    React.useEffect(() => {
+        progress.value = withTiming(value ? 1 : 0, { duration: 200 });
+    }, [value]);
+
+    const trackAnimatedStyle = useAnimatedStyle(() => {
+        const backgroundColor = interpolateColor(
+            progress.value,
+            [0, 1],
+            ['#070707', Theme.colors.red]
+        );
+        return { backgroundColor };
+    });
+
+    const thumbAnimatedStyle = useAnimatedStyle(() => {
+        const translateX = progress.value * 20;
+        return {
+            transform: [{ translateX }]
+        };
+    });
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onValueChange}
+        >
+            <Animated.View style={[styles.switchTrack, trackAnimatedStyle]}>
+                <Animated.View style={[styles.switchThumb, thumbAnimatedStyle]} />
+            </Animated.View>
+        </TouchableOpacity>
     );
 }
 
@@ -135,64 +231,78 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000',
-        paddingHorizontal: 25,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 20,
-        marginBottom: 10,
-    },
-    headerTitle: {
-        fontFamily: 'BebasNeue-Bold',
-        fontSize: 32,
-        color: '#F2E8CF',
-        letterSpacing: 2,
-        textTransform: 'uppercase',
+        paddingHorizontal: 20,
     },
     content: {
         flex: 1,
     },
     section: {
-        gap: 15,
         marginBottom: 10,
+    },
+    sectionHeaderContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    sectionHeaderLineShort: {
+        width: 8,
+        height: 1,
+        backgroundColor: 'rgba(242, 232, 207, 0.15)',
+        marginRight: 8,
     },
     sectionTitle: {
         fontFamily: 'BebasNeue-Bold',
-        fontSize: 18,
-        color: 'rgba(242, 232, 207, 0.6)',
+        fontSize: 16,
+        color: 'rgba(242, 232, 207, 0.5)',
         letterSpacing: 1.5,
         textTransform: 'uppercase',
-        marginBottom: 5,
+    },
+    sectionHeaderLineLong: {
+        flex: 1,
+        height: 1,
+        backgroundColor: 'rgba(242, 232, 207, 0.15)',
+        marginLeft: 8,
     },
     profileCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 18,
-        backgroundColor: 'rgba(255, 255, 255, 0.03)',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.08)',
-        borderRadius: 6,
-    },
-    avatarContainer: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: Theme.colors.backgroundLighter,
         borderWidth: 1.5,
-        borderColor: '#F2E8CF',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 12,
+        marginTop: 15,
     },
     profileInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15,
+    },
+    avatarContainer: {
+        width: 76,
+        height: 76,
+        borderRadius: 38,
+        borderWidth: 2,
+        borderColor: Theme.colors.red,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#000',
+        marginRight: 16,
+        overflow: 'hidden',
+    },
+    avatarImage: {
+        width: '100%',
+        height: '100%',
+        transform: [{ scale: 2.6 }, { translateY: 4 }],
+    },
+    profileMeta: {
+        justifyContent: 'center',
+        gap: 2,
     },
     profileName: {
         fontFamily: 'BebasNeue-Bold',
-        fontSize: 22,
+        fontSize: 24,
         color: '#FFF',
         letterSpacing: 1.5,
     },
@@ -202,52 +312,104 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.4)',
         marginTop: 2,
     },
+    chevron: {
+        opacity: 0.7,
+    },
+    cardContainer: {
+        backgroundColor: Theme.colors.backgroundLighter,
+        borderWidth: 1.5,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 12,
+        overflow: 'hidden',
+    },
     settingRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 15,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     },
     settingLabel: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
     },
     settingText: {
         fontFamily: 'BebasNeue-Bold',
         fontSize: 18,
-        color: '#FFF',
+        color: '#F2E8CF',
+        letterSpacing: 1,
     },
     infoRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingVertical: 8,
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    infoLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
     },
     infoLabel: {
         fontFamily: 'BebasNeue-Bold',
         fontSize: 18,
-        color: 'rgba(255, 255, 255, 0.5)',
+        color: '#F2E8CF',
+        letterSpacing: 1,
+    },
+    infoRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
     },
     infoValue: {
-        fontFamily: 'BebasNeue-Bold',
-        fontSize: 18,
-        color: '#FFF',
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.6)',
     },
     langToggle: {
         flexDirection: 'row',
-        gap: 5,
-        backgroundColor: '#1a1a1a',
+        gap: 4,
+        backgroundColor: '#0F0F0F',
         padding: 3,
-        borderRadius: 4,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     langOption: {
         paddingVertical: 4,
-        paddingHorizontal: 10,
-        borderRadius: 2,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     langActive: {
+        backgroundColor: '#F2E8CF',
+    },
+    langText: {
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 14,
+        letterSpacing: 1,
+    },
+    switchTrack: {
+        width: 44,
+        height: 24,
+        borderRadius: 12,
+        padding: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    switchThumb: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
         backgroundColor: '#F2E8CF',
     },
 });
