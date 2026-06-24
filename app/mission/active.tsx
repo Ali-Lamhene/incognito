@@ -54,6 +54,7 @@ export default function ActiveMissionScreen() {
     setShowStartSplash,
     showCompleteSplash,
     formatTime,
+    targetAgentName,
     actions: {
       handleAbort,
       handleUnmask,
@@ -195,6 +196,7 @@ export default function ActiveMissionScreen() {
           showUnmaskModal={showUnmaskModal}
           setShowUnmaskModal={setShowUnmaskModal}
           handleConfirmUnmask={handleConfirmUnmask}
+          targetAgentName={targetAgentName}
         />
       </ScrollView>
     </View>

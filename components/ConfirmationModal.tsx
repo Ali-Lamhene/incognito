@@ -1,7 +1,9 @@
-import { Modal, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
+import React from 'react';
+import { Modal, StyleSheet, TouchableWithoutFeedback, View, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 import { Button } from './ui/Button';
-import { ThemedText } from './ThemedText';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { Theme } from '../constants/Theme';
 
 interface ConfirmationModalProps {
     visible: boolean;
@@ -18,14 +20,29 @@ export function ConfirmationModal({
     visible,
     title,
     message,
-    confirmLabel = "CONFIRM",
-    cancelLabel = "CANCEL",
+    confirmLabel = "CONFIRMER",
+    cancelLabel = "ANNULER",
     onConfirm,
     onCancel,
     variant = 'default'
 }: ConfirmationModalProps) {
 
     if (!visible) return null;
+
+    const renderMessage = (text: string) => {
+        if (!text) return null;
+        const parts = text.split('*');
+        return parts.map((part, index) => {
+            if (index % 2 === 1) {
+                return (
+                    <Text key={index} style={styles.highlightText}>
+                        {part}
+                    </Text>
+                );
+            }
+            return part;
+        });
+    };
 
     return (
         <Modal
@@ -47,50 +64,50 @@ export function ConfirmationModal({
                         <Animated.View
                             entering={ZoomIn.duration(300)}
                             exiting={ZoomOut.duration(200)}
-                            style={[styles.container, variant === 'danger' && styles.dangerBorder]}
+                            style={styles.container}
                         >
-                            <View style={styles.header}>
-                                <ThemedText type="subtitle" style={[styles.title, variant === 'danger' && styles.dangerText]}>
-                                    {title}
-                                </ThemedText>
-                                <View style={[styles.line, variant === 'danger' && styles.dangerLine]} />
+                            {/* Close Button */}
+                            <TouchableOpacity
+                                onPress={onCancel}
+                                style={styles.closeButton}
+                                activeOpacity={0.7}
+                            >
+                                <Ionicons name="close" size={26} color={Theme.colors.red} />
+                            </TouchableOpacity>
+
+                            {/* Circular Spy Avatar */}
+                            <View style={styles.avatarContainer}>
+                                <FontAwesome5 
+                                    name="user-secret" 
+                                    size={95} 
+                                    color="#000000" 
+                                    style={styles.avatarIcon}
+                                />
                             </View>
 
-                            <ThemedText type="default" style={styles.message}>
-                                {message}
-                            </ThemedText>
+                            {/* Title */}
+                            <Text style={styles.title}>{title}</Text>
 
+                            {/* Message */}
+                            <Text style={styles.message}>
+                                {renderMessage(message)}
+                            </Text>
+
+                            {/* Stacked Actions */}
                             <View style={styles.actions}>
+                                <Button
+                                    title={confirmLabel}
+                                    onPress={onConfirm}
+                                    variant="primary"
+                                    style={styles.actionButton}
+                                />
                                 <Button
                                     title={cancelLabel}
                                     onPress={onCancel}
                                     variant="outline"
-                                    style={styles.button}
-                                    textStyle={{ fontSize: 12 }}
-                                />
-                                <Button
-                                    title={confirmLabel}
-                                    onPress={onConfirm}
-                                    style={[
-                                        styles.button,
-                                        variant === 'danger' ? {
-                                            borderColor: '#FFF',
-                                            backgroundColor: '#FFF', // White background
-                                            shadowColor: '#FFF',
-                                            shadowOpacity: 0.2,
-                                            shadowRadius: 4
-                                        } : undefined
-                                    ]}
-                                    textStyle={variant === 'danger' ? { color: '#000', fontSize: 11, letterSpacing: 1, fontWeight: 'bold' } : { fontSize: 12 }}
-                                    variant={variant === 'danger' ? 'demasquer' : 'primary'}
+                                    style={styles.actionButton}
                                 />
                             </View>
-
-                            {/* Decorative corners */}
-                            <View style={styles.cornerTL} />
-                            <View style={styles.cornerTR} />
-                            <View style={styles.cornerBL} />
-                            <View style={styles.cornerBR} />
                         </Animated.View>
                     </TouchableWithoutFeedback>
                 </View>
@@ -105,67 +122,76 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)', // Ensure dark overlay
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.95)', // Darker backdrop
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
     },
     container: {
         width: '85%',
-        maxWidth: 500,
-        marginHorizontal: 'auto',
-        backgroundColor: '#0a0a0a',
+        maxWidth: 400,
+        backgroundColor: '#0F0F0F',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        padding: 25,
-        gap: 20,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 24,
+        padding: 30,
+        alignItems: 'center',
+        position: 'relative',
     },
-    dangerBorder: {
-        borderColor: '#FFF', // White border for danger
-        shadowColor: '#FFF',
-        shadowOpacity: 0.1,
-        shadowRadius: 5,
+    closeButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        zIndex: 10,
     },
-    header: {
-        gap: 10,
+    avatarContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 1.5,
+        borderColor: Theme.colors.red,
+        backgroundColor: 'rgba(139, 30, 30, 0.4)',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        overflow: 'hidden',
+        marginTop: 10,
+        marginBottom: 20,
+        position: 'relative',
+    },
+    avatarIcon: {
+        bottom: -12,
+        position: 'absolute',
     },
     title: {
-        fontSize: 18,
-        letterSpacing: 2,
+        fontFamily: 'BebasNeue-Bold',
+        fontSize: 28,
+        color: '#FFFFFF',
+        letterSpacing: 1.5,
         textAlign: 'center',
-    },
-    dangerText: {
-        color: '#FFF', // White text for danger
-        textShadowColor: 'rgba(255, 255, 255, 0.2)',
-        textShadowRadius: 2,
-    },
-    line: {
-        height: 1,
-        width: '40%',
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        alignSelf: 'center',
-    },
-    dangerLine: {
-        backgroundColor: 'rgba(255, 255, 255, 0.5)', // Brighter white line
+        marginBottom: 12,
+        textTransform: 'uppercase',
     },
     message: {
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 12,
+        color: 'rgba(255, 255, 255, 0.7)',
+        lineHeight: 18,
         textAlign: 'center',
-        opacity: 0.8,
-        fontSize: 14,
-        lineHeight: 22,
+        marginBottom: 25,
+    },
+    highlightText: {
+        color: Theme.colors.red,
+        fontFamily: 'Montserrat-SemiBold',
     },
     actions: {
-        flexDirection: 'column', // Stack vertically for long texts
-        gap: 5,
-        marginTop: 10,
         width: '100%',
+        gap: 8,
     },
-    button: {
-        width: '100%', // Full width
+    actionButton: {
+        width: '100%',
+        height: 54,
+        borderRadius: 8,
+        marginVertical: 0,
     },
-    cornerTL: { position: 'absolute', top: -1, left: -1, width: 8, height: 8, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
-    cornerTR: { position: 'absolute', top: -1, right: -1, width: 8, height: 8, borderTopWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
-    cornerBL: { position: 'absolute', bottom: -1, left: -1, width: 8, height: 8, borderBottomWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
-    cornerBR: { position: 'absolute', bottom: -1, right: -1, width: 8, height: 8, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
 });

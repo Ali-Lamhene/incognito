@@ -142,6 +142,9 @@ export function useActiveMission() {
         }
     }, [isLowTime, status]);
 
+    const targetAgent = agents.find((a) => a.id === targetIdToUnmask);
+    const targetAgentName = targetAgent ? targetAgent.name : '';
+
     return {
         session,
         profile,
@@ -168,6 +171,7 @@ export function useActiveMission() {
         showCompleteSplash,
         setShowCompleteSplash,
         formatTime,
+        targetAgentName,
         actions: {
             handleAbort,
             handleUnmask,

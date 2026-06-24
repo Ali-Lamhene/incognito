@@ -9,6 +9,7 @@ interface ActiveModalsProps {
   showUnmaskModal: boolean;
   setShowUnmaskModal: (show: boolean) => void;
   handleConfirmUnmask: () => void;
+  targetAgentName?: string | null;
 }
 
 export function ActiveModals({
@@ -18,6 +19,7 @@ export function ActiveModals({
   showUnmaskModal,
   setShowUnmaskModal,
   handleConfirmUnmask,
+  targetAgentName,
 }: ActiveModalsProps) {
   const { t } = useTranslation();
 
@@ -37,7 +39,7 @@ export function ActiveModals({
       <ConfirmationModal
         visible={showUnmaskModal}
         title={t("mission.unmask_popup_title")}
-        message={t("mission.unmask_popup_msg")}
+        message={t("mission.unmask_popup_msg").replace("{{name}}", targetAgentName || "")}
         confirmLabel={t("mission.unmask_popup_btn")}
         cancelLabel={t("common.cancel")}
         onConfirm={handleConfirmUnmask}
