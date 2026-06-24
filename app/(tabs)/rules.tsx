@@ -18,7 +18,7 @@ export default function RulesScreen() {
         <View style={styles.container}>
             {/* Ambient Dark Gradient Background */}
             <LinearGradient
-                colors={['#000000', '#0D0D0D', '#120505']}
+                colors={['#000000', '#0D0D0D', '#000000']}
                 style={StyleSheet.absoluteFillObject}
             />
 
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     },
     ruleCard: {
         flexDirection: 'row',
-        backgroundColor: Theme.colors.backgroundLighter,
+        backgroundColor: Theme.colors.totalBlack,
         borderWidth: 1,
         borderColor: 'rgba(242, 232, 207, 0.08)',
         borderRadius: 8,
