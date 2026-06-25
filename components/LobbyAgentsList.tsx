@@ -4,6 +4,7 @@ import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withRepeat, withT
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Agent } from '../context/SessionContext';
 import { Theme } from '../constants/Theme';
+import { getAgentColor } from '../utils/agentColors';
 
 interface LobbyAgentsListProps {
     agents: Agent[];
@@ -74,13 +75,13 @@ export function LobbyAgentsList({ agents }: LobbyAgentsListProps) {
                 {agents.map((agent, index) => {
                     const isHost = index === 0; // Assuming first agent is host
                     const isReady = agent.status === 'READY' || isHost; // Usually host is always ready
-                    const avatarBg = avatarColors[index % avatarColors.length];
+                    const avatarBg = getAgentColor(agent.id, agents);
                     
                     return (
                         <View key={agent.id} style={styles.agentSlot}>
                             <View style={styles.agentInfo}>
                                 <View style={[styles.avatar, { borderColor: isHost ? Theme.colors.red : '#444', backgroundColor: avatarBg }]}>
-                                    <FontAwesome5 name="user-secret" size={16} color="#FFF" />
+                                    <FontAwesome5 name="user-secret" size={30} color="#FFF" style={{ transform: [{ translateY: 3.5 }] }} />
                                 </View>
                                 <Text style={styles.agentName}>{agent.name}</Text>
                                 {isHost && (
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        overflow: 'hidden',
     },
     emptyAvatar: {
         width: 36,

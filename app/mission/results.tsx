@@ -1,8 +1,9 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown, FadeInLeft, FadeInUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "../../components/ui/Button";
@@ -11,39 +12,95 @@ import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useProfileStore } from "../../store/profileStore";
 import { ConfirmationModal } from "../../components/ConfirmationModal";
+import { getAgentColor } from "../../utils/agentColors";
+import { db } from "../../services/firebase";
+import { ref, update, get } from "firebase/database";
+import { Theme } from "@/constants/Theme";
 
 export default function ResultsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const { agents, session, clearSession } = useSession();
+    const { agents, session, clearSession, status } = useSession();
     const { profile } = useProfileStore();
     const { t } = useTranslation();
 
     const [frozenAgents] = React.useState([...agents]);
-    const sortedAgents = [...frozenAgents].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const sortedAgentsRaw = [...frozenAgents].sort((a, b) => (b.score || 0) - (a.score || 0));
+    
+    // Fill in mock placeholders if there are fewer than 3 players to preview the full podium
+    const sortedAgents = [...sortedAgentsRaw];
+    if (sortedAgents.length < 2) {
+        sortedAgents.push({
+            id: 'mock_2',
+            name: 'AGENT SHADOW',
+            avatar: 'spy_2',
+            score: Math.max(0, (sortedAgents[0]?.score || 10) - 4),
+            status: 'READY',
+            lastSeen: Date.now(),
+        });
+    }
+    if (sortedAgents.length < 3) {
+        sortedAgents.push({
+            id: 'mock_3',
+            name: 'AGENT GHOST',
+            avatar: 'spy_3',
+            score: Math.max(0, (sortedAgents[1]?.score || 6) - 3),
+            status: 'READY',
+            lastSeen: Date.now(),
+        });
+    }
     const isHost = session?.role === 'HOST';
     const [showExitModal, setShowExitModal] = React.useState(false);
+
+    // Redirect to lobby if status changes to LOBBY (host started a new game)
+    React.useEffect(() => {
+        if (session?.code && status === 'LOBBY') {
+            router.replace(`/lobby/${session.code}`);
+        }
+    }, [status, session?.code]);
 
     const handleBackHome = async () => {
         await clearSession(profile?.id);
         router.replace("/");
     };
 
+    const handleNewGame = async () => {
+        if (!session?.code || !isHost) return;
+        
+        try {
+            const snapshot = await get(ref(db, `missions/${session.code}/agents`));
+            const currentAgents = snapshot.val();
+            
+            const updates: any = {};
+            updates[`missions/${session.code}/status`] = 'LOBBY';
+            updates[`missions/${session.code}/startedAt`] = null;
+            updates[`missions/${session.code}/events`] = null; // reset event list
+            
+            if (currentAgents) {
+                Object.keys(currentAgents).forEach(agentId => {
+                    updates[`missions/${session.code}/agents/${agentId}/completed`] = null;
+                    updates[`missions/${session.code}/agents/${agentId}/completedAt`] = null;
+                    updates[`missions/${session.code}/agents/${agentId}/challenge`] = null;
+                    updates[`missions/${session.code}/agents/${agentId}/score`] = 0;
+                    updates[`missions/${session.code}/agents/${agentId}/status`] = 'READY';
+                });
+            }
+            
+            await update(ref(db), updates);
+        } catch (error) {
+            console.error("Failed to restart game:", error);
+        }
+    };
+
     return (
         <View style={styles.container}>
-            {/* Background Layers */}
+            {/* Background Image */}
             <View style={styles.backgroundContainer}>
                 <Image
-                    source={require("../../assets/images/agent_silhouette_rain.jpg")}
+                    source={require("../../assets/UI/result_bg.png")}
                     style={styles.backgroundImage}
                     contentFit="cover"
                 />
-                <View style={styles.backgroundOverlay} />
-            </View>
-
-            {/* CONFIDENTIAL Watermark */}
-            <View style={styles.watermarkContainer} pointerEvents="none">
-                <ThemedText type="futuristic" style={styles.watermarkText}>{t('results.confidential')}</ThemedText>
             </View>
 
             <ConfirmationModal
@@ -55,140 +112,173 @@ export default function ResultsScreen() {
             />
 
             <ScrollView
-                style={{ flex: 1, marginBottom: insets.bottom }}
+                style={{ flex: 1 }}
                 contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: 20 }]}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header Section */}
                 <Animated.View entering={FadeInDown.duration(800)} style={styles.header}>
-                    <View style={styles.headerTop}>
-                        <View style={styles.statusDot} />
-                        <ThemedText type="code" style={styles.missionLabel}>
-                            {t('results.report_id')}{" // "}{session?.code}
-                        </ThemedText>
+                    <View style={styles.crestContainer}>
+                        <LinearGradient
+                            colors={['transparent', 'rgba(242, 232, 207, 0.25)']}
+                            start={{ x: 0, y: 0.5 }}
+                            end={{ x: 1, y: 0.5 }}
+                            style={styles.separatorLine}
+                        />
+                        <Image
+                            source={require("../../assets/UI/logo_agency.png")}
+                            style={styles.logoCrest}
+                            contentFit="contain"
+                        />
+                        <LinearGradient
+                            colors={['rgba(242, 232, 207, 0.25)', 'transparent']}
+                            start={{ x: 0, y: 0.5 }}
+                            end={{ x: 1, y: 0.5 }}
+                            style={styles.separatorLine}
+                        />
                     </View>
-                    <ThemedText type="futuristic" style={styles.screenTitle}>
-                        {t('results.debrief')}
+                    <ThemedText style={styles.screenTitle}>
+                        {t('results.mission_accomplished')}
                     </ThemedText>
-                    <View style={styles.headerLineContainer}>
-                        <View style={styles.headerLine} />
-                        <View style={[styles.headerLine, { width: 10, opacity: 0.8 }]} />
-                        <View style={[styles.headerLine, { width: 5, opacity: 0.5 }]} />
-                    </View>
-                </Animated.View>
-
-                {/* Summary Stats Card */}
-                <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.statsCard}>
-                    <View style={styles.statItem}>
-                        <ThemedText type="code" style={styles.statLabel}>{t('results.agents_deployed')}</ThemedText>
-                        <ThemedText type="futuristic" style={styles.statValue}>{agents.length}</ThemedText>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <ThemedText type="code" style={styles.statLabel}>{t('mission.duration')}</ThemedText>
-                        <ThemedText type="futuristic" style={[styles.statValue, { color: '#8B1E1E' }]}>
-                            {session?.duration || '—'}
-                        </ThemedText>
-                    </View>
                 </Animated.View>
 
                 {/* Podium Section */}
-                <View style={styles.podiumContainer}>
-                    {/* 2nd Place */}
-                    {sortedAgents[1] && (
-                        <Animated.View
-                            entering={FadeInUp.delay(500).duration(800)}
-                            style={[styles.podiumPlace, styles.secondPlace]}
-                        >
-                            <View style={styles.rankBadgeSmall}>
-                                <ThemedText type="code" style={styles.rankTextSmall}>02</ThemedText>
-                            </View>
-                            <Ionicons name={sortedAgents[1].avatar as any || "person"} size={24} color="rgba(255,255,255,0.6)" />
-                            <ThemedText type="code" numberOfLines={1} style={styles.podiumName}>{sortedAgents[1].name}</ThemedText>
-                            <ThemedText type="futuristic" style={styles.podiumScore}>{sortedAgents[1].score || 0}</ThemedText>
-                        </Animated.View>
-                    )}
+                {sortedAgents.length > 0 && (
+                    <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.podiumCard}>
+                        {/* "VAINQUEURS" separator — same pattern as PageHeader */}
+                        <View style={styles.winnersSeparator}>
+                            <LinearGradient
+                                colors={['transparent', 'rgba(198, 161, 92, 0.35)']}
+                                start={{ x: 0, y: 0.5 }}
+                                end={{ x: 1, y: 0.5 }}
+                                style={styles.winnersSeparatorLine}
+                            />
+                            <ThemedText style={styles.winnersSeparatorLabel}>{t('results.winners')}</ThemedText>
+                            <LinearGradient
+                                colors={['rgba(198, 161, 92, 0.35)', 'transparent']}
+                                start={{ x: 0, y: 0.5 }}
+                                end={{ x: 1, y: 0.5 }}
+                                style={styles.winnersSeparatorLine}
+                            />
+                        </View>
 
-                    {/* 1st Place / MVP */}
-                    {sortedAgents[0] && (
-                        <Animated.View
-                            entering={FadeInUp.delay(400).duration(1000)}
-                            style={[styles.podiumPlace, styles.firstPlace]}
-                        >
-                            <View style={styles.mvpBadge}>
-                                <ThemedText type="code" style={styles.mvpText}>{t('results.mvp')}</ThemedText>
-                            </View>
-                            <View style={styles.mvpGlow} />
-                            <Ionicons name={sortedAgents[0].avatar as any || "person"} size={44} color="#FFF" />
-                            <ThemedText type="code" numberOfLines={1} style={[styles.podiumName, { fontWeight: 'bold', fontSize: 10 }]}>
-                                {sortedAgents[0].name.toUpperCase()}
-                            </ThemedText>
-                            <ThemedText type="futuristic" style={styles.firstPlaceScore}>{sortedAgents[0].score || 0}</ThemedText>
-                            <ThemedText type="code" style={styles.creditsLabel}>{t('results.credits')}</ThemedText>
-                        </Animated.View>
-                    )}
+                        <View style={styles.podiumColumns}>
+                            {/* 2nd Place */}
+                            {sortedAgents[1] ? (
+                                <View style={styles.podiumCol}>
+                                    <View style={[styles.podiumAvatar, { borderColor: getAgentColor(sortedAgents[1].id, sortedAgents), backgroundColor: getAgentColor(sortedAgents[1].id, sortedAgents) }]}>
+                                        <FontAwesome5 name="user-secret" size={42} color="#000" style={{ transform: [{ translateY: 10 }] }} />
+                                    </View>
+                                    <ThemedText numberOfLines={1} style={styles.podiumName}>{sortedAgents[1].name}</ThemedText>
+                                    <ThemedText style={[styles.podiumScore, { color: getAgentColor(sortedAgents[1].id, sortedAgents) }]}>{sortedAgents[1].score || 0} pts</ThemedText>
+                                    <View style={styles.podiumRank}>
+                                        <ThemedText style={styles.podiumRankText}>2</ThemedText>
+                                    </View>
+                                </View>
+                            ) : <View style={styles.podiumCol} />}
 
-                    {/* 3rd Place */}
-                    {sortedAgents[2] && (
-                        <Animated.View
-                            entering={FadeInUp.delay(600).duration(800)}
-                            style={[styles.podiumPlace, styles.thirdPlace]}
-                        >
-                            <View style={styles.rankBadgeSmall}>
-                                <ThemedText type="code" style={styles.rankTextSmall}>03</ThemedText>
-                            </View>
-                            <Ionicons name={sortedAgents[2].avatar as any || "person"} size={20} color="rgba(255,255,255,0.4)" />
-                            <ThemedText type="code" numberOfLines={1} style={styles.podiumName}>{sortedAgents[2].name}</ThemedText>
-                            <ThemedText type="futuristic" style={styles.podiumScore}>{sortedAgents[2].score || 0}</ThemedText>
-                        </Animated.View>
-                    )}
-                </View>
+                            {/* 1st Place */}
+                            {sortedAgents[0] && (
+                                <View style={[styles.podiumCol, styles.podiumColFirst]}>
+                                    <FontAwesome5 name="crown" size={14} color="#C6A15C" style={{ marginBottom: 2 }} />
+                                    <View style={[styles.podiumAvatarFirst, { borderColor: getAgentColor(sortedAgents[0].id, sortedAgents), backgroundColor: getAgentColor(sortedAgents[0].id, sortedAgents) }]}>
+                                        <FontAwesome5 name="user-secret" size={54} color="#000" style={{ transform: [{ translateY: 12 }] }} />
+                                    </View>
+                                    <ThemedText numberOfLines={1} style={[styles.podiumName, { color: '#C6A15C' }]}>{sortedAgents[0].name}</ThemedText>
+                                    <ThemedText style={[styles.podiumScore, { color: '#C6A15C', fontSize: 18 }]}>{sortedAgents[0].score || 0} pts</ThemedText>
+                                    <View style={[styles.podiumRank, styles.podiumRankFirst]}>
+                                        <ThemedText style={[styles.podiumRankText, { color: '#000' }]}>1</ThemedText>
+                                    </View>
+                                </View>
+                            )}
 
-                {/* Agents Table List */}
-                <Animated.View entering={FadeInUp.delay(800).duration(600)} style={styles.tableContainer}>
-                    <View style={styles.tableHeader}>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.operational_unit')}</ThemedText>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.status')}</ThemedText>
-                        <ThemedText type="code" style={styles.tableHeaderLabel}>{t('results.rank_pts')}</ThemedText>
+                            {/* 3rd Place */}
+                            {sortedAgents[2] ? (
+                                <View style={styles.podiumCol}>
+                                    <View style={[styles.podiumAvatar, { borderColor: getAgentColor(sortedAgents[2].id, sortedAgents), backgroundColor: getAgentColor(sortedAgents[2].id, sortedAgents) }]}>
+                                        <FontAwesome5 name="user-secret" size={42} color="#000" style={{ transform: [{ translateY: 10 }] }} />
+                                    </View>
+                                    <ThemedText numberOfLines={1} style={styles.podiumName}>{sortedAgents[2].name}</ThemedText>
+                                    <ThemedText style={[styles.podiumScore, { color: getAgentColor(sortedAgents[2].id, sortedAgents) }]}>{sortedAgents[2].score || 0} pts</ThemedText>
+                                    <View style={styles.podiumRank}>
+                                        <ThemedText style={styles.podiumRankText}>3</ThemedText>
+                                    </View>
+                                </View>
+                            ) : <View style={styles.podiumCol} />}
+                        </View>
+                    </Animated.View>
+                )}
+
+                {/* Classement List */}
+                <Animated.View entering={FadeInUp.delay(500).duration(600)} style={styles.listSection}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="trophy-outline" size={14} color="#999" />
+                        <ThemedText style={[styles.sectionHeaderLabel, { color: '#999', fontSize: 10 }]}>
+                            {t('results.rank_pts').toUpperCase()}
+                        </ThemedText>
+                        <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.06)' }} />
                     </View>
 
-                    {sortedAgents.map((agent, index) => (
-                        <Animated.View
-                            key={agent.id}
-                            entering={FadeInLeft.delay(900 + index * 50)}
-                            style={[
-                                styles.agentRow,
-                                agent.id === profile?.id && styles.myRow
-                            ]}
-                        >
-                            <View style={styles.rowMainInfo}>
-                                <ThemedText type="code" style={styles.rowRank}>{index + 1 < 10 ? `0${index + 1}` : index + 1}</ThemedText>
-                                <ThemedText type="code" style={styles.rowAgentName}>{agent.name}</ThemedText>
-                            </View>
+                    <View style={styles.agentsList}>
+                        {sortedAgents.map((agent, index) => {
+                            const agentColor = getAgentColor(agent.id, sortedAgents);
+                            const isMe = agent.id === profile?.id;
+                            const isCleared = (agent.score || 0) > 0;
+                            
+                            return (
+                                <Animated.View
+                                    key={agent.id}
+                                    entering={FadeInLeft.delay(600 + index * 50)}
+                                    style={[
+                                        styles.agentSlot,
+                                        isMe && { borderLeftWidth: 2, borderLeftColor: agentColor },
+                                    ]}
+                                >
+                                    {/* Rank number */}
+                                    <ThemedText style={[styles.slotRank, { color: index === 0 ? '#C6A15C' : agentColor }]}>
+                                        {String(index + 1).padStart(2, '0')}
+                                    </ThemedText>
 
-                            <View style={styles.rowStatusBox}>
-                                <View style={[styles.statusIndicator, (agent.score || 0) > 0 ? styles.statusPositive : styles.statusNegative]} />
-                                <ThemedText type="code" style={styles.statusLabelSmall}>
-                                    {(agent.score || 0) > 0 ? t('results.cleared') : t('results.suspicious')}
-                                </ThemedText>
-                            </View>
+                                    {/* Avatar */}
+                                    <View style={[styles.slotAvatar, { borderColor: agentColor, backgroundColor: agentColor }]}>
+                                        <FontAwesome5 name="user-secret" size={22} color="#000" style={{ transform: [{ translateY: 5 }] }} />
+                                    </View>
 
-                            <ThemedText type="futuristic" style={styles.rowScoreValue}>{agent.score || 0}</ThemedText>
-                        </Animated.View>
-                    ))}
+                                    {/* Name */}
+                                    <ThemedText style={[styles.slotName, { flex: 1 }]}>
+                                        {isMe ? `${agent.name} (${t('results.you').toUpperCase()})` : agent.name}
+                                    </ThemedText>
+
+                                    {/* Score */}
+                                    <ThemedText style={[styles.slotScore, { color: agentColor }]}>
+                                        {agent.score || 0}
+                                    </ThemedText>
+                                </Animated.View>
+                            );
+                        })}
+                    </View>
                 </Animated.View>
 
-                {/* Footer Action */}
-                <Animated.View entering={FadeInUp.delay(1200).duration(600)} style={styles.footer}>
-                    <Button
-                        title={t('results.return_to_hq')}
-                        onPress={() => setShowExitModal(true)}
-                        style={styles.homeButton}
-                        textStyle={{ fontSize: 11, letterSpacing: 1 }}
-                        variant="primary"
-                    />
-                </Animated.View>
             </ScrollView>
+
+            {/* Footer Action Buttons — pinned to bottom */}
+            <Animated.View entering={FadeInUp.delay(800).duration(600)} style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
+                <Button
+                    title={isHost ? t('results.new_game') : (t('lobby.waiting_host') || "ATTENTE DE L'HÔTE...")}
+                    onPress={handleNewGame}
+                    style={styles.actionButton}
+                    icon="refresh-outline"
+                    variant="primary"
+                    disabled={!isHost}
+                />
+                <Button
+                    title={t('results.leave_lobby')}
+                    onPress={() => setShowExitModal(true)}
+                    style={styles.actionButton}
+                    icon="exit-outline"
+                    variant="secondary"
+                />
+            </Animated.View>
         </View>
     );
 }
@@ -204,259 +294,214 @@ const styles = StyleSheet.create({
     backgroundImage: {
         width: '100%',
         height: '100%',
-        opacity: 0.15,
-    },
-    backgroundOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(5, 5, 8, 0.92)',
-    },
-    watermarkContainer: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
-        opacity: 0.03,
-    },
-    watermarkText: {
-        fontSize: 80,
-        transform: [{ rotate: '-45deg' }],
-        color: '#FFF',
     },
     content: {
         paddingHorizontal: 25,
+        gap: 20,
     },
+    
+    // ── Header ──
     header: {
-        marginBottom: 30,
-        alignItems: 'flex-start',
+        alignItems: 'center',
+        width: '100%',
     },
-    headerTop: {
+    crestContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        paddingHorizontal: 60,
+        marginBottom: 8,
+    },
+    logoCrest: {
+        width: 60,
+        height: 60,
+        marginHorizontal: 2,
+    },
+    separatorLine: {
+        flex: 1,
+        height: 1,
+    },
+    screenTitle: {
+        fontSize: 42,
+        fontFamily: Theme.fonts.title,
+        color: Theme.colors.red,
+        textAlign: 'center',
+        letterSpacing: 2,
+        lineHeight: 36,
+        paddingTop: 6,
+    },
+    
+    // ── Section Header (reused) ──
+    sectionHeader: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        marginBottom: 8,
+        marginBottom: 12,
     },
-    statusDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 3,
-        backgroundColor: '#4CAF50',
-    },
-    missionLabel: {
-        fontSize: 10,
-        opacity: 0.4,
-        letterSpacing: 2,
-    },
-    screenTitle: {
-        fontSize: 32,
-        color: '#FFF',
-        letterSpacing: 8,
-    },
-    headerLineContainer: {
-        flexDirection: 'row',
-        gap: 4,
-        marginTop: 10,
-    },
-    headerLine: {
-        height: 2,
-        backgroundColor: '#FFF',
-        width: 40,
-        opacity: 0.3,
-    },
-    statsCard: {
-        flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
-        padding: 20,
-        marginBottom: 40,
-    },
-    statItem: {
+    sectionHeaderLine: {
         flex: 1,
+        height: 1,
+    },
+    sectionHeaderLabel: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 9,
+        color: '#C6A15C',
+        textTransform: 'uppercase',
+        letterSpacing: 1.5,
+    },
+
+    // ── Podium ──
+    podiumCard: {
+        backgroundColor: 'rgba(20, 5, 5, 0.4)',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        paddingVertical: 14,
+        paddingHorizontal: 10,
         alignItems: 'center',
     },
-    statDivider: {
-        width: 1,
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        height: '100%',
+    winnersSeparator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        paddingHorizontal: 10,
+        marginBottom: 14,
     },
-    statLabel: {
-        fontSize: 8,
-        opacity: 0.3,
-        letterSpacing: 1.5,
-        marginBottom: 4,
+    winnersSeparatorLine: {
+        flex: 1,
+        height: 1,
     },
-    statValue: {
-        fontSize: 18,
-        color: '#FFF',
+    winnersSeparatorLabel: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 9,
+        color: '#C6A15C',
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        marginHorizontal: 12,
     },
-    podiumContainer: {
+    podiumColumns: {
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        height: 260,
-        marginBottom: 50,
-        gap: 12,
+        gap: 10,
     },
-    podiumPlace: {
-        flex: 1,
-        backgroundColor: 'rgba(255,255,255,0.02)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
-        borderRadius: 8,
-        padding: 10,
+    podiumCol: {
+        width: 90,
         alignItems: 'center',
-        position: 'relative',
+        gap: 3,
     },
-    firstPlace: {
-        height: '100%',
-        borderColor: 'rgba(255,255,255,0.2)',
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        paddingTop: 45,
+    podiumColFirst: {
+        width: 105,
+        marginBottom: 6,
     },
-    secondPlace: {
-        height: '75%',
-        paddingTop: 30,
+    podiumAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        borderWidth: 1.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
     },
-    thirdPlace: {
-        height: '65%',
-        paddingTop: 25,
-    },
-    rankBadgeSmall: {
-        position: 'absolute',
-        top: -12,
-        backgroundColor: '#000',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-    },
-    rankTextSmall: {
-        fontSize: 8,
-        color: 'rgba(255,255,255,0.6)',
-    },
-    mvpBadge: {
-        position: 'absolute',
-        top: -15,
-        backgroundColor: '#4CAF50',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 4,
-        zIndex: 10,
-    },
-    mvpText: {
-        fontSize: 10,
-        color: '#000',
-        fontWeight: 'bold',
-        letterSpacing: 2,
-    },
-    mvpGlow: {
-        position: 'absolute',
-        top: 20,
-        width: '120%',
-        height: 60,
-        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-        borderRadius: 30,
-        filter: 'blur(20px)',
+    podiumAvatarFirst: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        borderWidth: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
     },
     podiumName: {
-        fontSize: 8,
-        opacity: 0.4,
-        marginTop: 15,
-        marginBottom: 5,
+        fontFamily: Theme.fonts.title,
+        fontSize: 12,
+        color: '#FFF',
+        letterSpacing: 0.5,
         textAlign: 'center',
     },
     podiumScore: {
-        fontSize: 20,
-        color: '#FFF',
+        fontFamily: Theme.fonts.title,
+        fontSize: 15,
+        letterSpacing: 0.5,
     },
-    firstPlaceScore: {
-        fontSize: 32,
-        color: '#FFF',
-        textShadowColor: 'rgba(255,255,255,0.5)',
-        textShadowOffset: { width: 0, height: 0 },
-        textShadowRadius: 10,
-    },
-    creditsLabel: {
-        fontSize: 7,
-        opacity: 0.3,
-        letterSpacing: 2,
-        marginTop: -2,
-    },
-    tableContainer: {
-        marginBottom: 40,
-    },
-    tableHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        marginBottom: 15,
-    },
-    tableHeaderLabel: {
-        fontSize: 8,
-        opacity: 0.2,
-        letterSpacing: 1.5,
-    },
-    agentRow: {
-        flexDirection: 'row',
+    podiumRank: {
+        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+        width: 18,
+        height: 18,
+        borderRadius: 9,
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.02)',
-        padding: 18,
-        borderRadius: 4,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.04)',
+        justifyContent: 'center',
     },
-    myRow: {
-        borderColor: 'rgba(76, 175, 80, 0.3)',
-        backgroundColor: 'rgba(76, 175, 80, 0.03)',
+    podiumRankFirst: {
+        backgroundColor: '#C6A15C',
+        width: 22,
+        height: 22,
+        borderRadius: 11,
     },
-    rowMainInfo: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 15,
-    },
-    rowRank: {
+    podiumRankText: {
+        fontFamily: Theme.fonts.title,
         fontSize: 10,
-        opacity: 0.2,
-    },
-    rowAgentName: {
-        fontSize: 14,
         color: '#FFF',
-        letterSpacing: 1,
     },
-    rowStatusBox: {
-        flex: 1,
+
+    // ── Classement List ──
+    listSection: {
+        // gap handled by sectionHeader marginBottom
+    },
+    agentsList: {
+        backgroundColor: 'rgba(20, 5, 5, 0.4)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    agentSlot: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 6,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+        gap: 10,
     },
-    statusIndicator: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
+    slotRank: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 14,
+        width: 20,
+        textAlign: 'center',
     },
-    statusPositive: {
-        backgroundColor: '#4CAF50',
+    slotAvatar: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
     },
-    statusNegative: {
-        backgroundColor: '#8B1E1E',
-    },
-    statusLabelSmall: {
-        fontSize: 8,
-        opacity: 0.3,
-    },
-    rowScoreValue: {
-        fontSize: 18,
+    slotName: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 13,
         color: '#FFF',
-        width: 50,
+        letterSpacing: 0.5,
+    },
+    slotScore: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 16,
         textAlign: 'right',
+        minWidth: 30,
     },
+
+    // ── Footer ──
     footer: {
-        marginTop: 10,
+        gap: 3,
+        paddingHorizontal: 25,
+        paddingTop: 6,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
-    homeButton: {
-        width: '100%',
+    actionButton: {
+        height: 48,
     },
 });

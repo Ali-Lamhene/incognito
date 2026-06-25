@@ -194,7 +194,13 @@
         "cleared": "CLEARED",
         "suspicious": "SUSPICIOUS",
         "return_to_hq": "RETURN TO HEADQUARTERS",
-        "report_id": "MISSION_REPORT"
+        "report_id": "MISSION_REPORT",
+        "mission_accomplished": "MISSION ACCOMPLISHED",
+        "team_objective_completed": "YOUR TEAM HAS FULFILLED ITS SECRET OBJECTIVE",
+        "new_game": "NEW GAME",
+        "leave_lobby": "LEAVE LOBBY",
+        "you": "YOU",
+        "winners": "WINNERS"
     },
     "splash": {
         "init": "SYSTEM INITIALIZATION...",

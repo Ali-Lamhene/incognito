@@ -5,6 +5,7 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { ThemedText } from './ThemedText';
 import { useTranslation } from '../hooks/useTranslation';
 import { Agent } from '../context/SessionContext';
+import { getAgentColor } from '../utils/agentColors';
 import { styles } from './ActiveAgentsList.styles';
 import { Theme } from '../constants/Theme';
 
@@ -43,7 +44,7 @@ export function ActiveAgentsList({
 
       <View style={styles.agentsList}>
         {filteredAgents.map((agent, index) => {
-          const avatarBg = avatarColors[index % avatarColors.length];
+          const avatarBg = getAgentColor(agent.id, agents);
           const isLast = index === filteredAgents.length - 1;
           return (
             <Animated.View
@@ -53,7 +54,7 @@ export function ActiveAgentsList({
             >
               <View style={styles.agentInfo}>
                 <View style={[styles.avatar, { backgroundColor: avatarBg }]}>
-                  <FontAwesome5 name="user-secret" size={20} color="#000000" />
+                  <FontAwesome5 name="user-secret" size={25} color="#000000" style={{ transform: [{ translateY: 2.8 }] }} />
                 </View>
                 <View style={styles.agentTextContainer}>
                   <ThemedText

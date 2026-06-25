@@ -63,6 +63,7 @@ export const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
   },
   agentTextContainer: {
     flexDirection: "column",

@@ -196,7 +196,13 @@
         "cleared": "ACQUITTÉ",
         "suspicious": "SUSPECT",
         "return_to_hq": "RETOURNER AU QUARTIER GÉNÉRAL",
-        "report_id": "RAPPORT_MISSION"
+        "report_id": "RAPPORT_MISSION",
+        "mission_accomplished": "MISSION ACCOMPLIE",
+        "team_objective_completed": "VOTRE ÉQUIPE A REMPLI SON OBJECTIF SECRET",
+        "new_game": "NOUVELLE PARTIE",
+        "leave_lobby": "QUITTER LE SALON",
+        "you": "VOUS",
+        "winners": "VAINQUEURS"
     },
     "splash": {
         "init": "INITIALISATION SYSTÈME...",
