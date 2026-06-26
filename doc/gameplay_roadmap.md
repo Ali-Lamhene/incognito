@@ -6,11 +6,11 @@ Ce document sert de spécification de référence pour le développement des pro
 
 ## 1. Déverrouillage Dossier & Main de Défis (Carousel)
 
-### A. Déverrouillage par Pression Continue (2 secondes)
+### A. Déverrouillage par Pression Continue (3 secondes)
 L'accès aux informations sensibles doit être sécurisé contre les regards indiscrets :
-- Pour ouvrir le dossier de mission, le joueur doit **rester appuyé pendant au moins 2 secondes** sur la zone de scan de la pochette.
-- Une animation visuelle (de type jauge circulaire ou ligne de progression de scan) indique la progression de la décryption pendant la pression.
-- Si le doigt est relâché avant les 2 secondes, le chargement s'annule et le dossier reste verrouillé.
+- Pour ouvrir le dossier de mission, le joueur doit **rester appuyé pendant au moins 3 secondes** sur la zone de scan de la pochette.
+- Une animation visuelle (ligne de progression de scan) indique la progression de la décryption pendant la pression.
+- Si le doigt est relâché avant les 3 secondes, le chargement s'annule et le dossier reste verrouillé.
 
 ### B. Gestion d'une "Main de Défis"
 Au lieu d'avoir un unique défi successif, les joueurs reçoivent une **main de plusieurs défis** (ex. 3 à 5 défis) à réaliser librement durant toute la durée de la partie :

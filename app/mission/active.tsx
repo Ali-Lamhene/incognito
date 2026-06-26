@@ -42,7 +42,6 @@ export default function ActiveMissionScreen() {
     isCompleted,
     timeLeft,
     isLowTime,
-    animatedScanStyle,
     visibleEvents,
     isRevealed,
     setIsRevealed,
@@ -139,7 +138,7 @@ export default function ActiveMissionScreen() {
                   timeLeft={timeLeft}
                   isLowTime={isLowTime}
                   formatTime={formatTime}
-                  animatedScanStyle={animatedScanStyle}
+                  animatedScanStyle={null}
                   isRevealed={isRevealed}
                   setIsRevealed={setIsRevealed}
                   myChallenge={myChallenge}

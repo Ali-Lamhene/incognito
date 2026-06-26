@@ -36,6 +36,11 @@ export type Agent = {
         text: string;
         id: string;
     };
+    challenges?: {
+        text: string;
+        id: string;
+        completed?: boolean;
+    }[];
     completed?: boolean;
     completedAt?: number;
     score?: number;
@@ -225,10 +230,17 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const availableChallenges = [...CHALLENGES];
 
         currentAgents.forEach(agent => {
-            if (availableChallenges.length === 0) return;
-            const randomIndex = Math.floor(Math.random() * availableChallenges.length);
-            const challenge = availableChallenges.splice(randomIndex, 1)[0];
-            updates[`missions/${session.code}/agents/${agent.id}/challenge`] = challenge;
+            const agentChallenges = [];
+            for (let i = 0; i < 3; i++) {
+                if (availableChallenges.length === 0) break;
+                const randomIndex = Math.floor(Math.random() * availableChallenges.length);
+                const challenge = availableChallenges.splice(randomIndex, 1)[0];
+                agentChallenges.push(challenge);
+            }
+            if (agentChallenges.length > 0) {
+                updates[`missions/${session.code}/agents/${agent.id}/challenge`] = agentChallenges[0];
+                updates[`missions/${session.code}/agents/${agent.id}/challenges`] = agentChallenges;
+            }
         });
 
         updates[`missions/${session.code}/status`] = 'ACTIVE';

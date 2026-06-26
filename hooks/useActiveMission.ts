@@ -48,8 +48,6 @@ export function useActiveMission() {
 
     const isLowTime = timeLeft < 60000 && timeLeft > 0;
 
-    const scanPos = useSharedValue(0);
-
     const me = agents.find((a) => a.id === profile?.id);
     const myChallenge = me?.challenge;
     const isCompleted = me?.completed;
@@ -67,12 +65,7 @@ export function useActiveMission() {
         }
 
         SoundService.stopBackgroundMusic();
-        scanPos.value = withRepeat(withTiming(1, { duration: 3000 }), -1, false);
-    }, [status, router, scanPos]);
-
-    const animatedScanStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: scanPos.value * 250 }],
-    }));
+    }, [status, router]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -158,7 +151,6 @@ export function useActiveMission() {
         isHost,
         timeLeft,
         isLowTime,
-        animatedScanStyle,
         visibleEvents,
         isRevealed,
         setIsRevealed,
