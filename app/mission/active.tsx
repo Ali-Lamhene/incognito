@@ -72,13 +72,6 @@ export default function ActiveMissionScreen() {
     );
   }
 
-  const fakeAgents = [
-    { id: 'fake1', name: 'BÊTA', score: 950, status: 'READY' as const, avatar: '', lastSeen: Date.now() },
-    { id: 'fake2', name: 'GAMMA', score: 800, status: 'READY' as const, avatar: '', lastSeen: Date.now() },
-    { id: 'fake3', name: 'DELTA', score: 720, status: 'READY' as const, avatar: '', lastSeen: Date.now() },
-    { id: 'fake4', name: 'EPSILON', score: 610, status: 'READY' as const, avatar: '', lastSeen: Date.now() },
-  ];
-
   if (showCompleteSplash) {
     return (
       <View style={[styles.container, { backgroundColor: '#000' }]}>
@@ -148,7 +141,7 @@ export default function ActiveMissionScreen() {
 
             <View style={styles.content}>
               <ActiveAgentsList
-                agents={[...agents, ...fakeAgents]}
+                agents={agents}
                 profile={profile}
                 now={now}
                 handleUnmask={handleUnmask}

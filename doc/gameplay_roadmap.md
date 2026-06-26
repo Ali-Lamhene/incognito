@@ -34,7 +34,3 @@ Une fois le temps écoulé, le jeu passe en phase de **Tribunal** avant de dévo
 - **Clôture** : L'Hôte valide, les scores définitifs sont écrits dans Firebase, et le statut passe à `FINISHED` pour ouvrir l'écran du podium final.
 
 
----
-
-## 4. Nettoyage de Code & Suppressions
-- **Suppression d'ActiveEventFeed** : Le composant de flux d'événements en direct `ActiveEventFeed.tsx` et toutes les logiques d'affichage de toasts/notifications en temps réel associées sont obsolètes et seront intégralement supprimés pour alléger le code.
