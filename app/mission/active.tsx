@@ -20,7 +20,6 @@ import { ThemedText } from "../../components/ThemedText";
 import { ActiveHeader } from "../../components/ActiveHeader";
 import { ActiveChallengeCard } from "../../components/ActiveChallengeCard";
 import { ActiveAgentsList } from "../../components/ActiveAgentsList";
-import { ActiveEventFeed } from "../../components/ActiveEventFeed";
 import { useTranslation } from "../../hooks/useTranslation";
 import { useActiveMission } from "../../hooks/useActiveMission";
 
@@ -34,7 +33,6 @@ export default function ActiveMissionScreen() {
     session,
     profile,
     agents,
-    events,
     status,
     now,
     me,
@@ -42,7 +40,6 @@ export default function ActiveMissionScreen() {
     isCompleted,
     timeLeft,
     isLowTime,
-    visibleEvents,
     isRevealed,
     setIsRevealed,
     showAbortModal,
@@ -181,12 +178,6 @@ export default function ActiveMissionScreen() {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* <ActiveEventFeed
-          events={events}
-          visibleEvents={visibleEvents}
-          bottomInset={insets.bottom + 20}
-        /> */}
 
         <ActiveModals
           showAbortModal={showAbortModal}

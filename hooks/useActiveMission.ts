@@ -11,7 +11,6 @@ export function useActiveMission() {
     const {
         session,
         agents,
-        events,
         status,
         clearSession,
         unmaskAgent,
@@ -22,8 +21,6 @@ export function useActiveMission() {
     const [showAbortModal, setShowAbortModal] = useState(false);
     const [showUnmaskModal, setShowUnmaskModal] = useState(false);
     const [targetIdToUnmask, setTargetIdToUnmask] = useState<string | null>(null);
-
-    const [visibleEvents, setVisibleEvents] = useState<string[]>([]);
     const [now, setNow] = useState(Date.now());
     const [showStartSplash, setShowStartSplash] = useState(true);
     const [showCompleteSplash, setShowCompleteSplash] = useState(false);
@@ -87,26 +84,6 @@ export function useActiveMission() {
         };
     }, [status, isHost, session?.duration, session?.startedAt, finishMission]);
 
-    useEffect(() => {
-        const currentTime = Date.now();
-        const newEvents = events.filter((e) => {
-            const isRecent = currentTime - e.timestamp < 5000;
-            const notShowing = !visibleEvents.includes(e.id);
-            return isRecent && notShowing;
-        });
-
-        if (newEvents.length > 0) {
-            const newIds = newEvents.map((e) => e.id);
-            setVisibleEvents((prev) => [...prev, ...newIds]);
-
-            newIds.forEach((id) => {
-                setTimeout(() => {
-                    setVisibleEvents((prev) => prev.filter((vid) => vid !== id));
-                }, 5000);
-            });
-        }
-    }, [events, visibleEvents]);
-
     const handleAbort = async () => {
         setShowAbortModal(false);
         await clearSession(profile?.id);
@@ -142,7 +119,6 @@ export function useActiveMission() {
         session,
         profile,
         agents,
-        events,
         status,
         now,
         me,
@@ -151,7 +127,6 @@ export function useActiveMission() {
         isHost,
         timeLeft,
         isLowTime,
-        visibleEvents,
         isRevealed,
         setIsRevealed,
         showAbortModal,
