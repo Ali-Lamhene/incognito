@@ -13,6 +13,7 @@ type MissionSession = {
     startedAt?: number;
     pausedAt?: number;
     events?: Record<string, MissionEvent>;
+    scoresValidated?: boolean;
 };
 
 type MissionEvent = {
@@ -35,15 +36,25 @@ export type Agent = {
     challenge?: {
         text: string;
         id: string;
+        completed?: boolean;
+        unmasked?: boolean;
+        lied?: boolean;
     };
     challenges?: {
         text: string;
         id: string;
         completed?: boolean;
+        unmasked?: boolean;
+        lied?: boolean;
     }[];
     completed?: boolean;
     completedAt?: number;
     score?: number;
+    pendingAccusation?: {
+        byId: string;
+        byName: string;
+    } | null;
+    unmaskedStatus?: 'CONFESSED' | null;
 };
 
 type SessionContextType = {
@@ -59,6 +70,8 @@ type SessionContextType = {
     finishMission: () => Promise<void>;
     checkSessionExists: (code: string) => Promise<boolean>;
     unmaskAgent: (targetId: string, validatorId: string) => Promise<boolean>;
+    confessAccusation: (agentId: string, challengeId?: string) => Promise<void>;
+    denyAccusation: (agentId: string) => Promise<void>;
     pushEvent: (event: Omit<MissionEvent, 'id' | 'timestamp'>) => Promise<void>;
 };
 
@@ -123,6 +136,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     duration: data.duration || prev.duration,
                     startedAt: data.startedAt || prev.startedAt,
                     pausedAt: data.pausedAt || null,
+                    scoresValidated: data.scoresValidated || false,
                 } : null);
             } else {
                 setAgents([]);
@@ -281,6 +295,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const validator = agents.find(a => a.id === validatorId);
         if (!target || !validator) return false;
 
+        const updates: any = {};
+        updates[`missions/${session.code}/agents/${targetId}/pendingAccusation`] = {
+            byId: validatorId,
+            byName: validator.name
+        };
+        await update(ref(db), updates);
+
         await pushEvent({
             type: 'SUSPECT',
             agentId: validatorId,
@@ -290,11 +311,42 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         return true;
     };
 
+    const confessAccusation = async (agentId: string, challengeId?: string) => {
+        if (!session?.code) return;
+        const updates: any = {};
+        updates[`missions/${session.code}/agents/${agentId}/unmaskedStatus`] = 'CONFESSED';
+        updates[`missions/${session.code}/agents/${agentId}/pendingAccusation`] = null;
+        
+        if (challengeId) {
+            const agentRef = ref(db, `missions/${session.code}/agents/${agentId}`);
+            const snapshot = await get(agentRef);
+            const agentData = snapshot.val();
+            if (agentData && agentData.challenges) {
+                const idx = agentData.challenges.findIndex((c: any) => c.id === challengeId);
+                if (idx !== -1) {
+                    updates[`missions/${session.code}/agents/${agentId}/challenges/${idx}/unmasked`] = true;
+                }
+            } else if (agentData && agentData.challenge && agentData.challenge.id === challengeId) {
+                updates[`missions/${session.code}/agents/${agentId}/challenge/unmasked`] = true;
+            }
+        }
+        
+        await update(ref(db), updates);
+    };
+
+    const denyAccusation = async (agentId: string) => {
+        if (!session?.code) return;
+        const updates: any = {};
+        updates[`missions/${session.code}/agents/${agentId}/pendingAccusation`] = null;
+        await update(ref(db), updates);
+    };
+
     return (
         <SessionContext.Provider value={{
             session, isInitialized, agents, events, status,
             createSession, joinSession, clearSession,
-            startMission, finishMission, checkSessionExists, unmaskAgent, pushEvent
+            startMission, finishMission, checkSessionExists, unmaskAgent,
+            confessAccusation, denyAccusation, pushEvent
         }}>
             {children}
         </SessionContext.Provider>

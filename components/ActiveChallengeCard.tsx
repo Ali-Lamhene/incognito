@@ -22,6 +22,8 @@ interface ActiveChallengeCardProps {
   status: string;
   now: number;
   isCompleted: boolean;
+  activeIndex?: number;
+  setActiveIndex?: (index: number) => void;
 }
 
 export function ActiveChallengeCard({
@@ -35,6 +37,8 @@ export function ActiveChallengeCard({
   status,
   now,
   isCompleted,
+  activeIndex: activeIndexProp,
+  setActiveIndex: setActiveIndexProp,
 }: ActiveChallengeCardProps) {
   const { t } = useTranslation();
 
@@ -42,7 +46,10 @@ export function ActiveChallengeCard({
   const [scanPercent, setScanPercent] = React.useState(0);
   const [isSecuring, setIsSecuring] = React.useState(false);
   const [cardWidth, setCardWidth] = React.useState(0);
-  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [internalActiveIndex, setInternalActiveIndex] = React.useState(0);
+
+  const activeIndex = activeIndexProp !== undefined ? activeIndexProp : internalActiveIndex;
+  const setActiveIndex = setActiveIndexProp !== undefined ? setActiveIndexProp : setInternalActiveIndex;
 
   const intervalRef = React.useRef<any>(null);
 

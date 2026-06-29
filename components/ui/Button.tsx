@@ -123,6 +123,12 @@ export function Button({
 
   const variantStyle = getVariantStyles();
 
+  const hasFlex = React.useMemo(() => {
+    if (!style) return false;
+    const flattened = StyleSheet.flatten(style) as ViewStyle;
+    return flattened && (flattened.flex !== undefined || flattened.flexGrow !== undefined);
+  }, [style]);
+
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -132,6 +138,7 @@ export function Button({
         styles.button,
         variantStyle.button,
         disabled && styles.disabledButton,
+        hasFlex && { width: 'auto' },
         style,
       ]}
     >

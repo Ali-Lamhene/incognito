@@ -51,10 +51,14 @@ export default function ActiveMissionScreen() {
     showCompleteSplash,
     formatTime,
     targetAgentName,
+    activeIndex,
+    setActiveIndex,
     actions: {
       handleAbort,
       handleUnmask,
       handleConfirmUnmask,
+      handleConfessAccusation,
+      handleDenyAccusation,
     }
   } = useActiveMission();
 
@@ -135,6 +139,8 @@ export default function ActiveMissionScreen() {
                   status={status}
                   now={now}
                   isCompleted={!!isCompleted}
+                  activeIndex={activeIndex}
+                  setActiveIndex={setActiveIndex}
                 />
               </View>
             </View>
@@ -180,6 +186,9 @@ export default function ActiveMissionScreen() {
           setShowUnmaskModal={setShowUnmaskModal}
           handleConfirmUnmask={handleConfirmUnmask}
           targetAgentName={targetAgentName}
+          me={me}
+          handleConfessAccusation={handleConfessAccusation}
+          handleDenyAccusation={handleDenyAccusation}
         />
       </ScrollView>
     </View>

@@ -17,6 +17,8 @@ import { db } from "../../services/firebase";
 import { ref, update, get } from "firebase/database";
 import { Theme } from "@/constants/Theme";
 
+import { Switch, ActivityIndicator, TouchableOpacity } from "react-native";
+
 export default function ResultsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -24,8 +26,39 @@ export default function ResultsScreen() {
     const { profile } = useProfileStore();
     const { t } = useTranslation();
 
-    const [frozenAgents] = React.useState([...agents]);
-    const sortedAgentsRaw = [...frozenAgents].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const [validationState, setValidationState] = React.useState<Record<string, {
+        challenges: Record<string, { completed: boolean, unmasked: boolean, lied: boolean, failed: boolean }>
+    }>>({});
+
+    const [currentAgentIndex, setCurrentAgentIndex] = React.useState(0);
+
+    React.useEffect(() => {
+        setValidationState(prev => {
+            const next = { ...prev };
+            let changed = false;
+            agents.forEach(agent => {
+                if (!next[agent.id]) {
+                    const challenges = agent.challenges || (agent.challenge ? [agent.challenge] : []);
+                    const challengesDict: Record<string, { completed: boolean, unmasked: boolean, lied: boolean, failed: boolean }> = {};
+                    challenges.forEach(c => {
+                        challengesDict[c.id] = {
+                            completed: c.completed || false,
+                            unmasked: c.unmasked || false,
+                            lied: c.lied || false,
+                            failed: false,
+                        };
+                    });
+                    next[agent.id] = {
+                        challenges: challengesDict
+                    };
+                    changed = true;
+                }
+            });
+            return changed ? next : prev;
+        });
+    }, [agents]);
+
+    const sortedAgentsRaw = [...agents].sort((a, b) => (b.score || 0) - (a.score || 0));
     
     // Fill in mock placeholders if there are fewer than 3 players to preview the full podium
     const sortedAgents = [...sortedAgentsRaw];
@@ -75,6 +108,7 @@ export default function ResultsScreen() {
             updates[`missions/${session.code}/status`] = 'LOBBY';
             updates[`missions/${session.code}/startedAt`] = null;
             updates[`missions/${session.code}/events`] = null; // reset event list
+            updates[`missions/${session.code}/scoresValidated`] = null; // reset scores validated flag
             
             if (currentAgents) {
                 Object.keys(currentAgents).forEach(agentId => {
@@ -83,6 +117,8 @@ export default function ResultsScreen() {
                     updates[`missions/${session.code}/agents/${agentId}/challenge`] = null;
                     updates[`missions/${session.code}/agents/${agentId}/score`] = 0;
                     updates[`missions/${session.code}/agents/${agentId}/status`] = 'READY';
+                    updates[`missions/${session.code}/agents/${agentId}/unmaskedStatus`] = null;
+                    updates[`missions/${session.code}/agents/${agentId}/pendingAccusation`] = null;
                 });
             }
             
@@ -91,6 +127,435 @@ export default function ResultsScreen() {
             console.error("Failed to restart game:", error);
         }
     };
+
+    const isCurrentAgentValidated = () => {
+        const agent = agents[currentAgentIndex];
+        if (!agent) return false;
+        const state = validationState[agent.id];
+        if (!state) return false;
+        const challenges = agent.challenges || (agent.challenge ? [agent.challenge] : []);
+        return challenges.every(c => {
+            const cState = state.challenges[c.id];
+            return cState && (cState.completed || cState.unmasked || cState.lied || cState.failed);
+        });
+    };
+
+    const handleValidateScores = async () => {
+        if (!session?.code) return;
+        
+        try {
+            const updates: any = {};
+            agents.forEach(agent => {
+                const state = validationState[agent.id];
+                if (!state) return;
+
+                const challenges = agent.challenges || (agent.challenge ? [agent.challenge] : []);
+                
+                let score = 0;
+                challenges.forEach(c => {
+                    const cState = state.challenges[c.id];
+                    if (cState) {
+                        if (cState.lied) {
+                            score -= 30;
+                        } else if (cState.unmasked) {
+                            score -= 10;
+                        } else if (cState.completed) {
+                            score += 10;
+                        }
+                    }
+                });
+
+                updates[`missions/${session.code}/agents/${agent.id}/score`] = score;
+                
+                const anyCompleted = challenges.some(c => {
+                    const cState = state.challenges[c.id];
+                    return cState?.completed && !cState?.unmasked && !cState?.lied;
+                });
+                updates[`missions/${session.code}/agents/${agent.id}/completed`] = anyCompleted;
+                
+                challenges.forEach((c, idx) => {
+                    const cState = state.challenges[c.id];
+                    updates[`missions/${session.code}/agents/${agent.id}/challenges/${idx}/completed`] = cState?.completed || false;
+                    updates[`missions/${session.code}/agents/${agent.id}/challenges/${idx}/unmasked`] = cState?.unmasked || false;
+                    updates[`missions/${session.code}/agents/${agent.id}/challenges/${idx}/lied`] = cState?.lied || false;
+                });
+                
+                if (agent.challenge) {
+                    const cState = state.challenges[agent.challenge.id];
+                    updates[`missions/${session.code}/agents/${agent.id}/challenge/completed`] = cState?.completed || false;
+                    updates[`missions/${session.code}/agents/${agent.id}/challenge/unmasked`] = cState?.unmasked || false;
+                    updates[`missions/${session.code}/agents/${agent.id}/challenge/lied`] = cState?.lied || false;
+                }
+            });
+
+            updates[`missions/${session.code}/scoresValidated`] = true;
+            await update(ref(db), updates);
+        } catch (error) {
+            console.error("Failed to validate scores:", error);
+        }
+    };
+
+    const renderHostTribunal = () => {
+        const agent = agents[currentAgentIndex];
+        if (!agent) {
+            return (
+                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <ActivityIndicator size="large" color={Theme.colors.red} />
+                </View>
+            );
+        }
+
+        const agentColor = getAgentColor(agent.id, agents);
+        const challenges = agent.challenges || (agent.challenge ? [agent.challenge] : []);
+        const state = validationState[agent.id];
+
+        return (
+            <View style={styles.container}>
+                {/* Background Image */}
+                <View style={styles.backgroundContainer}>
+                    <Image
+                        source={require("../../assets/UI/result_bg.png")}
+                        style={styles.backgroundImage}
+                        contentFit="cover"
+                    />
+                </View>
+
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Header */}
+                    <Animated.View entering={FadeInDown.duration(800)} style={styles.header}>
+                        <View style={styles.crestContainer}>
+                            <LinearGradient
+                                colors={['transparent', 'rgba(242, 232, 207, 0.25)']}
+                                start={{ x: 0, y: 0.5 }}
+                                end={{ x: 1, y: 0.5 }}
+                                style={styles.separatorLine}
+                            />
+                            <Image
+                                source={require("../../assets/UI/logo_agency.png")}
+                                style={styles.logoCrest}
+                                contentFit="contain"
+                            />
+                            <LinearGradient
+                                colors={['rgba(242, 232, 207, 0.25)', 'transparent']}
+                                start={{ x: 0, y: 0.5 }}
+                                end={{ x: 1, y: 0.5 }}
+                                style={styles.separatorLine}
+                            />
+                        </View>
+                        <ThemedText style={styles.screenTitle}>
+                            {t('results.court_title')}
+                        </ThemedText>
+                        <ThemedText style={styles.courtSubtitle}>
+                            {t('results.court_subtitle')}
+                        </ThemedText>
+                    </Animated.View>
+
+                    {/* Agent dossier validation */}
+                    {state && (
+                        <Animated.View
+                            key={agent.id}
+                            entering={FadeInLeft.duration(400)}
+                            style={styles.courtCard}
+                        >
+                            {/* Dossier Meta */}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)', paddingBottom: 10, marginBottom: 5 }}>
+                                <ThemedText style={{ fontFamily: Theme.fonts.subtitle, fontSize: 11, color: '#C6A15C', letterSpacing: 1 }}>
+                                    {t('results.court_dossier').replace('{{current}}', String(currentAgentIndex + 1)).replace('{{total}}', String(agents.length))}
+                                </ThemedText>
+                            </View>
+
+                            {/* Card Header */}
+                            <View style={styles.courtCardHeader}>
+                                <View style={[styles.slotAvatar, { borderColor: agentColor, backgroundColor: agentColor, width: 48, height: 48, borderRadius: 24 }]}>
+                                    <FontAwesome5 name="user-secret" size={38} color="#000" style={{ transform: [{ translateY: 7 }] }} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <ThemedText style={styles.courtAgentName}>{agent.name}</ThemedText>
+                                </View>
+                                {agent.unmaskedStatus === 'CONFESSED' && (
+                                    <View style={styles.confessedBadge}>
+                                        <ThemedText style={styles.confessedBadgeText}>
+                                            {t('results.court_confessed')}
+                                        </ThemedText>
+                                    </View>
+                                )}
+                            </View>
+
+                            {/* Challenges list */}
+                            <View style={[styles.challengesGroup, { marginTop: 5 }]}>
+                                {challenges.map((c) => {
+                                    const cState = state.challenges[c.id];
+                                    const isCompleted = cState?.completed || false;
+                                    const isUnmasked = cState?.unmasked || false;
+                                    const isLied = cState?.lied || false;
+                                    const isFailed = cState?.failed || false;
+
+                                    return (
+                                        <View key={c.id} style={styles.courtChallengeRow}>
+                                            <ThemedText style={styles.courtChallengeText}>{c.text}</ThemedText>
+                                            <View style={styles.courtChallengeButtons}>
+                                                {/* Row 1: Réussi & Échoué */}
+                                                <View style={styles.courtChallengeBtnRow}>
+                                                    {/* Réussi Button */}
+                                                    <TouchableOpacity
+                                                        activeOpacity={0.8}
+                                                        disabled={isUnmasked}
+                                                        onPress={() => {
+                                                            setValidationState(prev => {
+                                                                const agentState = prev[agent.id];
+                                                                const currentVal = agentState.challenges[c.id]?.completed || false;
+                                                                return {
+                                                                    ...prev,
+                                                                    [agent.id]: {
+                                                                        ...agentState,
+                                                                        challenges: {
+                                                                            ...agentState.challenges,
+                                                                            [c.id]: {
+                                                                                completed: !currentVal,
+                                                                                unmasked: false,
+                                                                                lied: false,
+                                                                                failed: false,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                };
+                                                            });
+                                                        }}
+                                                        style={[
+                                                            styles.courtChallengeBtn,
+                                                            styles.courtChallengeBtnHalf,
+                                                            isCompleted && styles.courtChallengeBtnSuccess,
+                                                            isUnmasked && styles.courtChallengeBtnDisabled
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={isCompleted ? "checkmark-circle" : "ellipse-outline"}
+                                                            size={16}
+                                                            color={isCompleted ? "#2ECC71" : "#666"}
+                                                        />
+                                                        <ThemedText style={[styles.courtChallengeBtnText, isCompleted && styles.courtChallengeBtnTextSuccess]}>
+                                                            {t('results.court_succeeded')}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+
+                                                    {/* Échoué Button */}
+                                                    <TouchableOpacity
+                                                        activeOpacity={isUnmasked ? 1 : 0.8}
+                                                        disabled={isUnmasked}
+                                                        onPress={() => {
+                                                            setValidationState(prev => {
+                                                                const agentState = prev[agent.id];
+                                                                const currentFailed = agentState.challenges[c.id]?.failed || false;
+                                                                return {
+                                                                    ...prev,
+                                                                    [agent.id]: {
+                                                                        ...agentState,
+                                                                        challenges: {
+                                                                            ...agentState.challenges,
+                                                                            [c.id]: {
+                                                                                completed: false,
+                                                                                unmasked: false,
+                                                                                lied: false,
+                                                                                failed: !currentFailed,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                };
+                                                            });
+                                                        }}
+                                                        style={[
+                                                            styles.courtChallengeBtn,
+                                                            styles.courtChallengeBtnHalf,
+                                                            isFailed && styles.courtChallengeBtnFailed,
+                                                            isUnmasked && styles.courtChallengeBtnDisabled
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={isFailed ? "close-circle" : "close-circle-outline"}
+                                                            size={16}
+                                                            color={isFailed ? "#FFF" : "#666"}
+                                                        />
+                                                        <ThemedText style={[styles.courtChallengeBtnText, isFailed && styles.courtChallengeBtnTextFailed]}>
+                                                            {t('results.court_failed')}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+                                                </View>
+
+                                                {/* Row 2: Démasqué & Mensonge */}
+                                                <View style={styles.courtChallengeBtnRow}>
+                                                    {/* Démasqué Button */}
+                                                    <TouchableOpacity
+                                                        activeOpacity={c.unmasked ? 1 : 0.8}
+                                                        disabled={!!c.unmasked}
+                                                        onPress={() => {
+                                                            setValidationState(prev => {
+                                                                const agentState = prev[agent.id];
+                                                                const currentUnmasked = agentState.challenges[c.id]?.unmasked || false;
+                                                                return {
+                                                                    ...prev,
+                                                                    [agent.id]: {
+                                                                        ...agentState,
+                                                                        challenges: {
+                                                                            ...agentState.challenges,
+                                                                            [c.id]: {
+                                                                                completed: false,
+                                                                                unmasked: !currentUnmasked,
+                                                                                lied: false,
+                                                                                failed: false,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                };
+                                                            });
+                                                        }}
+                                                        style={[
+                                                            styles.courtChallengeBtn,
+                                                            styles.courtChallengeBtnHalf,
+                                                            isUnmasked && styles.courtChallengeBtnDanger,
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={isUnmasked ? "eye-off" : "eye-outline"}
+                                                            size={16}
+                                                            color={isUnmasked ? Theme.colors.red : "#666"}
+                                                        />
+                                                        <ThemedText style={[styles.courtChallengeBtnText, isUnmasked && styles.courtChallengeBtnTextDanger]}>
+                                                            {t('results.court_unmasked')}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+
+                                                    {/* Mensonge Button */}
+                                                    <TouchableOpacity
+                                                        activeOpacity={0.8}
+                                                        disabled={!!c.unmasked}
+                                                        onPress={() => {
+                                                            setValidationState(prev => {
+                                                                const agentState = prev[agent.id];
+                                                                const currentLied = agentState.challenges[c.id]?.lied || false;
+                                                                return {
+                                                                    ...prev,
+                                                                    [agent.id]: {
+                                                                        ...agentState,
+                                                                        challenges: {
+                                                                            ...agentState.challenges,
+                                                                            [c.id]: {
+                                                                                completed: false,
+                                                                                unmasked: false,
+                                                                                lied: !currentLied,
+                                                                                failed: false,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                };
+                                                            });
+                                                        }}
+                                                        style={[
+                                                            styles.courtChallengeBtn,
+                                                            styles.courtChallengeBtnHalf,
+                                                            isLied && styles.courtChallengeBtnWarning,
+                                                            !!c.unmasked && styles.courtChallengeBtnDisabled
+                                                        ]}
+                                                    >
+                                                        <Ionicons
+                                                            name={isLied ? "alert-circle" : "alert-circle-outline"}
+                                                            size={16}
+                                                            color={isLied ? "#FFA500" : "#666"}
+                                                        />
+                                                        <ThemedText style={[styles.courtChallengeBtnText, isLied && styles.courtChallengeBtnTextWarning]}>
+                                                            {t('results.court_lied')}
+                                                        </ThemedText>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    );
+                                })}
+                            </View>
+                        </Animated.View>
+                    )}
+
+                    {/* Navigation buttons */}
+                    <View style={styles.courtNavigation}>
+                        <Button
+                            title={t('results.court_prev')}
+                            onPress={() => setCurrentAgentIndex(prev => Math.max(0, prev - 1))}
+                            variant="secondary"
+                            disabled={currentAgentIndex === 0}
+                            style={{ flex: 1, height: 48 }}
+                        />
+                        {currentAgentIndex < agents.length - 1 ? (
+                            <Button
+                                title={t('results.court_next')}
+                                onPress={() => setCurrentAgentIndex(prev => prev + 1)}
+                                variant="primary"
+                                disabled={!isCurrentAgentValidated()}
+                                style={{ flex: 1, height: 48 }}
+                            />
+                        ) : (
+                            <Button
+                                title={t('results.court_btn_validate')}
+                                onPress={handleValidateScores}
+                                variant="primary"
+                                disabled={!isCurrentAgentValidated()}
+                                style={{ flex: 1, height: 48 }}
+                            />
+                        )}
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    };
+
+    const renderAgentWaiting = () => {
+        return (
+            <View style={styles.container}>
+                {/* Background Image */}
+                <View style={styles.backgroundContainer}>
+                    <Image
+                        source={require("../../assets/UI/result_bg.png")}
+                        style={styles.backgroundImage}
+                        contentFit="cover"
+                    />
+                </View>
+
+                <View style={styles.waitingContainer}>
+                    <Animated.View entering={FadeInDown.duration(1000)} style={{ alignItems: 'center', gap: 20 }}>
+                        <FontAwesome5 name="balance-scale" size={60} color={Theme.colors.red} />
+                        <ThemedText style={styles.waitingTitle}>
+                            {t('results.court_title')}
+                        </ThemedText>
+                        <ThemedText style={styles.waitingSubtitle}>
+                            {t('results.court_waiting_agents')}
+                        </ThemedText>
+                        
+                        <ActivityIndicator size="large" color={Theme.colors.red} style={{ marginTop: 20 }} />
+                    </Animated.View>
+                </View>
+            </View>
+        );
+    };
+
+    if (!session) {
+        return (
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={Theme.colors.red} />
+            </View>
+        );
+    }
+
+    const scoresValidated = session.scoresValidated;
+
+    if (!scoresValidated) {
+        if (isHost) {
+            return renderHostTribunal();
+        } else {
+            return renderAgentWaiting();
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -262,7 +727,7 @@ export default function ResultsScreen() {
             </ScrollView>
 
             {/* Footer Action Buttons — pinned to bottom */}
-            <Animated.View entering={FadeInUp.delay(800).duration(600)} style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
+            <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
                 <Button
                     title={isHost ? t('results.new_game') : (t('lobby.waiting_host') || "ATTENTE DE L'HÔTE...")}
                     onPress={handleNewGame}
@@ -278,7 +743,7 @@ export default function ResultsScreen() {
                     icon="exit-outline"
                     variant="secondary"
                 />
-            </Animated.View>
+            </View>
         </View>
     );
 }
@@ -496,12 +961,195 @@ const styles = StyleSheet.create({
 
     // ── Footer ──
     footer: {
-        gap: 3,
+        width: '100%',
+        alignSelf: 'stretch',
+        gap: 10,
         paddingHorizontal: 25,
-        paddingTop: 6,
+        paddingTop: 12,
         backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
     actionButton: {
         height: 48,
+    },
+    courtSubtitle: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 12,
+        color: '#999',
+        textAlign: 'center',
+        marginTop: 6,
+        paddingHorizontal: 20,
+    },
+    courtList: {
+        gap: 16,
+        marginVertical: 10,
+    },
+    courtCard: {
+        backgroundColor: 'rgba(20, 5, 5, 0.45)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        padding: 16,
+        gap: 14,
+    },
+    courtCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    courtAgentName: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 16,
+        color: '#FFF',
+        letterSpacing: 0.5,
+    },
+    confessedBadge: {
+        backgroundColor: 'rgba(153, 0, 0, 0.2)',
+        borderColor: Theme.colors.red,
+        borderWidth: 1,
+        borderRadius: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+    confessedBadgeText: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 10,
+        color: Theme.colors.red,
+        letterSpacing: 0.5,
+    },
+    challengesGroup: {
+        gap: 8,
+    },
+    courtChallengeRow: {
+        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        paddingHorizontal: 12,
+        paddingTop: 12,
+        paddingBottom: 10,
+        gap: 10,
+    },
+    courtChallengeText: {
+        fontFamily: Theme.fonts.body,
+        fontSize: 13,
+        color: '#AAA',
+        lineHeight: 18,
+    },
+    courtChallengeButtons: {
+        flexDirection: 'column',
+        gap: 8,
+        marginTop: 4,
+        alignItems: 'stretch',
+    },
+    courtChallengeBtnRow: {
+        flexDirection: 'row',
+        gap: 8,
+        width: '100%',
+    },
+    courtChallengeBtnFull: {
+        width: '100%',
+        alignSelf: 'stretch',
+        paddingVertical: 12,
+    },
+    courtChallengeBtnHalf: {
+        flex: 1,
+    },
+    courtChallengeBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        paddingVertical: 8,
+        gap: 6,
+    },
+    courtChallengeBtnSuccess: {
+        backgroundColor: 'rgba(46, 204, 113, 0.08)',
+        borderColor: 'rgba(46, 204, 113, 0.3)',
+    },
+    courtChallengeBtnDanger: {
+        backgroundColor: 'rgba(153, 0, 0, 0.08)',
+        borderColor: 'rgba(153, 0, 0, 0.3)',
+    },
+    courtChallengeBtnWarning: {
+        backgroundColor: 'rgba(255, 165, 0, 0.08)',
+        borderColor: 'rgba(255, 165, 0, 0.3)',
+    },
+    courtChallengeBtnFailed: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderColor: 'rgba(255, 255, 255, 0.25)',
+    },
+    courtChallengeBtnTextFailed: {
+        color: '#FFF',
+    },
+    courtChallengeBtnDisabled: {
+        opacity: 0.3,
+    },
+    courtChallengeBtnText: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 10,
+        color: '#777',
+        letterSpacing: 0.5,
+    },
+    courtChallengeBtnTextSuccess: {
+        color: '#2ECC71',
+    },
+    courtChallengeBtnTextDanger: {
+        color: Theme.colors.red,
+    },
+    courtChallengeBtnTextWarning: {
+        color: '#FFA500',
+    },
+    courtNavigation: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 20,
+    },
+    toggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.05)',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        gap: 6,
+    },
+    toggleRowActive: {
+        borderColor: 'rgba(153, 0, 0, 0.2)',
+    },
+    toggleText: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 10,
+        color: '#888',
+        letterSpacing: 0.5,
+    },
+    toggleTextActive: {
+        color: '#FFF',
+    },
+    waitingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 30,
+        gap: 15,
+    },
+    waitingTitle: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 24,
+        color: Theme.colors.red,
+        letterSpacing: 2,
+        textAlign: 'center',
+    },
+    waitingSubtitle: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 13,
+        color: '#AAA',
+        letterSpacing: 0.5,
+        textAlign: 'center',
+        lineHeight: 18,
     },
 });

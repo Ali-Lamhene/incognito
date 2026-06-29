@@ -15,6 +15,8 @@ export function useActiveMission() {
         clearSession,
         unmaskAgent,
         finishMission,
+        confessAccusation,
+        denyAccusation,
     } = useSession();
 
     const [isRevealed, setIsRevealed] = useState(false);
@@ -24,6 +26,7 @@ export function useActiveMission() {
     const [now, setNow] = useState(Date.now());
     const [showStartSplash, setShowStartSplash] = useState(true);
     const [showCompleteSplash, setShowCompleteSplash] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     const parseDuration = (d?: string) => {
         if (!d) return 0;
@@ -112,6 +115,24 @@ export function useActiveMission() {
         }
     }, [isLowTime, status]);
 
+    useEffect(() => {
+        if (me?.pendingAccusation) {
+            SoundService.playSFX('TENSION_STINGER');
+        }
+    }, [me?.pendingAccusation]);
+
+    const handleConfessAccusation = async (challengeId: string) => {
+        if (profile?.id) {
+            await confessAccusation(profile.id, challengeId);
+        }
+    };
+
+    const handleDenyAccusation = async () => {
+        if (profile?.id) {
+            await denyAccusation(profile.id);
+        }
+    };
+
     const targetAgent = agents.find((a) => a.id === targetIdToUnmask);
     const targetAgentName = targetAgent ? targetAgent.name : '';
 
@@ -139,10 +160,14 @@ export function useActiveMission() {
         setShowCompleteSplash,
         formatTime,
         targetAgentName,
+        activeIndex,
+        setActiveIndex,
         actions: {
             handleAbort,
             handleUnmask,
             handleConfirmUnmask,
+            handleConfessAccusation,
+            handleDenyAccusation,
         }
     };
 }
