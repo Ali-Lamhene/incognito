@@ -729,7 +729,7 @@ export default function ResultsScreen() {
             {/* Footer Action Buttons — pinned to bottom */}
             <View style={[styles.footer, { paddingBottom: insets.bottom + 10 }]}>
                 <Button
-                    title={isHost ? t('results.new_game') : (t('lobby.waiting_host') || "ATTENTE DE L'HÔTE...")}
+                    title={isHost ? t('results.new_game') : t('lobby.waiting_host')}
                     onPress={handleNewGame}
                     style={styles.actionButton}
                     icon="refresh-outline"

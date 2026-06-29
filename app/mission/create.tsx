@@ -59,7 +59,7 @@ export default function CreateMissionScreen() {
                 contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 20) }]}
                 showsVerticalScrollIndicator={false}
             >
-                <PageHeader title="créer une mission" showSeparator />
+                <PageHeader title={t('mission.create_title')} showSeparator />
 
                 <View style={styles.selectorWrapper}>
                     <View style={styles.contentBlock}>
@@ -85,7 +85,7 @@ export default function CreateMissionScreen() {
 
                     <View style={styles.buttonBlock}>
                         <Button
-                            title="lancer la mission"
+                            title={t('mission.btn_init')}
                             onPress={handleCreate}
                             disabled={isCustomInvalid}
                             variant="primary"

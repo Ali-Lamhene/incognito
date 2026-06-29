@@ -9,6 +9,7 @@
         "ok": "OK"
     },
     "home": {
+        "home_tab": "HOME",
         "status_online": "ONLINE",
         "agent_active": "AGENT ACTIVE",
         "create_mission_title": "CREATE MISSION",
@@ -26,8 +27,10 @@
         "section_profile": "AGENT PROFILE",
         "section_device": "DEVICE PARAMETERS",
         "audio_fx": "AUDIO FX",
+        "haptics": "VIBRATIONS (STEALTH MODE)",
         "notifications": "NOTIFICATIONS",
         "language": "LANGUAGE",
+        "agent_code": "AGENT CODE: ",
         "section_info": "SYSTEM INFO",
         "version": "VERSION",
         "contact": "CONTACT"
@@ -43,9 +46,25 @@
         "btn_create": "CONFIRM IDENTITY",
         "btn_update": "UPDATE PROFILE"
     },
+    "join": {
+        "title": "JOIN A MISSION",
+        "scan_title": "SCAN A QR CODE",
+        "scan_desc": "Use your camera to scan the mission QR code.",
+        "or": "OR",
+        "manual_title": "ENTER MISSION CODE",
+        "manual_desc": "Manually enter the mission access code.",
+        "code_placeholder": "Mission code",
+        "invalid_code": "Invalid code",
+        "btn_join": "JOIN THE MISSION",
+        "scan_header": "JOIN BY QR CODE",
+        "scan_error": "Invalid code or mission not found",
+        "scan_instruction": "Use your camera to scan the QR code."
+    },
     "lobby": {
         "title": "TACTICAL LOBBY",
         "mission_id": "MISSION ID",
+        "mission_code": "MISSION CODE",
+        "scan_to_join": "Scan to join the mission",
         "waiting": "WAITING...",
         "linked_msg": "LINKED TO COMMAND",
         "scan_instruction": "SCAN TO JOIN",
@@ -62,7 +81,9 @@
         "recruitment_required": "RECRUITMENT REQUIRED: AT LEAST ONE OTHER AGENT MUST JOIN THE LOBBY.",
         "start_op_title": "DEPLOY THE MISSION?",
         "start_op_msg": "Are you ready to send your *agents* into the field?",
-        "btn_deploy_simple": "DEPLOY"
+        "btn_deploy_simple": "DEPLOY",
+        "waiting_host": "WAITING FOR HOST...",
+        "leave_lobby": "LEAVE LOBBY"
     },
     "mission": {
         "mission": "MISSION",
@@ -70,6 +91,12 @@
         "level": "LEVEL 02",
         "status": "STATUS",
         "in_mission": "IN MISSION",
+        "time_remaining": "TIME REMAINING",
+        "hold_to_decrypt": "HOLD PRINT TO DECRYPT",
+        "resolved": "RESOLVED",
+        "securing_in_progress": "SECURING IN PROGRESS...",
+        "securing": "SECURING...",
+        "hold_to_secure": "HOLD TO SECURE",
         "create_title": "MISSION CONFIG",
         "abort_mission": "ABORT MISSION",
         "threat_level": "THREAT LEVEL",
@@ -117,6 +144,8 @@
         "validate": "VALIDATE",
         "accept_failure": "ACCEPT FAILURE",
         "waiting_majority": "Waiting for majority...",
+        "which_challenge_title": "WHICH CHALLENGE TO CONFESS?",
+        "which_challenge_msg": "Select the challenge on which you were unmasked by {{name}}.",
         "unmask_attempt_self": "Agent {{name}} accuses you!",
         "unmask_attempt_msg": "Agent *{{name}}* accuses you of having completed a challenge.",
         "unmask_attempt_other": "Agent {{unmasker}} is attempting to unmask {{target}}...",

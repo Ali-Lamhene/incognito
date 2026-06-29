@@ -5,6 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '../constants/Theme';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LobbyQRFrameProps {
     code: string;
@@ -19,6 +20,8 @@ export function LobbyQRFrame({
     onCopy,
     children
 }: LobbyQRFrameProps) {
+    const { t } = useTranslation();
+
     return (
         <Animated.View entering={FadeInUp.delay(200).duration(600)} style={styles.cardContainer}>
             {/* City Background Texture */}
@@ -32,7 +35,7 @@ export function LobbyQRFrame({
 
             {/* Top Code Section */}
             <View style={styles.codeHeader}>
-                <Text style={styles.codeLabel}>CODE DE MISSION</Text>
+                <Text style={styles.codeLabel}>{t('lobby.mission_code')}</Text>
                 <TouchableOpacity onPress={onCopy} activeOpacity={0.7} style={styles.codeRow}>
                     <Ionicons name="star" size={14} color={Theme.colors.red} />
                     <Text style={styles.missionCodeText}>{code}</Text>
@@ -66,7 +69,7 @@ export function LobbyQRFrame({
 
             <View style={styles.hintContainer}>
                 <Ionicons name="qr-code-outline" size={16} color="#A0A0A0" />
-                <Text style={styles.copyHint}>Scannez pour rejoindre la mission</Text>
+                <Text style={styles.copyHint}>{t('lobby.scan_to_join')}</Text>
             </View>
 
             {children}

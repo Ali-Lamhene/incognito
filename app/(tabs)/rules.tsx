@@ -65,10 +65,7 @@ export default function RulesScreen() {
                     />
                     <View style={styles.introTextContainer}>
                         <Text style={styles.introText}>
-                            Accomplissez vos{'\n'}
-                            <Text style={styles.highlightRed}>missions secrètes</Text>{'\n'}
-                            sans vous faire{'\n'}
-                            démasquer.
+                            {t('rules.intro')}
                         </Text>
                     </View>
                 </View>

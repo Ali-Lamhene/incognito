@@ -25,7 +25,7 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
     const [selectedEmblem, setSelectedEmblem] = useState(initialData?.avatar || AGENT_EMBLEMS[0]);
     const [selectedColor, setSelectedColor] = useState(initialData?.color || AGENT_COLORS[0]);
     const { t } = useTranslation();
-    const { soundEnabled, language, toggleSound, setLanguage } = useSettingsStore();
+    const { language, setLanguage } = useSettingsStore();
 
     // Reset state when visible or initialData changes
     React.useEffect(() => {
@@ -111,20 +111,6 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                             {/* New Settings Section */}
                             <View style={styles.settingsSection}>
                                 <ThemedText type="code" style={styles.label}>{t('settings.section_device')}</ThemedText>
-                                
-                                <View style={styles.settingRow}>
-                                    <View style={styles.settingLabel}>
-                                        <Ionicons name="volume-high-outline" size={16} color="#FFF" />
-                                        <ThemedText type="code" style={styles.settingText}>{t('settings.audio_fx')}</ThemedText>
-                                    </View>
-                                    <Switch
-                                        value={soundEnabled}
-                                        onValueChange={toggleSound}
-                                        trackColor={{ false: '#333', true: '#FFF' }}
-                                        thumbColor={soundEnabled ? '#000' : '#FFF'}
-                                        style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
-                                    />
-                                </View>
 
                                 <View style={styles.settingRow}>
                                     <View style={styles.settingLabel}>

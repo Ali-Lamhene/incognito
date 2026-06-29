@@ -105,7 +105,7 @@ export default function ScanMissionScreen() {
             <View style={[styles.uiLayer, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 20) }]}>
                 <Animated.View entering={FadeIn.duration(600)} style={styles.header}>
                     <PageHeader 
-                        title="REJOINDRE PAR QR CODE" 
+                        title={t('join.scan_header')} 
                         showSeparator 
                     />
                 </Animated.View>
@@ -115,13 +115,13 @@ export default function ScanMissionScreen() {
                         <View style={[styles.instructionTag, { borderColor: Theme.colors.red, backgroundColor: 'rgba(139, 30, 30, 0.2)' }]}>
                             <Ionicons name="alert-circle" size={20} color={Theme.colors.red} />
                             <Text style={[styles.instructionText, { color: Theme.colors.red }]}>
-                                Code invalide ou mission introuvable
+                                {t('join.scan_error')}
                             </Text>
                         </View>
                     ) : (
                         <View style={styles.instructionTag}>
                             <Ionicons name="scan-outline" size={20} color={Theme.colors.red} />
-                            <Text style={styles.instructionText}>Utilisez l'appareil photo pour scanner le QR code.</Text>
+                            <Text style={styles.instructionText}>{t('join.scan_instruction')}</Text>
                         </View>
                     )}
                 </Animated.View>

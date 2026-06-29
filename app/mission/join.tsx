@@ -7,9 +7,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { useJoinMission } from '../../hooks/useJoinMission';
 import { Theme } from '../../constants/Theme';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function JoinMissionScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const {
         manualCode,
         onChangeCode,
@@ -29,7 +31,7 @@ export default function JoinMissionScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <PageHeader 
-                    title="REJOINDRE UNE MISSION" 
+                    title={t('join.title')} 
                     showSeparator 
                 />
 
@@ -49,9 +51,9 @@ export default function JoinMissionScreen() {
                                 <MaterialCommunityIcons name="qrcode-scan" size={40} color={Theme.colors.red} />
                             </View>
                             <View style={styles.cardTextContainer}>
-                                <Text style={styles.cardTitle}>SCANNER UN QR CODE</Text>
+                                <Text style={styles.cardTitle}>{t('join.scan_title')}</Text>
                                 <View style={styles.redUnderline} />
-                                <Text style={styles.cardSubtitle}>Utiliser l'appareil photo pour scanner le QR code de la mission.</Text>
+                                <Text style={styles.cardSubtitle}>{t('join.scan_desc')}</Text>
                             </View>
                             <Ionicons name="chevron-forward" size={24} color={Theme.colors.red} />
                         </TouchableOpacity>
@@ -65,7 +67,7 @@ export default function JoinMissionScreen() {
                             end={{ x: 1, y: 0.5 }}
                             style={styles.dividerLine}
                         />
-                        <Text style={styles.dividerText}>OU</Text>
+                        <Text style={styles.dividerText}>{t('join.or')}</Text>
                         <LinearGradient
                             colors={['rgba(255, 255, 255, 0.2)', 'transparent']}
                             start={{ x: 0, y: 0.5 }}
@@ -77,16 +79,16 @@ export default function JoinMissionScreen() {
                     {/* Manual Code Card */}
                     <View style={[styles.cardColumn, styles.contentBlock]}>
                         <View style={styles.manualTextContainer}>
-                            <Text style={styles.cardTitle}>ENTRER LE CODE DE LA MISSION</Text>
+                            <Text style={styles.cardTitle}>{t('join.manual_title')}</Text>
                             <View style={styles.redUnderline} />
-                            <Text style={styles.cardSubtitle}>Saisir manuellement le code d'accès à la mission.</Text>
+                            <Text style={styles.cardSubtitle}>{t('join.manual_desc')}</Text>
                         </View>
                         
                         <View style={[styles.inputContainer, error && styles.inputError]}>
                             <Ionicons name="lock-closed-outline" size={18} color={Theme.colors.red} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Code de la mission"
+                                placeholder={t('join.code_placeholder')}
                                 placeholderTextColor="rgba(255, 255, 255, 0.3)"
                                 value={manualCode}
                                 onChangeText={onChangeCode}
@@ -96,7 +98,7 @@ export default function JoinMissionScreen() {
                         </View>
                         
                         {error && (
-                            <Text style={styles.errorText}>Code invalide</Text>
+                            <Text style={styles.errorText}>{t('join.invalid_code')}</Text>
                         )}
 
                         <TouchableOpacity 
@@ -106,7 +108,7 @@ export default function JoinMissionScreen() {
                             activeOpacity={0.8}
                         >
                             <FontAwesome5 name="user-secret" size={16} color={!manualCode.trim() ? "rgba(255, 255, 255, 0.4)" : "#FFF"} style={styles.btnIcon} />
-                            <Text style={[styles.joinButtonText, !manualCode.trim() && styles.joinButtonTextDisabled]}>REJOINDRE LA MISSION</Text>
+                            <Text style={[styles.joinButtonText, !manualCode.trim() && styles.joinButtonTextDisabled]}>{t('join.btn_join')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

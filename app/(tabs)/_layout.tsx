@@ -3,9 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppState } from '../../store/appState';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   return (
     <Tabs
@@ -79,9 +81,9 @@ export default function TabsLayout() {
         headerShown: false,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Accueil' }} />
-      <Tabs.Screen name="rules" options={{ title: 'Règles' }} />
-      <Tabs.Screen name="settings" options={{ title: 'Paramètres' }} />
+      <Tabs.Screen name="index" options={{ title: t('home.home_tab') }} />
+      <Tabs.Screen name="rules" options={{ title: t('home.rules') }} />
+      <Tabs.Screen name="settings" options={{ title: t('settings.title') }} />
     </Tabs>
   );
 }

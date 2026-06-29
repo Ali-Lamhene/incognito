@@ -3,6 +3,7 @@ import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Theme } from '../constants/Theme';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LobbyHeaderProps {
     isHost: boolean;
@@ -15,17 +16,19 @@ export function LobbyHeader({
     onBack,
     onAbort
 }: LobbyHeaderProps) {
+    const { t } = useTranslation();
+
     return (
         <Animated.View entering={FadeInDown.duration(600)} style={styles.header}>
             <View style={styles.headerTop}>
                 <TouchableOpacity onPress={onBack} style={styles.backButton}>
                     <Ionicons name="chevron-back" size={20} color="#D1D1D1" />
-                    <Text style={styles.backText}>RETOUR</Text>
+                    <Text style={styles.backText}>{t('common.return')}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.centerTitleContainer}>
-                    <Text style={styles.screenTitle}>SALON D'OPÉRATION</Text>
-                    <Text style={styles.subTitle}>EN ATTENTE D'AGENTS</Text>
+                    <Text style={styles.screenTitle}>{t('lobby.title')}</Text>
+                    <Text style={styles.subTitle}>{t('lobby.waiting_agents')}</Text>
                 </View>
 
                 {/* Always show the abort button as QUITTER LE SALON based on the mockup.
@@ -33,9 +36,8 @@ export function LobbyHeader({
                     the parent handles the different actions. */}
                 <TouchableOpacity onPress={onAbort} style={styles.destroyButton}>
                     <MaterialCommunityIcons name="exit-run" size={16} color={Theme.colors.red} style={styles.exitIcon} />
-                    <View>
-                        <Text style={styles.destroyText}>QUITTER</Text>
-                        <Text style={styles.destroyText}>LE SALON</Text>
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.destroyText}>{t('lobby.leave_lobby')}</Text>
                     </View>
                 </TouchableOpacity>
             </View>

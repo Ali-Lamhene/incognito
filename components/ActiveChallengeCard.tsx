@@ -170,7 +170,7 @@ export function ActiveChallengeCard({
       {/* Timer Section above the folder */}
       <View style={styles.timerContainer}>
         <Text style={styles.timerLabel}>
-          TEMPS RESTANT
+          {t("mission.time_remaining")}
         </Text>
         <View style={styles.timerValueRow}>
           <LinearGradient
@@ -257,7 +257,7 @@ export function ActiveChallengeCard({
               <Text style={[styles.instructionText, isScanning && styles.instructionTextActive]}>
                 {isScanning 
                   ? `${t("mission.verification_in_progress").split(":")[0].trim()}... ${scanPercent}%`
-                  : "MAINTENIR L'EMPREINTE POUR DÉCRYPTER"}
+                  : t("mission.hold_to_decrypt")}
               </Text>
             </Animated.View>
           </View>
@@ -321,7 +321,7 @@ export function ActiveChallengeCard({
                           </Text>
                           {(isCompleted || challenge.completed) && (
                             <View style={[styles.stampContainer, styles.stampContainerCompleted]}>
-                              <Text style={[styles.stampText, styles.stampTextCompleted]}>RÉSOLU</Text>
+                              <Text style={[styles.stampText, styles.stampTextCompleted]}>{t("mission.resolved")}</Text>
                             </View>
                           )}
                         </View>
@@ -367,7 +367,7 @@ export function ActiveChallengeCard({
                       style={styles.lockIcon}
                     />
                     <Text style={styles.revealTitle}>
-                      SÉCURISATION EN COURS...
+                      {t("mission.securing_in_progress")}
                     </Text>
                     <View style={styles.starRow}>
                       <View style={styles.starLine} />
@@ -397,8 +397,8 @@ export function ActiveChallengeCard({
 
                 <Text style={[styles.instructionText, isSecuring && styles.instructionTextActive]}>
                   {isSecuring 
-                    ? `SÉCURISATION... ${scanPercent}%`
-                    : "MAINTENIR POUR SÉCURISER"}
+                    ? `${t("mission.securing")} ${scanPercent}%`
+                    : t("mission.hold_to_secure")}
                 </Text>
               </View>
             </Animated.View>

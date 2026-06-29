@@ -139,10 +139,10 @@ export function ActiveModals({
                 <>
                   {/* Step 2: Challenge selection */}
                   <Text style={styles.title}>
-                    QUEL DÉFI AVOUER ?
+                    {t("mission.which_challenge_title")}
                   </Text>
                   <Text style={styles.message}>
-                    Sélectionnez le défi sur lequel vous avez été démasqué par {me?.pendingAccusation?.byName || "l'autre agent"}.
+                    {t("mission.which_challenge_msg").replace("{{name}}", me?.pendingAccusation?.byName || t("common.unknown"))}
                   </Text>
 
                   <View style={styles.challengesList}>
@@ -162,7 +162,7 @@ export function ActiveModals({
                   </View>
 
                   <Button
-                    title="RETOUR"
+                    title={t("common.return")}
                     onPress={() => setShowChallengeSelection(false)}
                     variant="outline"
                     style={[styles.actionButton, { marginTop: 15 }]}

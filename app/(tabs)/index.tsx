@@ -89,13 +89,13 @@ export default function AgentHomeScreen() {
         {session ? (
           <>
             <Button
-              title="Retourner au salon"
+              title={t('home.return_to_lobby')}
               variant="primary"
               icon="arrow-forward-circle"
               onPress={() => router.push(`/lobby/${session.code}`)}
             />
             <Button
-              title="Abandonner la mission"
+              title={t('home.abort_mission')}
               variant="secondary"
               icon="exit-outline"
               onPress={async () => {
@@ -106,13 +106,13 @@ export default function AgentHomeScreen() {
         ) : (
           <>
             <Button
-              title="Créer une partie"
+              title={t('home.create_mission_title')}
               variant="primary"
               icon="person-add"
               onPress={() => router.push('/mission/create')}
             />
             <Button
-              title="Rejoindre une partie"
+              title={t('join.title')}
               variant="secondary"
               icon="people"
               onPress={() => router.push('/mission/join')}

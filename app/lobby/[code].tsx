@@ -81,7 +81,7 @@ export default function LobbyScreen() {
                             {isHost && (
                                 <>
                                     <Button
-                                        title={agents.length < 2 ? "DÉPLOYER" : "DÉPLOYER"}
+                                        title={t('lobby.btn_deploy_simple')}
                                         onPress={handleDeploy}
                                         disabled={agents.length < 1}
                                         style={styles.startButton}
@@ -92,8 +92,8 @@ export default function LobbyScreen() {
                                         <View style={styles.aloneHintContainer}>
                                             <Ionicons name="warning-outline" size={24} color={Theme.colors.red} />
                                             <View style={styles.aloneHintTextContainer}>
-                                                <Text style={styles.aloneHintTitle}>EN ATTENTE D'AGENTS</Text>
-                                                <Text style={styles.aloneHintSubtitle}>Vous devez être au minimum 2 agents pour lancer la mission.</Text>
+                                                <Text style={styles.aloneHintTitle}>{t('lobby.waiting_agents')}</Text>
+                                                <Text style={styles.aloneHintSubtitle}>{t('lobby.recruitment_required')}</Text>
                                             </View>
                                         </View>
                                     )}

@@ -9,6 +9,7 @@
         "ok": "OK"
     },
     "home": {
+        "home_tab": "ACCUEIL",
         "status_online": "EN LIGNE",
         "agent_active": "AGENT ACTIF",
         "create_mission_title": "CRÉER UNE MISSION",
@@ -27,9 +28,10 @@
         "section_device": "PARAMÈTRES APPAREIL",
         "audio_fx": "EFFETS AUDIO",
         "ambient_music": "MUSIQUE AMBIANCE",
-        "haptics": "VIBRATIONS (FURTIF)",
+        "haptics": "VIBRATIONS (MODE FURTIF)",
         "notifications": "NOTIFICATIONS",
         "language": "LANGUE",
+        "agent_code": "CODE AGENT : ",
         "section_info": "INFOS SYSTÈME",
         "version": "VERSION",
         "contact": "CONTACT"
@@ -45,9 +47,25 @@
         "btn_create": "CONFIRMER L'IDENTITÉ",
         "btn_update": "METTRE À JOUR"
     },
+    "join": {
+        "title": "REJOINDRE UNE MISSION",
+        "scan_title": "SCANNER UN QR CODE",
+        "scan_desc": "Utiliser l'appareil photo pour scanner le QR code de la mission.",
+        "or": "OU",
+        "manual_title": "ENTRER LE CODE DE LA MISSION",
+        "manual_desc": "Saisir manuellement le code d'accès à la mission.",
+        "code_placeholder": "Code de la mission",
+        "invalid_code": "Code invalide",
+        "btn_join": "REJOINDRE LA MISSION",
+        "scan_header": "REJOINDRE PAR QR CODE",
+        "scan_error": "Code invalide ou mission introuvable",
+        "scan_instruction": "Utilisez l'appareil photo pour scanner le QR code."
+    },
     "lobby": {
         "title": "SALON TACTIQUE",
         "mission_id": "ID MISSION",
+        "mission_code": "CODE DE MISSION",
+        "scan_to_join": "Scannez pour rejoindre la mission",
         "waiting": "EN ATTENTE...",
         "linked_msg": "LIAISON COM. ÉTABLIE",
         "scan_instruction": "SCANNEZ POUR REJOINDRE",
@@ -64,7 +82,9 @@
         "recruitment_required": "RECRUTEMENT REQUIS : AU MOINS UN AUTRE AGENT DOIT REJOINDRE LE SALON.",
         "start_op_title": "DÉPLOYER LA MISSION ?",
         "start_op_msg": "Êtes-vous prêt à envoyer vos *agents* sur le terrain ?",
-        "btn_deploy_simple": "DÉPLOYER"
+        "btn_deploy_simple": "DÉPLOYER",
+        "waiting_host": "ATTENTE DE L'HÔTE...",
+        "leave_lobby": "QUITTER LE SALON"
     },
     "mission": {
         "mission": "MISSION",
@@ -72,6 +92,12 @@
         "level": "NIVEAU 02",
         "status": "STATUT",
         "in_mission": "EN MISSION",
+        "time_remaining": "TEMPS RESTANT",
+        "hold_to_decrypt": "MAINTENIR L'EMPREINTE POUR DÉCRYPTER",
+        "resolved": "RÉSOLU",
+        "securing_in_progress": "SÉCURISATION EN COURS...",
+        "securing": "SÉCURISATION...",
+        "hold_to_secure": "MAINTENIR POUR SÉCURISER",
         "create_title": "CONFIGURATION",
         "abort_mission": "ABANDONNER MISSION",
         "threat_level": "NIVEAU DE MENACE",
@@ -119,6 +145,8 @@
         "validate": "VALIDER",
         "accept_failure": "ACCEPTER L'ÉCHEC",
         "waiting_majority": "Attente d'une majorité...",
+        "which_challenge_title": "QUEL DÉFI AVOUER ?",
+        "which_challenge_msg": "Sélectionnez le défi sur lequel vous avez été démasqué par {{name}}.",
         "unmask_attempt_self": "L'Agent {{name}} vous accuse !",
         "unmask_attempt_msg": "L'Agent *{{name}}* vous accuse d'avoir réalisé un défi.",
         "unmask_attempt_other": "L'Agent {{unmasker}} tente de démasquer {{target}}...",
@@ -213,7 +241,7 @@
         "report_id": "RAPPORT_MISSION",
         "mission_accomplished": "MISSION ACCOMPLIE",
         "team_objective_completed": "VOTRE ÉQUIPE A REMPLI SON OBJECTIF SECRET",
-        "new_game": "NOUVELLE PARTIE",
+        "new_game": "RECOMMENCER UNE PARTIE",
         "leave_lobby": "QUITTER LE SALON",
         "you": "VOUS",
         "winners": "VAINQUEURS"

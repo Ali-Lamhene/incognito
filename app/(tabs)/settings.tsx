@@ -20,7 +20,7 @@ import { PageHeader } from '../../components/ui/PageHeader';
 
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
-    const { soundEnabled, musicEnabled, hapticsEnabled, language, toggleSound, toggleMusic, toggleHaptics, setLanguage } = useSettingsStore();
+    const { hapticsEnabled, language, toggleHaptics, setLanguage } = useSettingsStore();
     const { profile, updateProfile } = useProfileStore();
     const { t } = useTranslation();
     const [showProfileModal, setShowProfileModal] = useState(false);
@@ -73,7 +73,7 @@ export default function SettingsScreen() {
                             <View style={styles.profileMeta}>
                                 <Text style={styles.profileName}>{profile?.codename || 'ALPHA'}</Text>
                                 <Text style={styles.profileId}>
-                                    CODE AGENT : {profile?.id ? profile.id.replace('AGENT-', '') : 'X7K9'}
+                                    {t('settings.agent_code')}{profile?.id ? profile.id.replace('AGENT-', '') : 'X7K9'}
                                 </Text>
                             </View>
                         </View>
@@ -86,30 +86,6 @@ export default function SettingsScreen() {
                     {renderSectionHeader(t('settings.section_device'))}
 
                     <View style={styles.cardContainer}>
-                        {/* Audio SFX */}
-                        <View style={styles.settingRow}>
-                            <View style={styles.settingLabel}>
-                                <Ionicons name="volume-high-outline" size={22} color="#F2E8CF" />
-                                <Text style={styles.settingText}>{t('settings.audio_fx')}</Text>
-                            </View>
-                            <CustomSwitch
-                                value={soundEnabled}
-                                onValueChange={toggleSound}
-                            />
-                        </View>
-
-                        {/* Ambient Music */}
-                        <View style={styles.settingRow}>
-                            <View style={styles.settingLabel}>
-                                <Ionicons name="musical-notes-outline" size={22} color="#F2E8CF" />
-                                <Text style={styles.settingText}>{t('settings.ambient_music') || 'Musique d\'ambiance'}</Text>
-                            </View>
-                            <CustomSwitch
-                                value={musicEnabled}
-                                onValueChange={toggleMusic}
-                            />
-                        </View>
-
                         {/* Haptics */}
                         <View style={styles.settingRow}>
                             <View style={styles.settingLabel}>
