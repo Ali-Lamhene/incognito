@@ -20,6 +20,7 @@ interface ProfileState {
     isFirstSetupDone: boolean;
     createProfile: (codename: string, avatar: string, color: string) => void;
     updateProfile: (updates: Partial<AgentProfile>) => void;
+    resetProfile: () => void;
 }
 
 const DEFAULT_COLORS = ['#0D9488', '#F43F5E', '#Eab308', '#8B5CF6', '#F97316'];
@@ -51,6 +52,10 @@ export const useProfileStore = create<ProfileState>()(
                 const currentCallback = get().profile;
                 if (!currentCallback) return;
                 set({ profile: { ...currentCallback, ...updates } });
+            },
+
+            resetProfile: () => {
+                set({ profile: null, isFirstSetupDone: false });
             },
         }),
         {

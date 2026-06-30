@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, Text, Alert } from 'react-native';
 import Animated, { 
     FadeInDown, 
     FadeInUp, 
@@ -17,13 +17,38 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { Theme } from '../../constants/Theme';
 import { ProfileSetupModal } from '../../components/ProfileSetupModal';
 import { PageHeader } from '../../components/ui/PageHeader';
+import { useSession } from '../../context/SessionContext';
 
 export default function SettingsScreen() {
     const insets = useSafeAreaInsets();
     const { hapticsEnabled, language, toggleHaptics, setLanguage } = useSettingsStore();
-    const { profile, updateProfile } = useProfileStore();
+    const { clearSession } = useSession();
+    const { profile, updateProfile, resetProfile } = useProfileStore();
     const { t } = useTranslation();
     const [showProfileModal, setShowProfileModal] = useState(false);
+
+    const handleResetAll = () => {
+        Alert.alert(
+            "Réinitialisation",
+            "Voulez-vous vraiment supprimer toutes les informations de l'agent et réinitialiser l'application ?",
+            [
+                { text: "Annuler", style: "cancel" },
+                { 
+                    text: "Réinitialiser", 
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await clearSession();
+                        } catch (e) {
+                            console.log("No active session to clear", e);
+                        }
+                        resetProfile();
+                        Alert.alert("Succès", "Profil agent réinitialisé.");
+                    }
+                }
+            ]
+        );
+    };
 
     const handleProfileComplete = (codename: string, avatar: string, color: string) => {
         updateProfile({ codename, avatar, themeColor: color });
@@ -150,6 +175,27 @@ export default function SettingsScreen() {
                                 <Text style={styles.infoValue}>otakumi.factory@gmail.com</Text>
                             </View>
                         </View>
+                    </View>
+                </View>
+
+                {/* Dev Tools (Provisoire) */}
+                <View style={styles.section}>
+                    {renderSectionHeader("DÉVELOPPEMENT (PROVISOIRE)")}
+
+                    <View style={styles.cardContainer}>
+                        <TouchableOpacity
+                            activeOpacity={0.7}
+                            onPress={handleResetAll}
+                            style={[styles.settingRow, { borderBottomWidth: 0 }]}
+                        >
+                            <View style={styles.settingLabel}>
+                                <Ionicons name="trash-outline" size={22} color={Theme.colors.status.alert} />
+                                <Text style={[styles.settingText, { color: Theme.colors.status.alert }]}>
+                                    Réinitialiser l'Agent (Reset)
+                                </Text>
+                            </View>
+                            <Ionicons name="chevron-forward" size={20} color={Theme.colors.status.alert} />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </Animated.ScrollView>
