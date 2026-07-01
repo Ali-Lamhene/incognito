@@ -8,7 +8,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Agent } from '../context/SessionContext';
 import { styles } from './ActiveChallengeCard.styles';
 import { Theme } from '../constants/Theme';
-import SoundService from '../services/SoundService';
+import HapticService from '../services/HapticService';
 
 interface ActiveChallengeCardProps {
   me?: Agent;
@@ -70,7 +70,7 @@ export function ActiveChallengeCard({
       setIsScanning(true);
     }
 
-    SoundService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
+    HapticService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
 
     const startTime = Date.now();
     let lastHapticTime = startTime;
@@ -90,7 +90,7 @@ export function ActiveChallengeCard({
       }
 
       if (currentTime - lastHapticTime >= 300) {
-        SoundService.triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+        HapticService.triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
         lastHapticTime = currentTime;
       }
     }, 30);
@@ -103,7 +103,7 @@ export function ActiveChallengeCard({
       clearInterval(intervalRef.current);
       intervalRef.current = null;
       if (isScanning || isSecuring) {
-        SoundService.triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
+        HapticService.triggerHaptic(Haptics.ImpactFeedbackStyle.Medium);
       }
     }
 
@@ -121,7 +121,7 @@ export function ActiveChallengeCard({
     setScanPercent(0);
     setIsRevealed(true);
 
-    SoundService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
+    HapticService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
   };
 
   const handleSecured = () => {
@@ -134,7 +134,7 @@ export function ActiveChallengeCard({
     setActiveIndex(0);
     setScanPercent(0);
 
-    SoundService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
+    HapticService.triggerHaptic(Haptics.ImpactFeedbackStyle.Heavy);
   };
 
   const handleHide = () => {

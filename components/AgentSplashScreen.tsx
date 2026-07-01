@@ -11,7 +11,6 @@ import Animated, {
     withTiming
 } from 'react-native-reanimated';
 import { useTranslation } from '../hooks/useTranslation';
-import SoundService from '../services/SoundService';
 import { ThemedText } from './ThemedText';
 
 const { width, height } = Dimensions.get('window');
@@ -29,8 +28,7 @@ export function AgentSplashScreen({ onComplete }: AgentSplashScreenProps) {
     const progress = useSharedValue(0);
 
     useEffect(() => {
-        // Play splash sound
-        SoundService.playSFX('SPLASH');
+
 
         // Entrance sequence
         opacity.value = withTiming(1, { duration: 2000 });

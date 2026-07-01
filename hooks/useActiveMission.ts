@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSharedValue, withRepeat, withTiming, useAnimatedStyle } from 'react-native-reanimated';
 import { useSession } from '../context/SessionContext';
 import { useProfileStore } from '../store/profileStore';
-import SoundService from '../services/SoundService';
+
 
 export function useActiveMission() {
     const router = useRouter();
@@ -64,7 +64,7 @@ export function useActiveMission() {
             return;
         }
 
-        SoundService.stopBackgroundMusic();
+
     }, [status, router]);
 
     useEffect(() => {
@@ -83,7 +83,6 @@ export function useActiveMission() {
 
         return () => {
             clearInterval(interval);
-            SoundService.stopBackgroundMusic();
         };
     }, [status, isHost, session?.duration, session?.startedAt, finishMission]);
 
@@ -100,26 +99,13 @@ export function useActiveMission() {
 
     const handleConfirmUnmask = async () => {
         if (profile?.id && targetIdToUnmask) {
-            SoundService.playSFX('TENSION_STINGER');
             await unmaskAgent(targetIdToUnmask, profile.id);
             setShowUnmaskModal(false);
             setTargetIdToUnmask(null);
         }
     };
 
-    useEffect(() => {
-        if (isLowTime && status === "ACTIVE") {
-            SoundService.playBackgroundMusic('HEARTBEAT');
-        } else if (status === "ACTIVE") {
-            SoundService.stopBackgroundMusic();
-        }
-    }, [isLowTime, status]);
 
-    useEffect(() => {
-        if (me?.pendingAccusation) {
-            SoundService.playSFX('TENSION_STINGER');
-        }
-    }, [me?.pendingAccusation]);
 
     const handleConfessAccusation = async (challengeId: string) => {
         if (profile?.id) {

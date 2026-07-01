@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
-import SoundService from '../services/SoundService';
+
 import { Theme } from '@/constants/Theme';
 
 const { width, height } = Dimensions.get('window');
@@ -34,7 +34,7 @@ export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScree
 
     useEffect(() => {
         // Play mission start sound
-        SoundService.playSFX('MISSION_START');
+
 
         // Animate progress bar fill
         progress.value = withTiming(1, { duration: SPLASH_DURATION, easing: Easing.linear });

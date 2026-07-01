@@ -13,7 +13,6 @@ import { Button } from '../../components/ui/Button';
 
 import { useSession } from '../../context/SessionContext';
 import { useTranslation } from '../../hooks/useTranslation';
-import SoundService from '../../services/SoundService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Theme } from '../../constants/Theme';
 
@@ -35,7 +34,6 @@ export default function AgentHomeScreen() {
 
   useEffect(() => {
     if (!showSplash) {
-      SoundService.playBackgroundMusic('HOME_AMBIENT');
       if (!hasLaunched) setHasLaunched();
     }
   }, [showSplash, hasLaunched, setHasLaunched]);

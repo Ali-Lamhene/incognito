@@ -13,7 +13,6 @@ import Animated, {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
-import SoundService from '../services/SoundService';
 import { Theme } from '../constants/Theme';
 
 const { width, height } = Dimensions.get('window');
@@ -38,8 +37,7 @@ export function MissionCompleteSplashScreen({ onComplete }: MissionCompleteSplas
     const containerOpacity = useSharedValue(1);
 
     useEffect(() => {
-        // Play success/game-over sound
-        SoundService.playSFX('SUCCESS');
+
 
         // Slowly zoom background image over duration
         bgScale.value = withTiming(1.08, { duration: COMPLETE_DURATION, easing: Easing.out(Easing.quad) });
