@@ -9,7 +9,10 @@ import {
     TouchableWithoutFeedback, 
     View, 
     Text,
-    useWindowDimensions
+    useWindowDimensions,
+    KeyboardAvoidingView,
+    Keyboard,
+    Platform
 } from 'react-native';
 import Animated, { 
     FadeIn, 
@@ -117,19 +120,25 @@ export function ProfileSetupModal({ visible, onComplete, initialData, modal = tr
 
     if (!modal) {
         return (
-            <View style={[styles.fullscreenContainer, { paddingTop: insets.top }]}>
-                {/* Background Image Texture */}
-                <Image 
-                    source={require('../assets/UI/texture_city_dark.png')} 
-                    style={[StyleSheet.absoluteFillObject, { opacity: 0.04 }]}
-                    contentFit="cover"
-                />
+            <KeyboardAvoidingView 
+                style={{ flex: 1 }} 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+            >
+                <View style={[styles.fullscreenContainer, { paddingTop: insets.top }]}>
+                    {/* Background Image Texture */}
+                    <Image 
+                        source={require('../assets/UI/texture_city_dark.png')} 
+                        style={[StyleSheet.absoluteFillObject, { opacity: 0.04 }]}
+                        contentFit="cover"
+                    />
 
-                <ScrollView 
-                    style={styles.scrollContainer} 
-                    contentContainerStyle={{ paddingBottom: 40 + insets.bottom }}
-                    showsVerticalScrollIndicator={false}
-                >
+                    <ScrollView 
+                        style={styles.scrollContainer} 
+                        contentContainerStyle={{ paddingBottom: 40 + insets.bottom }}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                    >
                     {/* Cover Header Image Wrapper (contains cover image shifted down and absolute logo) */}
                     <View style={[styles.coverWrapper, { height: coverImageHeight + 110 }]}>
                         <Image 
@@ -261,8 +270,9 @@ export function ProfileSetupModal({ visible, onComplete, initialData, modal = tr
                     </View>
                 </ScrollView>
             </View>
-        );
-    }
+        </KeyboardAvoidingView>
+    );
+}
 
     // Modal Mode for Editing profile later
     return (
@@ -272,14 +282,19 @@ export function ProfileSetupModal({ visible, onComplete, initialData, modal = tr
             animationType="none"
             statusBarTranslucent={true}
         >
-            <TouchableWithoutFeedback>
-                <View style={styles.modalOverlay}>
+            <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <Animated.View
                         entering={FadeIn.duration(200)}
                         exiting={FadeOut.duration(200)}
                         style={styles.modalBackdrop}
                     />
+                </TouchableWithoutFeedback>
 
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={styles.modalKeyboardAvoiding}
+                >
                     <Animated.View
                         entering={ZoomIn.duration(300)}
                         exiting={ZoomOut.duration(200)}
@@ -334,8 +349,8 @@ export function ProfileSetupModal({ visible, onComplete, initialData, modal = tr
                             />
                         </View>
                     </Animated.View>
-                </View>
-            </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </View>
         </Modal>
     );
 }
@@ -578,5 +593,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 0,
         padding: 4,
+    },
+    modalKeyboardAvoiding: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });
