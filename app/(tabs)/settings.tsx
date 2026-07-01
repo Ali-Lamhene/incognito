@@ -11,8 +11,10 @@ import Animated, {
     interpolateColor 
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { useProfileStore } from '../../store/profileStore';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useAppState } from '../../store/appState';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Theme } from '../../constants/Theme';
 import { ProfileSetupModal } from '../../components/ProfileSetupModal';
@@ -20,12 +22,14 @@ import { PageHeader } from '../../components/ui/PageHeader';
 import { useSession } from '../../context/SessionContext';
 
 export default function SettingsScreen() {
+    const router = useRouter();
     const insets = useSafeAreaInsets();
     const { hapticsEnabled, language, toggleHaptics, setLanguage } = useSettingsStore();
     const { clearSession } = useSession();
     const { profile, updateProfile, resetProfile } = useProfileStore();
     const { t } = useTranslation();
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const setShowGlobalProfileModal = useAppState((state) => state.setShowProfileModal);
 
     const handleResetAll = () => {
         Alert.alert(
@@ -43,7 +47,8 @@ export default function SettingsScreen() {
                             console.log("No active session to clear", e);
                         }
                         resetProfile();
-                        Alert.alert("Succès", "Profil agent réinitialisé.");
+                        setShowGlobalProfileModal(true);
+                        router.replace('/');
                     }
                 }
             ]
@@ -203,6 +208,7 @@ export default function SettingsScreen() {
             <ProfileSetupModal
                 visible={showProfileModal}
                 onComplete={handleProfileComplete}
+                onClose={() => setShowProfileModal(false)}
                 initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
             />
         </View>

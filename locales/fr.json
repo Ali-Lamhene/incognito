@@ -37,15 +37,26 @@
         "contact": "CONTACT"
     },
     "profile": {
-        "title_new": "IDENTIFICATION REQUISE",
-        "subtitle_new": "Veuillez configurer votre identité",
-        "title_edit": "MISE À JOUR REQUISE",
+        "title_new": "INITIALISATION",
+        "subtitle_new": "Bienvenue, agent. Avant de rejoindre la partie, enregistrez votre identité et vos préférences.",
+        "title_edit": "EDITION DU PROFIL",
         "subtitle_edit": "Modifier vos paramètres d'accréditation",
-        "label_codename": "NOM DE CODE",
-        "placeholder_codename": "Entrez votre alias",
+        "label_codename": "1. TON PSEUDO",
+        "placeholder_codename": "Entrez votre pseudo",
         "label_emblem": "EMBLÈME",
-        "btn_create": "CONFIRMER L'IDENTITÉ",
-        "btn_update": "METTRE À JOUR"
+        "btn_create": "REJOINDRE LA MISSION",
+        "btn_update": "CONFIRMER",
+        "input_subtext": "Ce pseudo sera visible par les autres agents.",
+        "label_preferences": "2. TES PRÉFÉRENCES",
+        "sound_fx_label": "Effets sonores",
+        "sound_fx_desc": "Active ou désactive les sons du jeu.",
+        "ambient_music_label": "Musique d'ambiance",
+        "ambient_music_desc": "Active ou désactive la musique.",
+        "haptics_label": "Vibreur",
+        "haptics_desc": "Active ou désactive les vibrations.",
+        "lang_label": "Langue de l'interface",
+        "lang_desc": "Sélectionnez la langue du terminal.",
+        "edit_codename_label": "PSEUDO DE L'AGENT"
     },
     "join": {
         "title": "REJOINDRE UNE MISSION",

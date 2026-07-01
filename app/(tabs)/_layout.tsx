@@ -2,13 +2,42 @@ import { Tabs } from 'expo-router';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState, useEffect } from 'react';
 import { useAppState } from '../../store/appState';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useProfileStore } from '../../store/profileStore';
+import { ProfileSetupModal } from '../../components/ProfileSetupModal';
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  
+  const { isFirstSetupDone, createProfile } = useProfileStore();
+  const [hydrated, setHydrated] = useState(useProfileStore.persist.hasHydrated());
+
+  useEffect(() => {
+    const unsub = useProfileStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    setHydrated(useProfileStore.persist.hasHydrated());
+    return () => unsub();
+  }, []);
+
+  if (!hydrated) {
+    return <View style={{ flex: 1, backgroundColor: '#000' }} />;
+  }
+
+  if (!isFirstSetupDone) {
+    return (
+      <ProfileSetupModal
+        visible={true}
+        modal={false}
+        onComplete={(codename, emblem, color) => {
+          createProfile(codename, emblem, color);
+        }}
+      />
+    );
+  }
+
   return (
     <Tabs
       tabBar={({ state, descriptors, navigation }) => {

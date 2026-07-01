@@ -36,15 +36,26 @@
         "contact": "CONTACT"
     },
     "profile": {
-        "title_new": "IDENTIFICATION REQUIRED",
-        "subtitle_new": "Please configure your identity",
-        "title_edit": "UPDATE REQUIRED",
+        "title_new": "INITIALIZATION",
+        "subtitle_new": "Welcome, agent. Before joining the game, register your identity and preferences.",
+        "title_edit": "EDIT PROFILE",
         "subtitle_edit": "Modify your accreditation parameters",
-        "label_codename": "CODENAME",
-        "placeholder_codename": "Enter your alias",
+        "label_codename": "1. YOUR CODENAME",
+        "placeholder_codename": "Enter your codename",
         "label_emblem": "EMBLEM",
-        "btn_create": "CONFIRM IDENTITY",
-        "btn_update": "UPDATE PROFILE"
+        "btn_create": "JOIN THE MISSION",
+        "btn_update": "CONFIRM",
+        "input_subtext": "This codename will be visible to other agents.",
+        "label_preferences": "2. YOUR PREFERENCES",
+        "sound_fx_label": "Sound Effects",
+        "sound_fx_desc": "Enable or disable game sounds.",
+        "ambient_music_label": "Ambient Music",
+        "ambient_music_desc": "Enable or disable music.",
+        "haptics_label": "Vibrations",
+        "haptics_desc": "Enable or disable haptic vibrations.",
+        "lang_label": "Interface Language",
+        "lang_desc": "Select the terminal language.",
+        "edit_codename_label": "AGENT'S CODENAME"
     },
     "join": {
         "title": "JOIN A MISSION",

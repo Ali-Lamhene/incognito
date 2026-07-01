@@ -1,49 +1,270 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Switch, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import React, { useState, useEffect } from 'react';
+import { 
+    Modal, 
+    ScrollView, 
+    StyleSheet, 
+    TextInput, 
+    TouchableOpacity, 
+    TouchableWithoutFeedback, 
+    View, 
+    Text,
+    useWindowDimensions
+} from 'react-native';
+import Animated, { 
+    FadeIn, 
+    FadeOut, 
+    ZoomIn, 
+    ZoomOut,
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+    interpolateColor
+} from 'react-native-reanimated';
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from '../hooks/useTranslation';
 import { useSettingsStore } from '../store/settingsStore';
+import { Theme } from '../constants/Theme';
 import { Button } from './ui/Button';
-import { ThemedText } from './ThemedText';
+import { LinearGradient } from 'expo-linear-gradient';
 
 interface ProfileSetupModalProps {
     visible: boolean;
     onComplete: (codename: string, avatar: string, color: string) => void;
     initialData?: { codename: string; avatar: string; color: string };
+    modal?: boolean;
+    onClose?: () => void;
 }
 
-const AGENT_EMBLEMS = [
-    'shield-checkmark-outline', 'finger-print-outline', 'eye-outline', 'skull-outline', 'flash-outline',
-    'radio-outline', 'locate-outline', 'briefcase-outline', 'bug-outline', 'lock-closed-outline',
-    'key-outline', 'rocket-outline', 'planet-outline', 'code-slash-outline', 'nuclear-outline'
-];
-const AGENT_COLORS = ['#0D9488', '#F43F5E', '#3B82F6', '#EAB308', '#8B5CF6', '#10B981'];
+interface CustomSwitchProps {
+    value: boolean;
+    onValueChange: () => void;
+}
 
-export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileSetupModalProps) {
+function CustomSwitch({ value, onValueChange }: CustomSwitchProps) {
+    const progress = useSharedValue(value ? 1 : 0);
+
+    React.useEffect(() => {
+        progress.value = withTiming(value ? 1 : 0, { duration: 200 });
+    }, [value]);
+
+    const trackAnimatedStyle = useAnimatedStyle(() => {
+        const backgroundColor = interpolateColor(
+            progress.value,
+            [0, 1],
+            ['#1A1A1A', Theme.colors.red]
+        );
+        return { backgroundColor };
+    });
+
+    const thumbAnimatedStyle = useAnimatedStyle(() => {
+        const translateX = progress.value * 20;
+        return {
+            transform: [{ translateX }]
+        };
+    });
+
+    return (
+        <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={onValueChange}
+        >
+            <Animated.View style={[styles.switchTrack, trackAnimatedStyle]}>
+                <Animated.View style={[styles.switchThumb, thumbAnimatedStyle]} />
+            </Animated.View>
+        </TouchableOpacity>
+    );
+}
+
+export function ProfileSetupModal({ visible, onComplete, initialData, modal = true, onClose }: ProfileSetupModalProps) {
     const [codename, setCodename] = useState(initialData?.codename || '');
-    const [selectedEmblem, setSelectedEmblem] = useState(initialData?.avatar || AGENT_EMBLEMS[0]);
-    const [selectedColor, setSelectedColor] = useState(initialData?.color || AGENT_COLORS[0]);
+    
     const { t } = useTranslation();
-    const { language, setLanguage } = useSettingsStore();
+    const insets = useSafeAreaInsets();
+    const { width: screenWidth } = useWindowDimensions();
+    
+    const { 
+        language, 
+        setLanguage, 
+        hapticsEnabled, 
+        toggleHaptics 
+    } = useSettingsStore();
 
     // Reset state when visible or initialData changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (visible) {
             setCodename(initialData?.codename || '');
-            setSelectedEmblem(initialData?.avatar || AGENT_EMBLEMS[0]);
-            setSelectedColor(initialData?.color || AGENT_COLORS[0]);
         }
     }, [visible, initialData]);
 
     const handleConfirm = () => {
         if (codename.trim().length > 0) {
-            onComplete(codename.trim(), selectedEmblem, selectedColor);
+            onComplete(
+                codename.trim(), 
+                initialData?.avatar || 'finger-print-outline', 
+                initialData?.color || '#8B1E1E'
+            );
         }
     };
 
     if (!visible) return null;
 
+    // Calculate dimensions based on screen width
+    const logoWidth = screenWidth - 40;
+    const logoHeight = logoWidth / 3.257;
+    const coverImageHeight = screenWidth / 2.048; // Natural aspect ratio height
+
+    if (!modal) {
+        return (
+            <View style={[styles.fullscreenContainer, { paddingTop: insets.top }]}>
+                {/* Background Image Texture */}
+                <Image 
+                    source={require('../assets/UI/texture_city_dark.png')} 
+                    style={[StyleSheet.absoluteFillObject, { opacity: 0.04 }]}
+                    contentFit="cover"
+                />
+
+                <ScrollView 
+                    style={styles.scrollContainer} 
+                    contentContainerStyle={{ paddingBottom: 40 + insets.bottom }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Cover Header Image Wrapper (contains cover image shifted down and absolute logo) */}
+                    <View style={[styles.coverWrapper, { height: coverImageHeight + 110 }]}>
+                        <Image 
+                            source={require('../assets/UI/header_init.png')} 
+                            style={[styles.coverImage, { height: coverImageHeight }]}
+                            contentFit="contain"
+                        />
+                        {/* Top Fade Gradient to blend the top edge of the illustration */}
+                        <LinearGradient
+                            colors={['#000000', 'rgba(0, 0, 0, 0.4)', 'transparent']}
+                            style={[styles.topGradient, { top: 100 }]}
+                        />
+                        {/* Deep Bottom Fade Gradient */}
+                        <LinearGradient
+                            colors={['transparent', 'rgba(0, 0, 0, 0.5)', 'rgba(0, 0, 0, 0.95)', '#000000']}
+                            style={styles.bottomGradient}
+                        />
+                        {/* Logo overlay at the top (absolute, matches inputs width) */}
+                        <View style={[styles.logoOverlayContainer, { width: logoWidth, height: logoHeight }]}>
+                            <Image 
+                                source={require('../assets/UI/incognito_logo.png')} 
+                                style={StyleSheet.absoluteFillObject}
+                                contentFit="contain"
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.formContainer}>
+                        {/* Title */}
+                        <Text style={styles.mainTitle}>{t('profile.title_new')}</Text>
+                        
+                        {/* Separator with sparkles/star and fading gradient lines */}
+                        <View style={styles.separatorContainer}>
+                            <LinearGradient
+                                colors={['transparent', 'rgba(139, 30, 30, 0.4)']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.separatorLine}
+                            />
+                            <Ionicons name="star" size={8} color={Theme.colors.red} style={{ marginHorizontal: 8 }} />
+                            <LinearGradient
+                                colors={['rgba(139, 30, 30, 0.4)', 'transparent']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={styles.separatorLine}
+                            />
+                        </View>
+
+                        {/* Welcome Text */}
+                        <Text style={styles.welcomeText}>
+                            {t('profile.subtitle_new')}
+                        </Text>
+
+                        {/* SECTION 1: TON PSEUDO */}
+                        <View style={styles.sectionHeader}>
+                            <Ionicons name="person-outline" size={18} color={Theme.colors.red} />
+                            <Text style={styles.sectionTitle}>{t('profile.label_codename')}</Text>
+                        </View>
+
+                        <View style={styles.inputWrapper}>
+                            <Ionicons name="person-outline" size={18} color="rgba(242, 232, 207, 0.4)" style={{ marginRight: 8 }} />
+                            <TextInput
+                                style={styles.inputField}
+                                placeholder={t('profile.placeholder_codename')}
+                                placeholderTextColor="rgba(242, 232, 207, 0.25)"
+                                value={codename}
+                                onChangeText={setCodename}
+                                maxLength={12}
+                                autoCapitalize="characters"
+                                autoCorrect={false}
+                            />
+                        </View>
+                        <Text style={styles.inputSubtext}>
+                            {t('profile.input_subtext')}
+                        </Text>
+
+                        {/* SECTION 2: TES PRÉFÉRENCES */}
+                        <View style={[styles.sectionHeader, { marginTop: 28 }]}>
+                            <Ionicons name="settings-outline" size={18} color={Theme.colors.red} />
+                            <Text style={styles.sectionTitle}>{t('profile.label_preferences')}</Text>
+                        </View>
+
+                        <View style={styles.preferencesList}>
+                            {/* Haptics */}
+                            <View style={styles.preferenceRow}>
+                                <View style={styles.preferenceInfo}>
+                                    <Text style={styles.preferenceLabel}>{t('profile.haptics_label')}</Text>
+                                    <Text style={styles.preferenceDesc}>{t('profile.haptics_desc')}</Text>
+                                </View>
+                                <CustomSwitch
+                                    value={hapticsEnabled}
+                                    onValueChange={toggleHaptics}
+                                />
+                            </View>
+
+                            {/* Language */}
+                            <View style={[styles.preferenceRow, { borderBottomWidth: 0 }]}>
+                                <View style={styles.preferenceInfo}>
+                                    <Text style={styles.preferenceLabel}>{t('profile.lang_label')}</Text>
+                                    <Text style={styles.preferenceDesc}>{t('profile.lang_desc')}</Text>
+                                </View>
+                                <View style={styles.langToggle}>
+                                    <TouchableOpacity
+                                        onPress={() => setLanguage('fr')}
+                                        style={[styles.langOption, language === 'fr' && styles.langActive]}
+                                    >
+                                        <Text style={[styles.langText, { color: language === 'fr' ? Theme.colors.text.dark : Theme.colors.text.light }]}>FR</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => setLanguage('en')}
+                                        style={[styles.langOption, language === 'en' && styles.langActive]}
+                                    >
+                                        <Text style={[styles.langText, { color: language === 'en' ? Theme.colors.text.dark : Theme.colors.text.light }]}>EN</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Button */}
+                        <TouchableOpacity
+                            style={[styles.submitButton, codename.trim().length === 0 && styles.submitButtonDisabled]}
+                            onPress={handleConfirm}
+                            disabled={codename.trim().length === 0}
+                            activeOpacity={0.8}
+                        >
+                            <Ionicons name="compass-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
+                            <Text style={styles.submitButtonText}>{t('profile.btn_create')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    }
+
+    // Modal Mode for Editing profile later
     return (
         <Modal
             transparent
@@ -52,32 +273,50 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
             statusBarTranslucent={true}
         >
             <TouchableWithoutFeedback>
-                <View style={styles.overlay}>
+                <View style={styles.modalOverlay}>
                     <Animated.View
                         entering={FadeIn.duration(200)}
                         exiting={FadeOut.duration(200)}
-                        style={styles.backdrop}
+                        style={styles.modalBackdrop}
                     />
 
                     <Animated.View
                         entering={ZoomIn.duration(300)}
                         exiting={ZoomOut.duration(200)}
-                        style={[styles.container, { borderColor: '#FFF' }]}
+                        style={styles.modalContainer}
                     >
-                        <View style={styles.header}>
-                            <ThemedText type="subtitle" style={styles.title}>
-                                {initialData ? t('profile.title_edit') : t('profile.title_new')}
-                            </ThemedText>
-                            <View style={[styles.line, { backgroundColor: '#FFF' }]} />
-                        </View>
+                        <View style={styles.cardWrapper}>
+                            {/* Card Texture */}
+                            <Image 
+                                source={require('../assets/UI/texture_city_dark.png')} 
+                                style={[StyleSheet.absoluteFillObject, { opacity: 0.08, borderRadius: 8 }]}
+                                contentFit="cover"
+                            />
+                            {/* Header section inside the card */}
+                            <View style={styles.cardHeader}>
+                                <Text style={styles.cardTitle}>
+                                    {t('profile.title_edit') || "EDITION DU PROFIL"}
+                                </Text>
+                                <View style={styles.headerLine} />
+                                
+                                {onClose && (
+                                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                                        <Ionicons name="close" size={24} color={Theme.colors.text.light} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
 
-                        <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
-                            <View style={styles.inputGroup}>
-                                <ThemedText type="code" style={styles.label}>{t('profile.label_codename')}</ThemedText>
+                            <View style={[styles.sectionHeader, { marginBottom: 12 }]}>
+                                <Ionicons name="person-outline" size={16} color={Theme.colors.red} />
+                                <Text style={styles.sectionTitle}>{t('profile.edit_codename_label')}</Text>
+                            </View>
+
+                            <View style={styles.inputWrapper}>
+                                <Ionicons name="person-outline" size={18} color="rgba(242, 232, 207, 0.4)" style={{ marginRight: 8 }} />
                                 <TextInput
-                                    style={[styles.input, { borderColor: '#FFF' }]}
+                                    style={styles.inputField}
                                     placeholder={t('profile.placeholder_codename')}
-                                    placeholderTextColor="rgba(255,255,255,0.3)"
+                                    placeholderTextColor="rgba(242, 232, 207, 0.25)"
                                     value={codename}
                                     onChangeText={setCodename}
                                     maxLength={12}
@@ -86,66 +325,14 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
                                 />
                             </View>
 
-                            <View style={styles.inputGroup}>
-                                <ThemedText type="code" style={styles.label}>{t('profile.label_emblem')}</ThemedText>
-                                <View style={styles.emblemGrid}>
-                                    {AGENT_EMBLEMS.map((icon) => (
-                                        <TouchableOpacity
-                                            key={icon}
-                                            onPress={() => setSelectedEmblem(icon)}
-                                            style={[
-                                                styles.emblemOption,
-                                                selectedEmblem === icon && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: '#FFF' }
-                                            ]}
-                                        >
-                                            <Ionicons
-                                                name={icon as any}
-                                                size={24}
-                                                color={selectedEmblem === icon ? '#FFF' : '#666'}
-                                            />
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-
-                            {/* New Settings Section */}
-                            <View style={styles.settingsSection}>
-                                <ThemedText type="code" style={styles.label}>{t('settings.section_device')}</ThemedText>
-
-                                <View style={styles.settingRow}>
-                                    <View style={styles.settingLabel}>
-                                        <Ionicons name="language-outline" size={16} color="#FFF" />
-                                        <ThemedText type="code" style={styles.settingText}>{t('settings.language')}</ThemedText>
-                                    </View>
-                                    <View style={styles.langToggle}>
-                                        <TouchableOpacity
-                                            onPress={() => setLanguage('fr')}
-                                            style={[styles.langOption, language === 'fr' && styles.langActive]}
-                                        >
-                                            <ThemedText type="code" style={[styles.langText, { color: language === 'fr' ? '#000' : '#FFF' }]}>FR</ThemedText>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity
-                                            onPress={() => setLanguage('en')}
-                                            style={[styles.langOption, language === 'en' && styles.langActive]}
-                                        >
-                                            <ThemedText type="code" style={[styles.langText, { color: language === 'en' ? '#000' : '#FFF' }]}>EN</ThemedText>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            </View>
-                        </ScrollView>
-
-                        <Button
-                            title={initialData ? t('common.confirm') : t('profile.btn_create')}
-                            onPress={handleConfirm}
-                            style={[styles.button, { backgroundColor: '#FFF' }]}
-                            textStyle={{ color: '#000', fontSize: 12 }}
-                            variant="primary"
-                        />
-
-                        {/* Decoration */}
-                        <View style={styles.cornerTL} />
-                        <View style={styles.cornerBR} />
+                            <Button
+                                title={t('common.confirm') || "CONFIRMER"}
+                                onPress={handleConfirm}
+                                disabled={codename.trim().length === 0}
+                                style={{ marginTop: 20 }}
+                                variant="primary"
+                            />
+                        </View>
                     </Animated.View>
                 </View>
             </TouchableWithoutFeedback>
@@ -154,145 +341,242 @@ export function ProfileSetupModal({ visible, onComplete, initialData }: ProfileS
 }
 
 const styles = StyleSheet.create({
-    overlay: {
+    fullscreenContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 2000,
-        backgroundColor: 'transparent',
+        backgroundColor: '#000000',
     },
-    backdrop: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    scrollContainer: {
+        flex: 1,
+    },
+    coverWrapper: {
         width: '100%',
-        height: '100%',
+        position: 'relative',
+        backgroundColor: '#000000',
     },
-    container: {
-        width: '85%',
-        maxWidth: 600,
-        marginHorizontal: 'auto',
-        backgroundColor: '#0a0a0a',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.15)',
-        padding: 25,
-        gap: 25,
+    coverImage: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
     },
-    header: {
-        gap: 10,
-        alignItems: 'center',
+    logoOverlayContainer: {
+        position: 'absolute',
+        top: 25,
+        left: 20,
+        zIndex: 3,
     },
-    title: {
-        fontSize: 18,
-        letterSpacing: 4,
-        textAlign: 'center',
+    topGradient: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: 30,
+        zIndex: 2,
     },
-    line: {
-        height: 2,
-        width: 40,
-        borderRadius: 1,
+    bottomGradient: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 70,
+        zIndex: 2,
     },
     formContainer: {
-        maxHeight: 400,
+        paddingHorizontal: 20,
+        paddingTop: 10,
     },
-    inputGroup: {
-        gap: 10,
-        marginBottom: 20,
+    mainTitle: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 28,
+        color: Theme.colors.red,
+        textAlign: 'center',
+        letterSpacing: 2,
+        marginTop: 5,
     },
-    label: {
-        fontSize: 10,
-        opacity: 0.6,
+    separatorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 12,
+    },
+    separatorLine: {
+        width: 80,
+        height: 1,
+    },
+    welcomeText: {
+        fontFamily: Theme.fonts.body,
+        fontSize: 11,
+        color: Theme.colors.text.light,
+        opacity: 0.75,
+        textAlign: 'center',
+        lineHeight: 15,
+        paddingHorizontal: 10,
+        marginBottom: 25,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+        gap: 8,
+    },
+    sectionTitle: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 16,
+        color: Theme.colors.red,
         letterSpacing: 1,
     },
-    input: {
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderWidth: 1,
-        padding: 12,
-        color: '#FFF',
-        fontFamily: 'Courier', // Fallback
-        fontSize: 16,
-        letterSpacing: 2,
-        textAlign: 'center',
-    },
-    emblemGrid: {
+    inputWrapper: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12, // More gap
-        justifyContent: 'center',
-    },
-    emblemOption: {
-        width: 44,
-        height: 44,
-        justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#0D0D0D',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
-        backgroundColor: 'rgba(0,0,0,0.3)',
+        borderColor: 'rgba(242, 232, 207, 0.15)',
+        borderRadius: 6,
+        paddingHorizontal: 12,
     },
-    colorRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-        justifyContent: 'center',
+    inputField: {
+        flex: 1,
+        color: Theme.colors.text.light,
+        fontFamily: Theme.fonts.body,
+        fontSize: 14,
+        paddingVertical: 12,
     },
-    colorOption: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: 'transparent',
+    inputSubtext: {
+        fontFamily: Theme.fonts.body,
+        fontSize: 11,
+        color: Theme.colors.text.muted,
+        marginTop: 6,
+        paddingLeft: 4,
     },
-    colorSelected: {
-        borderColor: '#FFF',
-        transform: [{ scale: 1.2 }],
-    },
-    button: {
-        marginTop: 10,
-        borderWidth: 0,
-        height: 50,
-    },
-    settingsSection: {
-        marginTop: 10,
-        paddingTop: 15,
+    preferencesList: {
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255,255,255,0.1)',
-        gap: 10,
+        borderTopColor: 'rgba(242, 232, 207, 0.1)',
     },
-    settingRow: {
+    preferenceRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 5,
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(242, 232, 207, 0.1)',
     },
-    settingLabel: {
+    preferenceInfo: {
+        flex: 1,
+        marginRight: 10,
+    },
+    preferenceLabel: {
+        fontFamily: Theme.fonts.subtitle,
+        fontSize: 14,
+        color: Theme.colors.text.light,
+        letterSpacing: 0.5,
+    },
+    preferenceDesc: {
+        fontFamily: Theme.fonts.body,
+        fontSize: 11,
+        color: Theme.colors.text.muted,
+        marginTop: 3,
+    },
+    submitButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        justifyContent: 'center',
+        backgroundColor: Theme.colors.red,
+        borderRadius: 6,
+        paddingVertical: 15,
+        marginTop: 35,
     },
-    settingText: {
-        fontSize: 10,
-        opacity: 0.8,
+    submitButtonDisabled: {
+        opacity: 0.5,
+    },
+    submitButtonText: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 18,
+        color: '#FFF',
+        letterSpacing: 1.5,
     },
     langToggle: {
         flexDirection: 'row',
         gap: 4,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        padding: 2,
-        borderRadius: 2,
+        backgroundColor: '#0F0F0F',
+        padding: 3,
+        borderRadius: 6,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(242, 232, 207, 0.15)',
     },
     langOption: {
-        paddingVertical: 2,
-        paddingHorizontal: 6,
-        borderRadius: 1,
+        paddingVertical: 4,
+        paddingHorizontal: 12,
+        borderRadius: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     langActive: {
-        backgroundColor: '#FFF',
+        backgroundColor: Theme.colors.text.light,
     },
     langText: {
-        fontSize: 8,
-        fontWeight: 'bold',
+        fontFamily: Theme.fonts.title,
+        fontSize: 14,
+        letterSpacing: 1,
     },
-    cornerTL: { position: 'absolute', top: -1, left: -1, width: 10, height: 10, borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#FFF' },
-    cornerBR: { position: 'absolute', bottom: -1, right: -1, width: 10, height: 10, borderBottomWidth: 2, borderRightWidth: 2, borderColor: '#FFF' },
+    switchTrack: {
+        width: 44,
+        height: 24,
+        borderRadius: 12,
+        padding: 3,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(242, 232, 207, 0.15)',
+    },
+    switchThumb: {
+        width: 18,
+        height: 18,
+        borderRadius: 9,
+        backgroundColor: Theme.colors.text.light,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalBackdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    },
+    modalContainer: {
+        width: '90%',
+        maxWidth: 420,
+        backgroundColor: 'transparent',
+    },
+    cardWrapper: {
+        backgroundColor: 'rgba(26, 26, 26, 0.9)',
+        borderWidth: 1.5,
+        borderColor: 'rgba(242, 232, 207, 0.12)',
+        borderRadius: 8,
+        padding: 20,
+        position: 'relative',
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        position: 'relative',
+    },
+    cardTitle: {
+        fontFamily: Theme.fonts.title,
+        fontSize: 16,
+        color: Theme.colors.red,
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+    },
+    headerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: 'rgba(242, 232, 207, 0.15)',
+        marginLeft: 10,
+    },
+    closeButton: {
+        position: 'absolute',
+        right: 0,
+        padding: 4,
+    },
 });

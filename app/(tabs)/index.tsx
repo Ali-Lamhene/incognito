@@ -124,6 +124,7 @@ export default function AgentHomeScreen() {
       <ProfileSetupModal
         visible={showProfileModal}
         onComplete={handleProfileComplete}
+        onClose={() => setShowProfileModal(false)}
         initialData={profile ? { codename: profile.codename, avatar: profile.avatar, color: profile.themeColor } : undefined}
       />
     </View>
