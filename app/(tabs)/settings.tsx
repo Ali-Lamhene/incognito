@@ -166,7 +166,7 @@ export default function SettingsScreen() {
                                 <Text style={styles.infoLabel}>{t('settings.version')}</Text>
                             </View>
                             <View style={styles.infoRight}>
-                                <Text style={styles.infoValue}>v1.0.0 (BETA)</Text>
+                                <Text style={styles.infoValue}>v1.1.0 (BETA)</Text>
                             </View>
                         </View>
 

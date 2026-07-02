@@ -2,14 +2,15 @@
   "expo": {
     "name": "incognito",
     "slug": "incognito",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_logo.png",
     "scheme": "incognito",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +19,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.otakumi.incognito"
+      "package": "com.otakumi.incognito",
+      "versionCode": 2
     },
     "web": {
       "output": "static",
