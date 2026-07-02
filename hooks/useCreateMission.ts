@@ -24,9 +24,9 @@ export function useCreateMission() {
         const missionCode = generateMissionCode();
         const finalDuration = duration === 'CUSTOM' ? `${customDuration} MIN` : t(`mission.options.${duration}`);
 
-        await createSession(missionCode, finalDuration);
+        await createSession(missionCode, finalDuration, terrain);
 
-        console.log("Mission Initialized:", { duration: finalDuration, missionCode });
+        console.log("Mission Initialized:", { duration: finalDuration, missionCode, terrain });
         router.push(`/lobby/${missionCode}`);
     };
 

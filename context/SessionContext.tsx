@@ -14,6 +14,7 @@ type MissionSession = {
     pausedAt?: number;
     events?: Record<string, MissionEvent>;
     scoresValidated?: boolean;
+    terrain?: number;
 };
 
 type MissionEvent = {
@@ -63,7 +64,7 @@ type SessionContextType = {
     agents: Agent[];
     events: MissionEvent[];
     status: 'LOBBY' | 'ACTIVE' | 'FINISHED';
-    createSession: (code: string, duration: string) => Promise<void>;
+    createSession: (code: string, duration: string, terrain: number) => Promise<void>;
     joinSession: (code: string) => Promise<boolean>;
     clearSession: (agentId?: string) => Promise<void>;
     startMission: () => Promise<void>;
@@ -137,6 +138,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     startedAt: data.startedAt || prev.startedAt,
                     pausedAt: data.pausedAt || null,
                     scoresValidated: data.scoresValidated || false,
+                    terrain: data.terrain || prev.terrain,
                 } : null);
             } else {
                 setAgents([]);
@@ -171,19 +173,21 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
     };
 
-    const createSession = async (code: string, duration: string) => {
+    const createSession = async (code: string, duration: string, terrain: number) => {
         const newSession: MissionSession = {
             code,
             role: 'HOST',
             createdAt: Date.now(),
-            duration
+            duration,
+            terrain
         };
 
         await set(ref(db, `missions/${code}`), {
             duration,
             createdAt: serverTimestamp(),
             status: 'LOBBY',
-            hostId: 'TBD'
+            hostId: 'TBD',
+            terrain
         });
 
         setSession(newSession);
@@ -241,14 +245,19 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         }));
 
         const updates: any = {};
-        const availableChallenges = [...CHALLENGES];
+        const missionTerrain = missionData.terrain || 1;
+        const availableChallenges = CHALLENGES.filter(c => c.terrain === missionTerrain);
+        let pool = [...availableChallenges];
 
         currentAgents.forEach(agent => {
             const agentChallenges = [];
             for (let i = 0; i < 3; i++) {
-                if (availableChallenges.length === 0) break;
-                const randomIndex = Math.floor(Math.random() * availableChallenges.length);
-                const challenge = availableChallenges.splice(randomIndex, 1)[0];
+                if (pool.length === 0) {
+                    pool = [...availableChallenges];
+                }
+                if (pool.length === 0) break;
+                const randomIndex = Math.floor(Math.random() * pool.length);
+                const challenge = pool.splice(randomIndex, 1)[0];
                 agentChallenges.push(challenge);
             }
             if (agentChallenges.length > 0) {
