@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     },
     introTextContainer: {
         position: 'absolute',
-        right: 0,
+        right: 20,
         top: 0,
         bottom: 0,
         justifyContent: 'center',

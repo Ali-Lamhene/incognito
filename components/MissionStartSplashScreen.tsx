@@ -90,7 +90,7 @@ export function MissionStartSplashScreen({ onComplete }: MissionStartSplashScree
                 <Image
                     source={require('../assets/UI/incognito_logo.png')}
                     style={styles.logoText}
-                    contentFit="cover"
+                    contentFit="contain"
                 />
 
                 {/* Mission Status Label */}
