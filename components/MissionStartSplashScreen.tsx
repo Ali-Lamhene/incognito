@@ -125,8 +125,9 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     logoText: {
-        width: '90%',
-        height: 75,
+        width: '85%',
+        maxWidth: 380,
+        aspectRatio: 860 / 264,
         marginBottom: 1,
     },
     missionLabel: {
