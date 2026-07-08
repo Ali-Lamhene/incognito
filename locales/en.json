@@ -190,6 +190,7 @@
         "transfer_hq_msg": "Transferring data to Headquarters... Stay discreet.",
         "current_score": "Current score: {{score}}",
         "field_units_status": "AGENTS IN MISSION",
+        "no_other_agents": "NO OTHER AGENTS ON THE FIELD",
         "view_map": "VIEW MAP",
         "suspicious_transmission": "SUSPICIOUS TRANSMISSION ({{time}}s)",
         "operational": "OPERATIONAL",

@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { ThemedText } from './ThemedText';
 import { useTranslation } from '../hooks/useTranslation';
@@ -9,29 +8,23 @@ import { getAgentColor } from '../utils/agentColors';
 import { styles } from './ActiveAgentsList.styles';
 import { Theme } from '../constants/Theme';
 
+
 interface ActiveAgentsListProps {
   agents: Agent[];
   profile: any;
-  now: number;
   handleUnmask: (targetId: string) => void;
 }
 
-export function ActiveAgentsList({
+export const ActiveAgentsList = React.memo(function ActiveAgentsList({
   agents,
   profile,
-  now,
   handleUnmask,
 }: ActiveAgentsListProps) {
   const { t } = useTranslation();
 
-  const avatarColors = [
-    '#4F2B79', '#1E3E62', '#8B5E1E', '#1C4A28', // Mockup colors: Purple, Blue, Orange, Green
-    '#6B2D2D', '#2D4A6B', '#3B5B3B', '#6B522D', '#4A2D6B',
-    '#2D6B5B', '#6B402D', '#454552', '#54384A', '#3D4A3D',
-    '#5A4D3D', '#2C3E50', '#4E342E', '#37474F', '#424242',
-  ];
 
-  const filteredAgents = agents.filter((a) => a.id !== profile?.id);
+
+  const filteredAgents = agents;
 
   return (
     <View style={styles.sectionContainer}>
@@ -43,18 +36,24 @@ export function ActiveAgentsList({
       </View>
 
       <View style={styles.agentsList}>
-        {filteredAgents.map((agent, index) => {
+        {filteredAgents.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <ThemedText style={styles.emptyText}>
+              {t("mission.no_other_agents")}
+            </ThemedText>
+          </View>
+        ) : (
+          filteredAgents.map((agent, index) => {
           const avatarBg = getAgentColor(agent.id, agents);
           const isLast = index === filteredAgents.length - 1;
           return (
-            <Animated.View
+            <View
               key={agent.id}
-              entering={FadeInUp.delay(400 + index * 100)}
               style={[styles.agentRow, isLast && { borderBottomWidth: 0 }]}
             >
               <View style={styles.agentInfo}>
                 <View style={[styles.avatar, { backgroundColor: avatarBg }]}>
-                  <FontAwesome5 name="user-secret" size={25} color="#000000" style={{ transform: [{ translateY: 2.8 }] }} />
+                  <FontAwesome5 name="user-secret" size={25} color="#FFFFFF" style={{ transform: [{ translateY: 2.8 }] }} />
                 </View>
                 <View style={styles.agentTextContainer}>
                   <ThemedText
@@ -75,23 +74,26 @@ export function ActiveAgentsList({
                 </View>
               </View>
 
-              <TouchableOpacity
-                onPress={() => handleUnmask(agent.id)}
-                style={styles.unmaskBtn}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="locate-outline" size={14} color={Theme.colors.red} />
-                <ThemedText
-                  type="code"
-                  style={styles.unmaskText}
+              {agent.id !== profile?.id && (
+                <TouchableOpacity
+                  onPress={() => handleUnmask(agent.id)}
+                  style={styles.unmaskBtn}
+                  activeOpacity={0.7}
                 >
-                  {t("mission.unmask_now").toUpperCase()}
-                </ThemedText>
-              </TouchableOpacity>
-            </Animated.View>
+                  <Ionicons name="locate-outline" size={14} color={Theme.colors.red} />
+                  <ThemedText
+                    type="code"
+                    style={styles.unmaskText}
+                  >
+                    {t("mission.unmask_now").toUpperCase()}
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
+            </View>
           );
-        })}
+        })
+      )}
       </View>
     </View>
   );
-}
+});

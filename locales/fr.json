@@ -191,6 +191,7 @@
         "transfer_hq_msg": "Transfert des données vers le Quartier Général... Restez discret.",
         "current_score": "Score actuel : {{score}}",
         "field_units_status": "AGENTS EN MISSION",
+        "no_other_agents": "AUCUN AUTRE AGENT SUR LE TERRAIN",
         "view_map": "VOIR CARTE",
         "suspicious_transmission": "ÉMISSION SUSPECTE ({{time}}s)",
         "operational": "OPÉRATIONNEL",

@@ -149,7 +149,6 @@ export default function ActiveMissionScreen() {
               <ActiveAgentsList
                 agents={agents}
                 profile={profile}
-                now={now}
                 handleUnmask={handleUnmask}
               />
             </View>
