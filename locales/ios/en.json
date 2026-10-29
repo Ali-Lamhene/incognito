@@ -1,3 +1,5 @@
 {
-  "NSCameraUsageDescription": "Incognito uses the camera only to scan a game's QR code so you can join it. No photos or videos are recorded or shared."
+  "ios": {
+    "NSCameraUsageDescription": "Incognito uses the camera only to scan a game's QR code so you can join it. No photos or videos are recorded or shared."
+  }
 }
