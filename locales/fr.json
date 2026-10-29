@@ -279,8 +279,8 @@
         "redirecting_in": "Redirection dans {{seconds}}s..."
     },
     "permissions": {
-        "camera_msg": "Accès caméra requis pour scanner les fréquences.",
-        "camera_btn": "AUTORISER L'ACCÈS"
+        "camera_msg": "La caméra sert uniquement à scanner le QR code d'une partie pour la rejoindre.",
+        "camera_btn": "CONTINUER"
     },
     "rules": {
         "title": "RÈGLES",

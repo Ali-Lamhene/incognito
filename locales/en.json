@@ -278,8 +278,8 @@
         "redirecting_in": "Redirecting in {{seconds}}s..."
     },
     "permissions": {
-        "camera_msg": "Camera access required to scan frequencies.",
-        "camera_btn": "GRANT ACCESS"
+        "camera_msg": "The camera is used only to scan a game's QR code so you can join it.",
+        "camera_btn": "CONTINUE"
     },
     "rules": {
         "title": "RULES",

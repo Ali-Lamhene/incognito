@@ -31,8 +31,20 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "locales": {
+      "fr": "./locales/ios/fr.json",
+      "en": "./locales/ios/en.json"
+    },
     "plugins": [
       "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Incognito uses the camera only to scan a game's QR code so you can join it. No photos or videos are recorded or shared.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       [
         "expo-splash-screen",
         {
