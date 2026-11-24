@@ -21,6 +21,7 @@ export default function LobbyScreen() {
     const {
         code,
         isHost,
+        hostId,
         agents,
         animatedScannerStyle,
         modals: {
@@ -103,7 +104,7 @@ export default function LobbyScreen() {
                     </LobbyQRFrame>
 
                     {/* Agents List */}
-                    <LobbyAgentsList agents={agents} />
+                    <LobbyAgentsList agents={agents} hostId={hostId} />
                 </ScrollView>
             </View>
 

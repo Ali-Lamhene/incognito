@@ -15,6 +15,7 @@ type MissionSession = {
     events?: Record<string, MissionEvent>;
     scoresValidated?: boolean;
     terrain?: number;
+    hostId?: string;
 };
 
 type MissionEvent = {
@@ -141,6 +142,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     pausedAt: data.pausedAt || null,
                     scoresValidated: data.scoresValidated || false,
                     terrain: data.terrain || prev.terrain,
+                    hostId: data.hostId || prev.hostId,
                 } : null);
             } else {
                 setAgents([]);
@@ -219,14 +221,15 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             role: 'HOST',
             createdAt: Date.now(),
             duration,
-            terrain
+            terrain,
+            hostId: profile?.id,
         };
 
         await set(ref(db, `missions/${code}`), {
             duration,
             createdAt: serverTimestamp(),
             status: 'LOBBY',
-            hostId: 'TBD',
+            hostId: profile?.id ?? null,
             terrain
         });
 

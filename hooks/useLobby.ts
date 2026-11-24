@@ -104,6 +104,7 @@ export function useLobby() {
     return {
         code,
         isHost,
+        hostId: session?.hostId,
         agents,
         isInitialized,
         animatedScannerStyle,

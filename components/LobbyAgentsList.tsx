@@ -8,6 +8,7 @@ import { getAgentColor } from '../utils/agentColors';
 
 interface LobbyAgentsListProps {
     agents: Agent[];
+    hostId?: string;
 }
 
 const SearchingSlot = () => {
@@ -39,7 +40,7 @@ const SearchingSlot = () => {
     );
 };
 
-export function LobbyAgentsList({ agents }: LobbyAgentsListProps) {
+export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
     const maxAgents = 8;
     const hasEmptySlot = agents.length < maxAgents;
 
@@ -73,7 +74,7 @@ export function LobbyAgentsList({ agents }: LobbyAgentsListProps) {
             
             <View style={styles.agentsList}>
                 {agents.map((agent, index) => {
-                    const isHost = index === 0; // Assuming first agent is host
+                    const isHost = !!hostId && agent.id === hostId;
                     const isReady = agent.status === 'READY' || isHost; // Usually host is always ready
                     const avatarBg = getAgentColor(agent.id, agents);
                     
