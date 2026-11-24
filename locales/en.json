@@ -11,6 +11,7 @@
     "home": {
         "home_tab": "HOME",
         "status_online": "ONLINE",
+        "status_offline": "OFFLINE",
         "agent_active": "AGENT ACTIVE",
         "create_mission_title": "CREATE MISSION",
         "create_mission_subtitle": "NEW OPERATION",

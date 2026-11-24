@@ -307,6 +307,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const missionData = missionSnapshot.val();
 
         if (!missionData || !missionData.agents) return;
+        // 2 joueurs minimum (seul autorisé en développement pour tester)
+        if (!__DEV__ && Object.keys(missionData.agents).length < 2) return;
 
         const currentAgents = Object.entries(missionData.agents).map(([id, val]: [string, any]) => ({
             id,

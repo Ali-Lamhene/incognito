@@ -14,6 +14,9 @@ import { useLobby } from '../../hooks/useLobby';
 import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '../../constants/Theme';
 
+// 2 joueurs minimum pour lancer. En développement, on peut lancer seul pour tester.
+const MIN_AGENTS_TO_START = __DEV__ ? 1 : 2;
+
 export default function LobbyScreen() {
     const insets = useSafeAreaInsets();
     const { t } = useTranslation();
@@ -80,7 +83,7 @@ export default function LobbyScreen() {
                                     <Button
                                         title={t('lobby.btn_deploy_simple')}
                                         onPress={handleDeploy}
-                                        disabled={agents.length < 1}
+                                        disabled={agents.length < MIN_AGENTS_TO_START}
                                         style={styles.startButton}
                                         variant="primary"
                                         icon="custom-target"

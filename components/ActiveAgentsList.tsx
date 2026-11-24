@@ -46,6 +46,7 @@ export const ActiveAgentsList = React.memo(function ActiveAgentsList({
           filteredAgents.map((agent, index) => {
           const avatarBg = getAgentColor(agent.id, agents);
           const isLast = index === filteredAgents.length - 1;
+          const isOffline = agent.online === false;
           return (
             <View
               key={agent.id}
@@ -65,10 +66,10 @@ export const ActiveAgentsList = React.memo(function ActiveAgentsList({
                   </ThemedText>
                   <View style={styles.agentMetaRow}>
                     <View style={styles.statusWrapper}>
-                      <ThemedText style={styles.statusText}>
-                        {t("home.status_online") || "EN LIGNE"}
+                      <ThemedText style={[styles.statusText, isOffline && styles.statusTextOffline]}>
+                        {isOffline ? t("home.status_offline") : t("home.status_online")}
                       </ThemedText>
-                      <View style={styles.statusDot} />
+                      <View style={[styles.statusDot, isOffline && styles.statusDotOffline]} />
                     </View>
                   </View>
                 </View>

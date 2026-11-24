@@ -106,6 +106,12 @@ export const styles = StyleSheet.create({
     borderRadius: 2.5,
     backgroundColor: Theme.colors.status.online,
   },
+  statusTextOffline: {
+    color: "rgba(255, 255, 255, 0.35)",
+  },
+  statusDotOffline: {
+    backgroundColor: "rgba(255, 255, 255, 0.35)",
+  },
   unmaskBtn: {
     flexDirection: "row",
     alignItems: "center",

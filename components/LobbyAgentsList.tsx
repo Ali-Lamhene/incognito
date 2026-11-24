@@ -78,7 +78,8 @@ export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
             <View style={styles.agentsList}>
                 {agents.map((agent, index) => {
                     const isHost = !!hostId && agent.id === hostId;
-                    const isReady = agent.status === 'READY' || isHost; // Usually host is always ready
+                    const isOffline = agent.online === false;
+                    const isReady = !isOffline && (agent.status === 'READY' || isHost);
                     const avatarBg = getAgentColor(agent.id, agents);
                     
                     return (
@@ -97,7 +98,7 @@ export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
                             <View style={styles.statusContainer}>
                                 <View style={[styles.statusDot, { backgroundColor: isReady ? '#4CAF50' : '#555' }]} />
                                 <Text style={[styles.statusTextReady, { color: isReady ? '#4CAF50' : '#555' }]}>
-                                    {isReady ? t('lobby.agent_ready') : t('lobby.agent_waiting')}
+                                    {isOffline ? t('home.status_offline') : isReady ? t('lobby.agent_ready') : t('lobby.agent_waiting')}
                                 </Text>
                             </View>
                         </View>
