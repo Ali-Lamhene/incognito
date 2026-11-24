@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { child, get, increment, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
+import { child, get, onDisconnect, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
@@ -34,6 +34,7 @@ export type Agent = {
     avatar: string;
     status: 'READY' | 'WAITING';
     lastSeen: any;
+    online?: boolean;
     challenge?: {
         text: string;
         id: string;
@@ -84,6 +85,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [events, setEvents] = useState<MissionEvent[]>([]);
     const [status, setStatus] = useState<'LOBBY' | 'ACTIVE' | 'FINISHED'>('LOBBY');
+    const profile = useProfileStore((state) => state.profile);
 
     useEffect(() => {
         loadSession();
@@ -149,6 +151,44 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         return () => unsubscribe();
     }, [session?.code]);
+
+    // Présence : le joueur est (ré)inscrit à chaque connexion au serveur.
+    // Une coupure réseau ne le supprime pas : il est seulement marqué hors ligne,
+    // ses défis et son score sont conservés. Seul clearSession le retire.
+    const profileId = profile?.id;
+    const profileName = profile?.codename;
+    const profileAvatar = profile?.avatar;
+    useEffect(() => {
+        if (!session?.code || !profileId) return;
+        const code = session.code;
+        const agentRef = ref(db, `missions/${code}/agents/${profileId}`);
+        let cancelled = false;
+
+        const unsubscribe = onValue(ref(db, '.info/connected'), async (snap) => {
+            if (snap.val() !== true) return;
+            try {
+                // Ne pas recréer une mission qui a été supprimée entre-temps
+                const missionSnap = await get(ref(db, `missions/${code}/status`));
+                if (cancelled || !missionSnap.exists()) return;
+                await onDisconnect(agentRef).update({ online: false, lastSeen: serverTimestamp() });
+                // update (et non set) pour conserver défis, score et accusations
+                await update(agentRef, {
+                    name: profileName,
+                    avatar: profileAvatar,
+                    status: 'READY',
+                    online: true,
+                    lastSeen: serverTimestamp(),
+                });
+            } catch (e) {
+                console.error('Erreur de présence Firebase', e);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            unsubscribe();
+        };
+    }, [session?.code, profileId, profileName, profileAvatar]);
 
     const loadSession = async () => {
         try {
@@ -285,6 +325,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const resolvedAgentId = agentId || useProfileStore.getState().profile?.id;
 
         try {
+            if (resolvedAgentId) {
+                // Annule le marquage « hors ligne » prévu, sinon il recréerait le joueur supprimé
+                await onDisconnect(ref(db, `missions/${session.code}/agents/${resolvedAgentId}`)).cancel();
+            }
             if (session.role === 'HOST') {
                 await remove(ref(db, `missions/${session.code}`));
             } else if (resolvedAgentId) {

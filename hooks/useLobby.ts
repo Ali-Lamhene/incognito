@@ -2,8 +2,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import * as Clipboard from 'expo-clipboard';
 import { useSharedValue, useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
-import { onDisconnect, ref, remove, serverTimestamp, set } from 'firebase/database';
-import { db } from '../services/firebase';
 import { useSession } from '../context/SessionContext';
 import { useProfileStore } from '../store/profileStore';
 
@@ -27,32 +25,8 @@ export function useLobby() {
         }
     }, [status]);
 
-    // Enregistrement de l'agent sur Firebase
-    useEffect(() => {
-        if (!isInitialized || !code || !profile || isExiting) return;
-
-        const agentRef = ref(db, `missions/${code}/agents/${profile.id}`);
-
-        // S'enregistrer
-        set(agentRef, {
-            name: profile.codename,
-            avatar: profile.avatar,
-            status: 'READY',
-            lastSeen: serverTimestamp()
-        });
-
-        // Se retirer automatiquement en cas de déconnexion (fermeture app, perte réseau)
-        onDisconnect(agentRef).remove();
-
-        return () => {
-            // On ne supprime l'agent que s'il a explicitement quitté (bouton abandonner)
-            // ou si on est encore dans le lobby et qu'il change d'écran.
-            // Si la mission est ACTIVE, on garde l'agent pour qu'il puisse voir son objectif.
-            if (isExiting) {
-                remove(agentRef);
-            }
-        };
-    }, [code, profile?.id, isInitialized, isExiting]);
+    // L'inscription du joueur dans Firebase (et sa présence en ligne / hors ligne)
+    // est gérée par SessionProvider dès qu'une session est active.
 
     useEffect(() => {
         if (isExiting) return;
