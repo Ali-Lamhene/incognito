@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { useProfileStore } from '../../store/profileStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useAppState } from '../../store/appState';
@@ -166,7 +167,7 @@ export default function SettingsScreen() {
                                 <Text style={styles.infoLabel}>{t('settings.version')}</Text>
                             </View>
                             <View style={styles.infoRight}>
-                                <Text style={styles.infoValue}>v1.1.0 (BETA)</Text>
+                                <Text style={styles.infoValue}>v{Constants.expoConfig?.version ?? '?'} (BETA)</Text>
                             </View>
                         </View>
 
