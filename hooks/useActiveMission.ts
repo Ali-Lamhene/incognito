@@ -72,7 +72,8 @@ export function useActiveMission() {
             const currentTime = Date.now();
             setNow(currentTime);
 
-            if (isHost && status === "ACTIVE") {
+            // Tout joueur peut clore la mission à la fin du chrono (l'hôte peut être hors ligne)
+            if (status === "ACTIVE") {
                 const dMs = parseDuration(session?.duration);
                 const sTime = session?.startedAt || 0;
                 if (sTime > 0 && currentTime >= sTime + dMs) {
@@ -84,7 +85,7 @@ export function useActiveMission() {
         return () => {
             clearInterval(interval);
         };
-    }, [status, isHost, session?.duration, session?.startedAt, finishMission]);
+    }, [status, session?.duration, session?.startedAt, finishMission]);
 
     const handleAbort = async () => {
         setShowAbortModal(false);

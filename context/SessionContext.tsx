@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { child, get, onDisconnect, onValue, ref, remove, runTransaction, serverTimestamp, set, update } from 'firebase/database';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
 import { useProfileStore } from '../store/profileStore';
@@ -36,6 +36,7 @@ export type Agent = {
     status: 'READY' | 'WAITING';
     lastSeen: any;
     online?: boolean;
+    joinedAt?: number;
     challenge?: {
         text: string;
         id: string;
@@ -89,6 +90,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const [events, setEvents] = useState<MissionEvent[]>([]);
     const [status, setStatus] = useState<'LOBBY' | 'ACTIVE' | 'FINISHED'>('LOBBY');
     const profile = useProfileStore((state) => state.profile);
+    const profileIdRef = useRef<string | undefined>(profile?.id);
+    profileIdRef.current = profile?.id;
 
     useEffect(() => {
         loadSession();
@@ -145,6 +148,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     scoresValidated: data.scoresValidated || false,
                     terrain: data.terrain || prev.terrain,
                     hostId: data.hostId || prev.hostId,
+                    // Le rôle suit hostId : il change quand l'hôte est transféré
+                    role: data.hostId && profileIdRef.current
+                        ? (data.hostId === profileIdRef.current ? 'HOST' : 'AGENT')
+                        : prev.role,
                 } : null);
             } else {
                 setAgents([]);
@@ -155,6 +162,20 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         return () => unsubscribe();
     }, [session?.code]);
+
+    // Garde le rôle à jour dans le stockage local (utile après un transfert d'hôte)
+    useEffect(() => {
+        if (!session) return;
+        AsyncStorage.setItem('incognito_session', JSON.stringify({
+            code: session.code,
+            role: session.role,
+            createdAt: session.createdAt,
+            duration: session.duration,
+            terrain: session.terrain,
+            hostId: session.hostId,
+        })).catch(() => {});
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session?.code, session?.role]);
 
     // Présence : le joueur est (ré)inscrit à chaque connexion au serveur.
     // Une coupure réseau ne le supprime pas : il est seulement marqué hors ligne,
@@ -175,6 +196,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 const missionSnap = await get(ref(db, `missions/${code}/status`));
                 if (cancelled || !missionSnap.exists()) return;
                 await onDisconnect(agentRef).update({ online: false, lastSeen: serverTimestamp() });
+                // joinedAt n'est écrit qu'à la première arrivée : il sert à choisir le prochain hôte
+                const joinedSnap = await get(child(agentRef, 'joinedAt'));
                 // update (et non set) pour conserver défis, score et accusations
                 await update(agentRef, {
                     name: profileName,
@@ -182,6 +205,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                     status: 'READY',
                     online: true,
                     lastSeen: serverTimestamp(),
+                    ...(joinedSnap.exists() ? {} : { joinedAt: serverTimestamp() }),
                 });
             } catch (e) {
                 console.error('Erreur de présence Firebase', e);
@@ -317,10 +341,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         await update(ref(db), updates);
     };
 
+    // N'importe quel joueur peut clore la mission quand le temps est écoulé
+    // (l'hôte peut avoir l'écran verrouillé). La transaction ne fait passer
+    // le statut à FINISHED que depuis ACTIVE.
     const finishMission = async () => {
-        if (!session || session.role !== 'HOST') return;
-        await update(ref(db, `missions/${session.code}`), {
-            status: 'FINISHED'
+        if (!session?.code) return;
+        await runTransaction(ref(db, `missions/${session.code}/status`), (current) => {
+            if (current !== 'ACTIVE') return;
+            return 'FINISHED';
         });
     };
 
@@ -334,10 +362,8 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
                 // Annule le marquage « hors ligne » prévu, sinon il recréerait le joueur supprimé
                 await onDisconnect(ref(db, `missions/${session.code}/agents/${resolvedAgentId}`)).cancel();
             }
-            if (session.role === 'HOST') {
-                await remove(ref(db, `missions/${session.code}`));
-            } else if (resolvedAgentId) {
-                await remove(ref(db, `missions/${session.code}/agents/${resolvedAgentId}`));
+            if (resolvedAgentId) {
+                await leaveMission(session.code, resolvedAgentId);
             }
         } catch (e) {
             console.error('Erreur lors de la fermeture de session Firebase', e);
@@ -345,6 +371,42 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         setSession(null);
         await AsyncStorage.removeItem('incognito_session');
+    };
+
+    // Retire un joueur. S'il était l'hôte, le rôle passe au joueur arrivé le plus tôt
+    // (les joueurs en ligne d'abord). La mission n'est supprimée qu'au départ du dernier joueur.
+    const leaveMission = async (code: string, agentId: string) => {
+        const missionSnap = await get(ref(db, `missions/${code}`));
+        const data = missionSnap.val();
+        if (!data) return;
+
+        const remaining = Object.entries<any>(data.agents || {})
+            .filter(([id]) => id !== agentId)
+            .map(([id, val]) => ({ id, ...val }));
+
+        if (remaining.length === 0) {
+            await remove(ref(db, `missions/${code}`));
+            return;
+        }
+
+        const updates: any = {};
+        updates[`missions/${code}/agents/${agentId}`] = null;
+
+        const hostIsGone = !data.hostId || data.hostId === agentId || !remaining.some(a => a.id === data.hostId);
+        if (hostIsGone) {
+            const [nextHost] = [...remaining].sort((a, b) => {
+                const offlineA = a.online === false ? 1 : 0;
+                const offlineB = b.online === false ? 1 : 0;
+                if (offlineA !== offlineB) return offlineA - offlineB;
+                const joinedA = typeof a.joinedAt === 'number' ? a.joinedAt : Number.MAX_SAFE_INTEGER;
+                const joinedB = typeof b.joinedAt === 'number' ? b.joinedAt : Number.MAX_SAFE_INTEGER;
+                if (joinedA !== joinedB) return joinedA - joinedB;
+                return a.id.localeCompare(b.id);
+            });
+            updates[`missions/${code}/hostId`] = nextHost.id;
+        }
+
+        await update(ref(db), updates);
     };
 
     const unmaskAgent = async (targetId: string, validatorId: string): Promise<boolean> => {

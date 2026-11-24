@@ -569,7 +569,7 @@ export default function ResultsScreen() {
             <ConfirmationModal
                 visible={showExitModal}
                 title={t('lobby.leave_title')}
-                message={t('mission.abort_msg')}
+                message={t(isHost ? 'mission.abort_msg_host' : 'mission.abort_msg')}
                 onConfirm={handleBackHome}
                 onCancel={() => setShowExitModal(false)}
             />

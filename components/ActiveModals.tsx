@@ -20,6 +20,7 @@ interface ActiveModalsProps {
   me?: Agent | null;
   handleConfessAccusation?: (challengeId: string) => void;
   handleDenyAccusation?: () => void;
+  isHost?: boolean;
 }
 
 export function ActiveModals({
@@ -33,6 +34,7 @@ export function ActiveModals({
   me,
   handleConfessAccusation,
   handleDenyAccusation,
+  isHost,
 }: ActiveModalsProps) {
   const { t, language } = useTranslation();
   const [showChallengeSelection, setShowChallengeSelection] = useState(false);
@@ -62,7 +64,7 @@ export function ActiveModals({
       <ConfirmationModal
         visible={showAbortModal}
         title={t("mission.abort_title")}
-        message={t("mission.abort_msg")}
+        message={t(isHost ? "mission.abort_msg_host" : "mission.abort_msg")}
         confirmLabel={t("mission.btn_leave_mission")}
         cancelLabel={t("mission.btn_stay")}
         variant="danger"

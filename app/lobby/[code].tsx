@@ -27,15 +27,11 @@ export default function LobbyScreen() {
         modals: {
             showStartModal,
             setShowStartModal,
-            showDestroyModal,
-            setShowDestroyModal,
             showLeaveModal,
             setShowLeaveModal,
         },
         actions: {
             handleBack,
-            handleAbort,
-            confirmDestroy,
             confirmLeave,
             handleDeploy,
             confirmStart,
@@ -109,13 +105,11 @@ export default function LobbyScreen() {
             </View>
 
             <LobbyModals
-                showDestroyModal={showDestroyModal}
                 showLeaveModal={showLeaveModal}
                 showStartModal={showStartModal}
-                setShowDestroyModal={setShowDestroyModal}
                 setShowLeaveModal={setShowLeaveModal}
                 setShowStartModal={setShowStartModal}
-                onConfirmDestroy={confirmDestroy}
+                isHost={isHost}
                 onConfirmLeave={confirmLeave}
                 onConfirmStart={confirmStart}
             />

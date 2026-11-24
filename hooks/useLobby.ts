@@ -15,7 +15,6 @@ export function useLobby() {
 
     const [isExiting, setIsExiting] = useState(false);
     const [showStartModal, setShowStartModal] = useState(false);
-    const [showDestroyModal, setShowDestroyModal] = useState(false);
     const [showLeaveModal, setShowLeaveModal] = useState(false);
 
     // Redirection quand la mission commence
@@ -56,23 +55,10 @@ export function useLobby() {
         borderColor: '#FFF',
     }));
 
+    // Hôte ou non, quitter le salon passe par la même fenêtre :
+    // si l'hôte part, son rôle est transmis à un autre agent (voir leaveMission).
     const handleBack = () => {
-        if (!isHost) {
-            handleLeave();
-        } else {
-            handleAbort();
-        }
-    };
-
-    const handleAbort = () => {
-        setShowDestroyModal(true);
-    };
-
-    const confirmDestroy = async () => {
-        setIsExiting(true);
-        setShowDestroyModal(false);
-        await clearSession(profile?.id);
-        router.replace('/');
+        handleLeave();
     };
 
     const handleLeave = () => {
@@ -111,15 +97,11 @@ export function useLobby() {
         modals: {
             showStartModal,
             setShowStartModal,
-            showDestroyModal,
-            setShowDestroyModal,
             showLeaveModal,
             setShowLeaveModal,
         },
         actions: {
             handleBack,
-            handleAbort,
-            confirmDestroy,
             handleLeave,
             confirmLeave,
             handleDeploy,

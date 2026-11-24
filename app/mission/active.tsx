@@ -38,6 +38,7 @@ export default function ActiveMissionScreen() {
     me,
     myChallenge,
     isCompleted,
+    isHost,
     timeLeft,
     isLowTime,
     isRevealed,
@@ -188,6 +189,7 @@ export default function ActiveMissionScreen() {
           me={me}
           handleConfessAccusation={handleConfessAccusation}
           handleDenyAccusation={handleDenyAccusation}
+          isHost={isHost}
         />
       </ScrollView>
     </View>
