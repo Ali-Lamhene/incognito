@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/Theme';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface DurationSelectorProps {
     duration: string;
@@ -17,6 +18,7 @@ export function DurationSelector({
     customDuration,
     setCustomDuration,
 }: DurationSelectorProps) {
+    const { t } = useTranslation();
 
     React.useEffect(() => {
         if (duration !== 'CUSTOM') {
@@ -44,7 +46,7 @@ export function DurationSelector({
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <Ionicons name="stopwatch-outline" size={18} color={Theme.colors.red} />
-                <Text style={styles.headerText}>DURÉE DE LA MISSION</Text>
+                <Text style={styles.headerText}>{t('create_setup.duration_header')}</Text>
             </View>
 
             {/* Custom Duration Card */}
@@ -60,7 +62,7 @@ export function DurationSelector({
                             <View style={styles.numberBox}>
                                 <Text style={styles.counterValue}>{String(hours).padStart(2, '0')}</Text>
                             </View>
-                            <Text style={styles.counterLabel}>HEURES</Text>
+                            <Text style={styles.counterLabel}>{t('create_setup.hours')}</Text>
                             <TouchableOpacity onPress={() => handleAddMins(-60)} hitSlop={10} disabled={!canSubHours}>
                                 <Ionicons name="chevron-down" color={canSubHours ? Theme.colors.text.light : Theme.colors.text.muted} size={28} />
                             </TouchableOpacity>
@@ -75,7 +77,7 @@ export function DurationSelector({
                             <View style={styles.numberBox}>
                                 <Text style={styles.counterValue}>{String(mins).padStart(2, '0')}</Text>
                             </View>
-                            <Text style={styles.counterLabel}>MINUTES</Text>
+                            <Text style={styles.counterLabel}>{t('create_setup.minutes')}</Text>
                             <TouchableOpacity onPress={() => handleAddMins(-5)} hitSlop={10} disabled={!canSubMins}>
                                 <Ionicons name="chevron-down" color={canSubMins ? Theme.colors.text.light : Theme.colors.text.muted} size={28} />
                             </TouchableOpacity>

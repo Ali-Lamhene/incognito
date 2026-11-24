@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '../constants/Theme';
 import { Image } from 'expo-image';
 import { TargetIcon } from './ui/TargetIcon';
+import { useTranslation } from '../hooks/useTranslation';
 
 export interface TerrainSelectorProps {
     terrain: number;
@@ -13,50 +14,51 @@ export interface TerrainSelectorProps {
 const terrains = [
     { 
         id: 1, 
-        name: 'BASE SECRÈTE', 
-        subtitle: 'À la maison ou chez des amis',
+        nameKey: 'create_setup.terrain_1_name',
+        subtitleKey: 'create_setup.terrain_1_subtitle',
         icon: 'home' as const,
         image: require('../assets/UI/incognito_param_mission_bg_home.png') 
     },
     { 
         id: 2, 
-        name: 'TERRAIN LIBRE', 
-        subtitle: 'Parcs, rues, places et espaces publics',
+        nameKey: 'create_setup.terrain_2_name',
+        subtitleKey: 'create_setup.terrain_2_subtitle',
         icon: 'earth' as const,
         image: require('../assets/UI/incognito_param_mission_bg_free.png') 
     },
     { 
         id: 3, 
-        name: 'INFILTRATION', 
-        subtitle: 'Bars, restaurants et lieux animés',
+        nameKey: 'create_setup.terrain_3_name',
+        subtitleKey: 'create_setup.terrain_3_subtitle',
         icon: 'wine' as const,
         image: require('../assets/UI/incognito_param_mission_bg_infiltration.png') 
     },
 ];
 
 export function TerrainSelector({ terrain, setTerrain }: TerrainSelectorProps) {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
             <View style={styles.headerRow}>
                 <TargetIcon size={18} color={Theme.colors.red} />
-                <Text style={styles.headerText}>TERRAIN D'OPÉRATION</Text>
+                <Text style={styles.headerText}>{t('create_setup.terrain_header')}</Text>
             </View>
 
             <View style={styles.cardsRow}>
-                {terrains.map((t) => {
-                    const isSelected = terrain === t.id;
+                {terrains.map((item) => {
+                    const isSelected = terrain === item.id;
                     return (
                         <TouchableOpacity
-                            key={t.id}
+                            key={item.id}
                             activeOpacity={0.8}
-                            onPress={() => setTerrain(t.id)}
+                            onPress={() => setTerrain(item.id)}
                             style={[
                                 styles.card,
                                 isSelected && styles.cardActive
                             ]}
                         >
                             <Image 
-                                source={t.image} 
+                                source={item.image} 
                                 style={[StyleSheet.absoluteFill, !isSelected && { opacity: 0.3 }]} 
                                 contentFit="cover" 
                             />
@@ -65,7 +67,7 @@ export function TerrainSelector({ terrain, setTerrain }: TerrainSelectorProps) {
                             <View style={styles.cardContent}>
                                 <View style={styles.iconContainer}>
                                     <Ionicons 
-                                        name={t.icon} 
+                                        name={item.icon} 
                                         size={18} 
                                         color={isSelected ? Theme.colors.red : Theme.colors.text.light} 
                                         style={!isSelected && { opacity: 0.8 }}
@@ -76,13 +78,13 @@ export function TerrainSelector({ terrain, setTerrain }: TerrainSelectorProps) {
                                     numberOfLines={1}
                                     adjustsFontSizeToFit
                                 >
-                                    {t.name}
+                                    {t(item.nameKey)}
                                 </Text>
                                 <Text 
                                     style={[styles.cardSubtitle, isSelected && styles.cardSubtitleActive]}
                                     numberOfLines={2}
                                 >
-                                    {t.subtitle}
+                                    {t(item.subtitleKey)}
                                 </Text>
                             </View>
 

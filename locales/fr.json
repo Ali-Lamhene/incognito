@@ -95,7 +95,11 @@
         "start_op_msg": "Êtes-vous prêt à envoyer vos *agents* sur le terrain ?",
         "btn_deploy_simple": "DÉPLOYER",
         "waiting_host": "ATTENTE DE L'HÔTE...",
-        "leave_lobby": "QUITTER LE SALON"
+        "leave_lobby": "QUITTER LE SALON",
+        "host_badge": "HÔTE",
+        "agent_ready": "PRÊT",
+        "agent_waiting": "EN ATTENTE",
+        "slot_waiting": "En attente..."
     },
     "mission": {
         "mission": "MISSION",
@@ -316,5 +320,19 @@
         "rule_5_b5_part2": "+5 points",
         "quote": "La meilleure stratégie n'est pas d'être invisible, c'est de paraître totalement innocent.",
         "btn_understand": "COMPRIS, AGENT !"
+    },
+    "create_setup": {
+        "terrain_header": "TERRAIN D'OPÉRATION",
+        "terrain_1_name": "BASE SECRÈTE",
+        "terrain_1_subtitle": "À la maison ou chez des amis",
+        "terrain_2_name": "TERRAIN LIBRE",
+        "terrain_2_subtitle": "Parcs, rues, places et espaces publics",
+        "terrain_3_name": "INFILTRATION",
+        "terrain_3_subtitle": "Bars, restaurants et lieux animés",
+        "duration_header": "DURÉE DE LA MISSION",
+        "hours": "HEURES",
+        "minutes": "MINUTES",
+        "advice_title": "CONSEIL AGENT",
+        "advice_text": "Le choix du terrain influence le type de mission et les interactions possibles"
     }
 }

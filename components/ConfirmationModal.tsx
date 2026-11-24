@@ -4,6 +4,7 @@ import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanima
 import { Button } from './ui/Button';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Theme } from '../constants/Theme';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface ConfirmationModalProps {
     visible: boolean;
@@ -20,12 +21,15 @@ export function ConfirmationModal({
     visible,
     title,
     message,
-    confirmLabel = "CONFIRMER",
-    cancelLabel = "ANNULER",
+    confirmLabel,
+    cancelLabel,
     onConfirm,
     onCancel,
     variant = 'default'
 }: ConfirmationModalProps) {
+    const { t } = useTranslation();
+    const confirmText = confirmLabel ?? t('common.confirm');
+    const cancelText = cancelLabel ?? t('common.cancel');
 
     if (!visible) return null;
 
@@ -96,13 +100,13 @@ export function ConfirmationModal({
                             {/* Stacked Actions */}
                             <View style={styles.actions}>
                                 <Button
-                                    title={confirmLabel}
+                                    title={confirmText}
                                     onPress={onConfirm}
                                     variant="primary"
                                     style={styles.actionButton}
                                 />
                                 <Button
-                                    title={cancelLabel}
+                                    title={cancelText}
                                     onPress={onCancel}
                                     variant="outline"
                                     style={styles.actionButton}

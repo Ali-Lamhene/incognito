@@ -5,6 +5,7 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Agent } from '../context/SessionContext';
 import { Theme } from '../constants/Theme';
 import { getAgentColor } from '../utils/agentColors';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LobbyAgentsListProps {
     agents: Agent[];
@@ -12,6 +13,7 @@ interface LobbyAgentsListProps {
 }
 
 const SearchingSlot = () => {
+    const { t } = useTranslation();
     const pulse = useSharedValue(0.4);
 
     useEffect(() => {
@@ -30,17 +32,18 @@ const SearchingSlot = () => {
         <Animated.View style={[styles.agentSlot, animatedStyle]}>
             <View style={styles.agentInfo}>
                 <View style={styles.emptyAvatar} />
-                <Text style={styles.emptyText}>En attente...</Text>
+                <Text style={styles.emptyText}>{t('lobby.slot_waiting')}</Text>
             </View>
             <View style={styles.statusContainer}>
                 <View style={[styles.statusDot, { backgroundColor: '#555' }]} />
-                <Text style={styles.statusTextWaiting}>EN ATTENTE</Text>
+                <Text style={styles.statusTextWaiting}>{t('lobby.agent_waiting')}</Text>
             </View>
         </Animated.View>
     );
 };
 
 export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
+    const { t } = useTranslation();
     const maxAgents = 8;
     const hasEmptySlot = agents.length < maxAgents;
 
@@ -68,7 +71,7 @@ export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
             <View style={styles.sectionHeader}>
                 <Ionicons name="people" size={16} color="#D1D1D1" />
                 <Text style={styles.sectionLabel}>
-                    AGENTS CONNECTÉS ({agents.length})
+                    {t('lobby.agents_connected')} ({agents.length})
                 </Text>
             </View>
             
@@ -87,14 +90,14 @@ export function LobbyAgentsList({ agents, hostId }: LobbyAgentsListProps) {
                                 <Text style={styles.agentName}>{agent.name}</Text>
                                 {isHost && (
                                     <View style={styles.hostBadge}>
-                                        <Text style={styles.hostBadgeText}>HÔTE</Text>
+                                        <Text style={styles.hostBadgeText}>{t('lobby.host_badge')}</Text>
                                     </View>
                                 )}
                             </View>
                             <View style={styles.statusContainer}>
                                 <View style={[styles.statusDot, { backgroundColor: isReady ? '#4CAF50' : '#555' }]} />
                                 <Text style={[styles.statusTextReady, { color: isReady ? '#4CAF50' : '#555' }]}>
-                                    {isReady ? 'PRÊT' : 'EN ATTENTE'}
+                                    {isReady ? t('lobby.agent_ready') : t('lobby.agent_waiting')}
                                 </Text>
                             </View>
                         </View>

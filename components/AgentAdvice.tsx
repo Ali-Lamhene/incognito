@@ -3,8 +3,10 @@ import { StyleSheet, View, Text } from 'react-native';
 import { Theme } from '../constants/Theme';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '../hooks/useTranslation';
 
 export function AgentAdvice() {
+    const { t } = useTranslation();
     return (
         <View style={styles.container}>
             <Image 
@@ -14,10 +16,10 @@ export function AgentAdvice() {
             />
             <View style={styles.textContainer}>
                 <View style={styles.headerRow}>
-                    <Text style={styles.title}>CONSEIL AGENT</Text>
+                    <Text style={styles.title}>{t('create_setup.advice_title')}</Text>
                 </View>
                 <Text style={styles.description}>
-                    Le choix du terrain influence le type de mission et les interactions possibles
+                    {t('create_setup.advice_text')}
                 </Text>
             </View>
             <Ionicons 

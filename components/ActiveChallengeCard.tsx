@@ -5,6 +5,7 @@ import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from '../hooks/useTranslation';
+import { getChallengeText } from '../constants/Challenges';
 import { Agent } from '../context/SessionContext';
 import { styles } from './ActiveChallengeCard.styles';
 import { Theme } from '../constants/Theme';
@@ -40,7 +41,7 @@ export function ActiveChallengeCard({
   activeIndex: activeIndexProp,
   setActiveIndex: setActiveIndexProp,
 }: ActiveChallengeCardProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const [isScanning, setIsScanning] = React.useState(false);
   const [scanPercent, setScanPercent] = React.useState(0);
@@ -314,7 +315,7 @@ export function ActiveChallengeCard({
                               (isCompleted || challenge.completed) && styles.challengeTextCompleted,
                             ]}
                           >
-                            {challenge.text ||
+                            {getChallengeText(challenge, language) ||
                               (me
                                 ? t("mission.no_objective")
                                 : t("mission.searching_profile"))}

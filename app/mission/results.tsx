@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/Button";
 import { ThemedText } from "../../components/ThemedText";
 import { useSession } from "../../context/SessionContext";
 import { useTranslation } from "../../hooks/useTranslation";
+import { getChallengeText } from "../../constants/Challenges";
 import { useProfileStore } from "../../store/profileStore";
 import { ConfirmationModal } from "../../components/ConfirmationModal";
 import { getAgentColor } from "../../utils/agentColors";
@@ -26,7 +27,7 @@ export default function ResultsScreen() {
     const insets = useSafeAreaInsets();
     const { agents, session, clearSession, status } = useSession();
     const { profile } = useProfileStore();
-    const { t } = useTranslation();
+    const { t, language } = useTranslation();
 
     const [validationState, setValidationState] = React.useState<Record<string, {
         challenges: Record<string, { completed: boolean, unmasked: boolean, lied: boolean, failed: boolean }>
@@ -293,7 +294,7 @@ export default function ResultsScreen() {
 
                                     return (
                                         <View key={c.id} style={styles.courtChallengeRow}>
-                                            <ThemedText style={styles.courtChallengeText}>{c.text}</ThemedText>
+                                            <ThemedText style={styles.courtChallengeText}>{getChallengeText(c, language)}</ThemedText>
                                             <View style={styles.courtChallengeButtons}>
                                                 {/* Row 1: Réussi & Échoué */}
                                                 <View style={styles.courtChallengeBtnRow}>

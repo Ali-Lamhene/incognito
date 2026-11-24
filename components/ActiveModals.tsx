@@ -6,6 +6,7 @@ import { Button } from './ui/Button';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Theme } from '../constants/Theme';
 import { useTranslation } from '../hooks/useTranslation';
+import { getChallengeText } from '../constants/Challenges';
 import { Agent } from '../context/SessionContext';
 
 interface ActiveModalsProps {
@@ -33,7 +34,7 @@ export function ActiveModals({
   handleConfessAccusation,
   handleDenyAccusation,
 }: ActiveModalsProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [showChallengeSelection, setShowChallengeSelection] = useState(false);
 
   const myChallenges = me?.challenges || (me?.challenge ? [me.challenge] : []);
@@ -154,7 +155,7 @@ export function ActiveModals({
                         style={styles.challengeItem}
                       >
                         <Text style={styles.challengeItemText} numberOfLines={2}>
-                          {challenge.text}
+                          {getChallengeText(challenge, language)}
                         </Text>
                         <Ionicons name="chevron-forward" size={18} color={Theme.colors.red} />
                       </TouchableOpacity>

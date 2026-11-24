@@ -27,6 +27,7 @@
         "section_profile": "AGENT PROFILE",
         "section_device": "DEVICE PARAMETERS",
         "audio_fx": "AUDIO FX",
+        "ambient_music": "AMBIENT MUSIC",
         "haptics": "VIBRATIONS (STEALTH MODE)",
         "notifications": "NOTIFICATIONS",
         "language": "LANGUAGE",
@@ -94,7 +95,11 @@
         "start_op_msg": "Are you ready to send your *agents* into the field?",
         "btn_deploy_simple": "DEPLOY",
         "waiting_host": "WAITING FOR HOST...",
-        "leave_lobby": "LEAVE LOBBY"
+        "leave_lobby": "LEAVE LOBBY",
+        "host_badge": "HOST",
+        "agent_ready": "READY",
+        "agent_waiting": "WAITING",
+        "slot_waiting": "Waiting..."
     },
     "mission": {
         "mission": "MISSION",
@@ -315,5 +320,19 @@
         "rule_5_b5_part2": "+5 points",
         "quote": "The best strategy is not to be invisible, but to appear completely innocent.",
         "btn_understand": "UNDERSTOOD, AGENT !"
+    },
+    "create_setup": {
+        "terrain_header": "FIELD OF OPERATION",
+        "terrain_1_name": "SECRET BASE",
+        "terrain_1_subtitle": "At home or at a friend's place",
+        "terrain_2_name": "OPEN FIELD",
+        "terrain_2_subtitle": "Parks, streets, squares and public spaces",
+        "terrain_3_name": "INFILTRATION",
+        "terrain_3_subtitle": "Bars, restaurants and lively places",
+        "duration_header": "MISSION DURATION",
+        "hours": "HOURS",
+        "minutes": "MINUTES",
+        "advice_title": "AGENT TIP",
+        "advice_text": "The field you choose shapes the type of missions and the possible interactions"
     }
 }
