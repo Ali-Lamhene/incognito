@@ -77,15 +77,22 @@ export const ActiveAgentsList = React.memo(function ActiveAgentsList({
               {agent.id !== profile?.id && (
                 <TouchableOpacity
                   onPress={() => handleUnmask(agent.id)}
-                  style={styles.unmaskBtn}
+                  disabled={!!agent.pendingAccusation}
+                  style={[styles.unmaskBtn, agent.pendingAccusation && styles.unmaskBtnDisabled]}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="locate-outline" size={14} color={Theme.colors.red} />
+                  <Ionicons
+                    name={agent.pendingAccusation ? "hourglass-outline" : "locate-outline"}
+                    size={14}
+                    color={agent.pendingAccusation ? "rgba(255, 255, 255, 0.35)" : Theme.colors.red}
+                  />
                   <ThemedText
                     type="code"
-                    style={styles.unmaskText}
+                    style={[styles.unmaskText, agent.pendingAccusation && styles.unmaskTextDisabled]}
                   >
-                    {t("mission.unmask_now").toUpperCase()}
+                    {agent.pendingAccusation
+                      ? t("mission.accusation_pending")
+                      : t("mission.unmask_now").toUpperCase()}
                   </ThemedText>
                 </TouchableOpacity>
               )}

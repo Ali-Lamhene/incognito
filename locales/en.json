@@ -197,6 +197,7 @@
         "voting_in_progress": "VOTING...",
         "unmask_now_excl": "UNMASK!",
         "unmask_now": "UNMASK",
+        "accusation_pending": "ACCUSATION PENDING",
         "leave_lobby": "LEAVE LOBBY",
         "random_arbitration": "RANDOM ARBITRATION",
         "tie_break_msg": "Perfect tie... HQ decides!",
@@ -310,6 +311,8 @@
         "rule_5_b3_part2": "-10 points",
         "rule_5_b4_part1": "If lying during unmasking: ",
         "rule_5_b4_part2": "-30 points",
+        "rule_5_b5_part1": "Accuser, if the agent confesses: ",
+        "rule_5_b5_part2": "+5 points",
         "quote": "The best strategy is not to be invisible, but to appear completely innocent.",
         "btn_understand": "UNDERSTOOD, AGENT !"
     }

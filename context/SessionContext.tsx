@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { child, get, onDisconnect, onValue, ref, remove, serverTimestamp, set, update } from 'firebase/database';
+import { child, get, onDisconnect, onValue, ref, remove, runTransaction, serverTimestamp, set, update } from 'firebase/database';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CHALLENGES } from '../constants/Challenges';
 import { db } from '../services/firebase';
@@ -42,6 +42,7 @@ export type Agent = {
         completed?: boolean;
         unmasked?: boolean;
         lied?: boolean;
+        unmaskedBy?: { id: string; name: string } | null;
     };
     challenges?: {
         text: string;
@@ -49,6 +50,7 @@ export type Agent = {
         completed?: boolean;
         unmasked?: boolean;
         lied?: boolean;
+        unmaskedBy?: { id: string; name: string } | null;
     }[];
     completed?: boolean;
     completedAt?: number;
@@ -351,12 +353,16 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         const validator = agents.find(a => a.id === validatorId);
         if (!target || !validator) return false;
 
-        const updates: any = {};
-        updates[`missions/${session.code}/agents/${targetId}/pendingAccusation`] = {
-            byId: validatorId,
-            byName: validator.name
-        };
-        await update(ref(db), updates);
+        // Transaction : une seule accusation à la fois. Si la cible est déjà
+        // accusée et n'a pas encore répondu, la nouvelle accusation est refusée.
+        const result = await runTransaction(
+            ref(db, `missions/${session.code}/agents/${targetId}/pendingAccusation`),
+            (current) => {
+                if (current) return; // abandon
+                return { byId: validatorId, byName: validator.name };
+            }
+        );
+        if (!result.committed) return false;
 
         await pushEvent({
             type: 'SUSPECT',
@@ -377,13 +383,19 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
             const agentRef = ref(db, `missions/${session.code}/agents/${agentId}`);
             const snapshot = await get(agentRef);
             const agentData = snapshot.val();
+            // Garde la trace de l'accusateur : il gagnera des points au tribunal
+            const accusation = agentData?.pendingAccusation;
+            const unmaskedBy = accusation?.byId ? { id: accusation.byId, name: accusation.byName || '' } : null;
             if (agentData && agentData.challenges) {
                 const idx = agentData.challenges.findIndex((c: any) => c.id === challengeId);
                 if (idx !== -1) {
                     updates[`missions/${session.code}/agents/${agentId}/challenges/${idx}/unmasked`] = true;
+                    updates[`missions/${session.code}/agents/${agentId}/challenges/${idx}/unmaskedBy`] = unmaskedBy;
                 }
-            } else if (agentData && agentData.challenge && agentData.challenge.id === challengeId) {
+            }
+            if (agentData && agentData.challenge && agentData.challenge.id === challengeId) {
                 updates[`missions/${session.code}/agents/${agentId}/challenge/unmasked`] = true;
+                updates[`missions/${session.code}/agents/${agentId}/challenge/unmaskedBy`] = unmaskedBy;
             }
         }
         

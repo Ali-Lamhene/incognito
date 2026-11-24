@@ -19,6 +19,8 @@ import { Theme } from "@/constants/Theme";
 
 import { Switch, ActivityIndicator, TouchableOpacity } from "react-native";
 
+const ACCUSER_POINTS = 5;
+
 export default function ResultsScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -122,6 +124,22 @@ export default function ResultsScreen() {
         
         try {
             const updates: any = {};
+
+            // Points d'accusateur : +5 par défi avoué en jeu (bouton Démasquer).
+            // Une case « Démasqué » cochée à la main au tribunal ne rapporte rien.
+            const accuserBonus: Record<string, number> = {};
+            agents.forEach(agent => {
+                const state = validationState[agent.id];
+                if (!state) return;
+                const challenges = agent.challenges || (agent.challenge ? [agent.challenge] : []);
+                challenges.forEach(c => {
+                    const byId = c.unmaskedBy?.id;
+                    if (byId && byId !== agent.id && state.challenges[c.id]?.unmasked) {
+                        accuserBonus[byId] = (accuserBonus[byId] || 0) + ACCUSER_POINTS;
+                    }
+                });
+            });
+
             agents.forEach(agent => {
                 const state = validationState[agent.id];
                 if (!state) return;
@@ -141,6 +159,8 @@ export default function ResultsScreen() {
                         }
                     }
                 });
+
+                score += accuserBonus[agent.id] || 0;
 
                 updates[`missions/${session.code}/agents/${agent.id}/score`] = score;
                 

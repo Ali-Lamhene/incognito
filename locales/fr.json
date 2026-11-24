@@ -198,6 +198,7 @@
         "voting_in_progress": "VOTE...",
         "unmask_now_excl": "DÉMASQUER !",
         "unmask_now": "DÉMASQUER",
+        "accusation_pending": "ACCUSATION EN COURS",
         "leave_lobby": "QUITTER LE SALON",
         "random_arbitration": "ARBITRAGE ALÉATOIRE",
         "tie_break_msg": "Égalité parfaite... Le QG tranche !",
@@ -311,6 +312,8 @@
         "rule_5_b3_part2": "-10 points",
         "rule_5_b4_part1": "Si mensonge lors du démasquage : ",
         "rule_5_b4_part2": "-30 points",
+        "rule_5_b5_part1": "Accusateur, si l'agent avoue : ",
+        "rule_5_b5_part2": "+5 points",
         "quote": "La meilleure stratégie n'est pas d'être invisible, c'est de paraître totalement innocent.",
         "btn_understand": "COMPRIS, AGENT !"
     }

@@ -261,6 +261,13 @@ export default function RulesScreen() {
                                         <Text style={styles.textRed}>{t('rules.rule_5_b4_part2')}</Text>.
                                     </Text>
                                 </View>
+                                <View style={styles.bulletRow}>
+                                    <View style={styles.bulletDot} />
+                                    <Text style={styles.bulletText}>
+                                        {t('rules.rule_5_b5_part1')}
+                                        <Text style={styles.textGreen}>{t('rules.rule_5_b5_part2')}</Text>.
+                                    </Text>
+                                </View>
                             </View>
                         </View>
                     </Animated.View>

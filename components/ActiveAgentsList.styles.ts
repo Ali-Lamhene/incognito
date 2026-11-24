@@ -117,6 +117,14 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgba(139, 30, 30, 0.05)",
     gap: 6,
   },
+  unmaskBtnDisabled: {
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    backgroundColor: "rgba(255, 255, 255, 0.03)",
+  },
+  unmaskTextDisabled: {
+    color: "rgba(255, 255, 255, 0.35)",
+    textShadowRadius: 0,
+  },
   unmaskText: {
     fontSize: 9,
     color: Theme.colors.red,
