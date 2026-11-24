@@ -58,30 +58,7 @@ export default function ResultsScreen() {
         });
     }, [agents]);
 
-    const sortedAgentsRaw = [...agents].sort((a, b) => (b.score || 0) - (a.score || 0));
-    
-    // Fill in mock placeholders if there are fewer than 3 players to preview the full podium
-    const sortedAgents = [...sortedAgentsRaw];
-    if (sortedAgents.length < 2) {
-        sortedAgents.push({
-            id: 'mock_2',
-            name: 'AGENT SHADOW',
-            avatar: 'spy_2',
-            score: Math.max(0, (sortedAgents[0]?.score || 10) - 4),
-            status: 'READY',
-            lastSeen: Date.now(),
-        });
-    }
-    if (sortedAgents.length < 3) {
-        sortedAgents.push({
-            id: 'mock_3',
-            name: 'AGENT GHOST',
-            avatar: 'spy_3',
-            score: Math.max(0, (sortedAgents[1]?.score || 6) - 3),
-            status: 'READY',
-            lastSeen: Date.now(),
-        });
-    }
+    const sortedAgents = [...agents].sort((a, b) => (b.score || 0) - (a.score || 0));
     const isHost = session?.role === 'HOST';
     const [showExitModal, setShowExitModal] = React.useState(false);
 
